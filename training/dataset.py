@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import torch.tensor as Tensor
 
 from torch.utils.data import Dataset as BaseDataset
-# from torch.utils.data import Subset
+from torch.utils.data import Subset
 
 
 def imshow(img: Tensor) -> None:
@@ -50,16 +50,11 @@ class Dataset(BaseDataset):
         gt = cv2.imread(self.images_fps[i])
         gt = cv2.cvtColor(gt, cv2.COLOR_BGR2RGB)
 
-        # h, w, _ = gt.shape
-        # h //= 4
-        # w //= 4
-        # gt = cv2.resize(gt, (w - w % 2, h - h % 2), interpolation=cv2.INTER_LANCZOS4)
-
         if self.augmentation is not None:
             gt = self.augmentation(image=gt)["image"]
 
         h, w, _ = gt.shape
-        in_image = cv2.resize(gt, (w // self.scale, h // self.scale), interpolation=cv2.INTER_AREA)
+        in_image = cv2.resize(gt, (w // self.scale, h // self.scale), interpolation=cv2.INTER_CUBIC)
 
         gt = self.normalization(gt)
         in_image = self.normalization(in_image)
@@ -108,6 +103,14 @@ def get_training_augmentation(crop_size: int):
     ])
 
 
+def get_validation_augmentation(crop_size: int):
+    return albu.Compose([
+
+        albu.PadIfNeeded(min_height=crop_size, min_width=crop_size, always_apply=True),
+        albu.CenterCrop(height=crop_size, width=crop_size, always_apply=True)
+    ])
+
+
 # os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 DATA_DIR = 'data/DIV2K/'
@@ -117,7 +120,7 @@ valid_dir = os.path.join(DATA_DIR, 'DIV2K_valid_HR')
 test_dir = os.path.join(DATA_DIR, 'DIV2K_test_HR')
 
 # Load datasets
-train_batch_size = 800
+train_batch_size = 32
 valid_batch_size = 1
 
 crop_size = 64
@@ -129,7 +132,9 @@ train_set = Dataset(train_dir, scale=scale,
 train_loader = torch.utils.data.DataLoader(train_set, batch_size=train_batch_size,
                                            shuffle=True, num_workers=0)
 
-valid_set = Dataset(valid_dir, scale=scale)
+valid_set = Dataset(valid_dir, scale=scale,
+                    augmentation=get_validation_augmentation(1140))
+valid_set = Subset(valid_set, list(range(10)))
 valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=valid_batch_size,
                                            shuffle=False, num_workers=0)
 

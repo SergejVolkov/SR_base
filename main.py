@@ -19,8 +19,8 @@ if __name__ == "__main__":
     net = RDN(ds.scale, 3, 64, 64, 16, 8)
     net.to(device)
 
-    # PATH = 'model_instances/net_tmp_epoch_37_acc_22.94.pth'
-    # net.load_state_dict(torch.load(PATH))
+    PATH = '../drive/MyDrive/model_instances/net_tmp_epoch_28_acc_27.67.pth'
+    net.load_state_dict(torch.load(PATH))
 
     train(net, epoch_count=scheduler.count_epoch(), start_epoch=0, use_scheduler=True)
     # predict(net)
