@@ -70,7 +70,7 @@ def train(net: nn.Module, epoch_count: int, start_epoch: int=0,
 
         if test_accuracy > best_accuracy:
             best_accuracy = test_accuracy
-            PATH = 'model_instances/net_tmp_epoch_%d_acc_%.2f.pth' % (epoch_idx, test_accuracy)
+            PATH = '../drive/MyDrive/model_instances/net_tmp_epoch_%d_acc_%.2f.pth' % (epoch_idx, test_accuracy)
             torch.save(net.state_dict(), PATH)
             print('Model saved!')
 

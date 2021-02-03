@@ -14,7 +14,7 @@ def init(exp_id: str) -> None:
             exp_id: name of experiment
         Returns: """
     global writer
-    writer = SummaryWriter("log/" + exp_id)
+    writer = SummaryWriter("../drive/MyDrive/log/" + exp_id)
 
 
 def save() -> None:
