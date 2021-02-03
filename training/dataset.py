@@ -130,13 +130,13 @@ train_set = Dataset(train_dir, scale=scale,
                     augmentation=get_training_augmentation(crop_size))
 # train_set = Subset(train_set, list(range(128)))
 train_loader = torch.utils.data.DataLoader(train_set, batch_size=train_batch_size,
-                                           shuffle=True, num_workers=0)
+                                           shuffle=True, num_workers=12)
 
 valid_set = Dataset(valid_dir, scale=scale,
                     augmentation=get_validation_augmentation(1140))
 valid_set = Subset(valid_set, list(range(10)))
 valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=valid_batch_size,
-                                           shuffle=False, num_workers=0)
+                                           shuffle=False, num_workers=12)
 
 
 # Look at images we have

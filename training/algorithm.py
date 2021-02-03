@@ -1,10 +1,11 @@
 import torch.optim as optim
 import torch.nn as nn
 from training.metric import PSNR
+from training.loss import VGGPerceptual
 
 
 def get_loss() -> nn.Module:
-    return nn.L1Loss()
+    return VGGPerceptual()
 
 
 def get_metric():

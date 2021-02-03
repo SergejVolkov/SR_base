@@ -1,4 +1,4 @@
-import torch
+import torchvision
 import torch.nn as nn
 import torch.tensor as Tensor
 
@@ -6,11 +6,12 @@ import torch.tensor as Tensor
 class VGGPerceptual(nn.Module):
     def __init__(self):
         super(VGGPerceptual, self).__init__()
+        self.validation_model = torchvision.models.vgg16(pretrained=True).cuda()
+        self.validation_model.classifier = nn.Identity()
+        self.validation_model.eval()
+        self.loss = nn.L1Loss()
 
     def forward(self, input: Tensor, target: Tensor) -> Tensor:
-        log_exp_sum = torch.log(torch.exp(input).sum(1))
-        item_loss = torch.zeros(target.shape)
-        for i in range(target.shape[0]):
-            item_loss[i] = -input[i][target[i]] + log_exp_sum[i]
-        average_batch_loss = item_loss.sum() / target.shape[0]
-        return average_batch_loss
+        l1 = self.loss(input, target)
+        l1_features = self.loss(self.validation_model(input), self.validation_model(target))
+        return l1 + l1_features
