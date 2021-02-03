@@ -1,4 +1,4 @@
-params_list = [[0.0005] for _ in range(20)] +\
+params_list = [[0.0005] for _ in range(10)] +\
               [[0.00001] for _ in range(10)]
 
 
