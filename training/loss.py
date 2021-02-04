@@ -12,6 +12,6 @@ class VGGPerceptual(nn.Module):
         self.loss = nn.L1Loss()
 
     def forward(self, input: Tensor, target: Tensor) -> Tensor:
-        l1 = self.loss(input, target)
+        # l1 = self.loss(input, target)
         l1_features = self.loss(self.validation_model(input), self.validation_model(target))
-        return l1 + l1_features
+        return l1_features
