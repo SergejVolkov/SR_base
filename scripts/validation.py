@@ -49,7 +49,7 @@ def get_static_images() -> list:
             ).squeeze(0) / 2 + 0.5, min=0, max=1)
         )
         # Add HR sample
-        images.append(gt)
+        images.append(torch.clamp(gt.squeeze(0) / 2 + 0.5, min=0, max=1))
         if len(images) >= images_to_save * 2:
             break
 

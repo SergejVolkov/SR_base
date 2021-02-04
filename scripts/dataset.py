@@ -143,7 +143,7 @@ valid_set = Dataset(valid_dir, scale=scale,
                     augmentation=get_validation_augmentation(1140))
 valid_set = Subset(valid_set, list(range(10)))
 valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=valid_batch_size,
-                                           shuffle=False, num_workers=12)
+                                           shuffle=False, num_workers=4)
 
 
 # Look at images we have
