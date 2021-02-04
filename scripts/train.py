@@ -90,9 +90,13 @@ def train(net: nn.Module, epoch_count: int, start_epoch: int=0,
         gt = torch.clamp(gt[0, :, :, :] / 2 + 0.5, min=0, max=1)
 
         # Save log
+        log_lr = scheduler.lr
+        if warmup.active:
+            log_lr = warmup.lr
+
         log.add(epoch_idx=epoch_idx,
                 scalars=(train_accuracy, test_accuracy,
-                         average_loss, test_loss, scheduler.lr),
+                         average_loss, test_loss, log_lr),
                 images=tuple(images + [inputs, outputs, gt]))
         log.save()
 

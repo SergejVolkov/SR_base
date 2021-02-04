@@ -47,8 +47,8 @@ def add(epoch_idx: int, scalars: tuple=None,
         for i in range(len(scalars)):
             writer.add_scalar(scalar_labels[i], scalars[i], epoch_idx)
     if images is not None:
-        for i in range(im_start, len(images)):
-            writer.add_image(image_labels[i], images[i], epoch_idx)
+        for i in range(len(images)):
+            writer.add_image(image_labels[im_start + i], images[i], epoch_idx)
 
     for i in range(len(constant_labels)):
         if constant_value[i] is not None:

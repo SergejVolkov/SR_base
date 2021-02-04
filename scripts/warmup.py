@@ -3,7 +3,7 @@ import scripts.dataset as ds
 
 
 # Number of warmup epochs
-epoch_count = 2
+epoch_count = 4
 
 # Warmup state
 active = True
@@ -11,11 +11,16 @@ active = True
 # Dataset size
 total_samples = len(ds.train_loader)
 
+# Current learning rate
+lr = 0
+
 
 def get_params(epoch_idx: int, sample_id: int) -> tuple:
-    global active
+    global active, lr
     if epoch_idx == epoch_count:
         active = False
-        return scheduler.lr
-    return (scheduler.lr * (epoch_idx +
-                                  (sample_id + 1) / total_samples) / epoch_count, )
+        lr = scheduler.lr
+    else:
+        lr = scheduler.lr * (epoch_idx +
+                             (sample_id + 1) / total_samples) / epoch_count
+    return lr,
