@@ -9,3 +9,4 @@ class Bicubic(nn.Module):
 
     def forward(self, x):
         return F.interpolate(x, scale_factor=(2, 2), mode='bicubic')
+ 

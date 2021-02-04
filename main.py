@@ -3,7 +3,7 @@ import log_utils.log_tensorboard as log
 import scripts.dataset as ds
 # from models.ResNet import sr_resnet18
 from models.RDN import RDN
-from models.algo import Bicubic
+from models.Algo import Bicubic
 from scripts.train import train
 from scripts.validation import valid
 from scripts.validation import get_static_images
@@ -20,7 +20,7 @@ if __name__ == "__main__":
     # Evaluate algorithmic method for future comparison
     naive = Bicubic()
     naive.to(device)
-    naive_acc, naive_loss, _ = valid(Bicubic, title="Valid Bicubic")
+    naive_acc, naive_loss, _ = valid(naive, title="Valid Bicubic")
     log.add(epoch_idx=0, constants=(naive_acc, naive_loss))
 
     # Add static images to log
