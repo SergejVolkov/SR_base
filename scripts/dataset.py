@@ -32,12 +32,14 @@ class Dataset(BaseDataset):
             self,
             images_dir,
             scale,
-            augmentation=None
+            augmentation=None,
+            in_aug=None
     ):
         self.ids = os.listdir(images_dir)
         self.images_fps = [os.path.join(images_dir, image_id) for image_id in self.ids]
 
         self.augmentation = augmentation
+        self.in_aug = in_aug
         self.normalization = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
@@ -55,6 +57,8 @@ class Dataset(BaseDataset):
 
         h, w, _ = gt.shape
         in_image = cv2.resize(gt, (w // self.scale, h // self.scale), interpolation=cv2.INTER_CUBIC)
+        if self.in_aug is not None:
+            in_image = self.in_aug(image=in_image)["image"]
 
         gt = self.normalization(gt)
         in_image = self.normalization(in_image)
@@ -70,34 +74,34 @@ def get_training_augmentation(crop_size: int):
 
         albu.HorizontalFlip(p=0.5),
         # albu.ShiftScaleRotate(scale_limit=0.5, rotate_limit=0, shift_limit=0.1, p=1, border_mode=0),
-        albu.IAAAdditiveGaussianNoise(p=0.2),
-        albu.IAAPerspective(p=0.5),
+        # albu.IAAAdditiveGaussianNoise(p=0.2),
+        # albu.IAAPerspective(p=0.5),
 
-        albu.OneOf(
-            [
-                albu.CLAHE(p=1),
-                albu.RandomBrightness(p=1),
-                albu.RandomGamma(p=1),
-            ],
-            p=0.5,
-        ),
+        # albu.OneOf(
+        #     [
+        #         albu.CLAHE(p=1),
+        #         albu.RandomBrightness(p=1),
+        #         albu.RandomGamma(p=1),
+        #     ],
+        #     p=0.5,
+        # ),
 
-        albu.OneOf(
-            [
-                albu.IAASharpen(p=1),
-                albu.Blur(blur_limit=3, p=1),
-                albu.MotionBlur(blur_limit=3, p=1),
-            ],
-            p=0.5,
-        ),
+        # albu.OneOf(
+        #     [
+        #         albu.IAASharpen(p=1),
+        #         albu.Blur(blur_limit=7, p=1),
+        #         albu.MotionBlur(blur_limit=7, p=1),
+        #     ],
+        #     p=0.5,
+        # ),
 
-        albu.OneOf(
-            [
-                albu.RandomContrast(p=1),
-                albu.HueSaturationValue(p=1),
-            ],
-            p=0.5,
-        ),
+        # albu.OneOf(
+        #     [
+        #         albu.RandomContrast(p=1),
+        #         albu.HueSaturationValue(p=1),
+        #     ],
+        #     p=0.5,
+        # ),
 
         albu.RandomCrop(height=crop_size, width=crop_size, always_apply=True)
     ])
@@ -105,10 +109,13 @@ def get_training_augmentation(crop_size: int):
 
 def get_validation_augmentation(crop_size: int):
     return albu.Compose([
-
         albu.PadIfNeeded(min_height=crop_size, min_width=crop_size, always_apply=True),
         albu.CenterCrop(height=crop_size, width=crop_size, always_apply=True)
     ])
+
+
+def get_input_image_augmentation():
+    return albu.Blur(blur_limit=3, p=1)
 
 
 # os.environ['CUDA_VISIBLE_DEVICES'] = '0'
@@ -127,7 +134,8 @@ crop_size = 64
 scale = 2
 
 train_set = Dataset(train_dir, scale=scale,
-                    augmentation=get_training_augmentation(crop_size))
+                    augmentation=get_training_augmentation(crop_size),
+                    in_aug=get_input_image_augmentation())
 # train_set = Subset(train_set, list(range(128)))
 train_loader = torch.utils.data.DataLoader(train_set, batch_size=train_batch_size,
                                            shuffle=True, num_workers=12)
@@ -141,7 +149,8 @@ valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=valid_batch_siz
 
 # Look at images we have
 
-# not_aug_set = Dataset(train_dir, scale=scale)
+# not_aug_set = Dataset(train_dir, scale=scale,
+#                       in_aug=get_input_image_augmentation())
 #
 # image_in, image_out = not_aug_set[0]  # get some sample
 # imshow(image_in)
@@ -149,7 +158,7 @@ valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=valid_batch_siz
 
 # Visualize augmented images
 
-# for i in range(2):
+# for i in range(3):
 #     image_in, image_out = train_set[0]
 #     imshow(image_in)
 #     imshow(image_out)

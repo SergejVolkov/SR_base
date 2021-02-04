@@ -3,33 +3,36 @@ import time
 import pyprind
 import torch
 import torch.nn as nn
-import training.dataset as ds
-import training.algorithm as algorithm
-import training.scheduler as scheduler
-import training.validation as validation
+import scripts.dataset as ds
+import scripts.algorithm as algorithm
+import scripts.scheduler as scheduler
+import scripts.warmup as warmup
+import scripts.validation as validation
 import log_utils.log_tensorboard as log
+import torch.nn.functional as F
 
 from datetime import timedelta
 
 
 # Train model for 'epoch_count' epochs
 def train(net: nn.Module, epoch_count: int, start_epoch: int=0,
-          use_scheduler: bool=False) -> None:
+          use_scheduler: bool=False, use_warmup: bool=False) -> None:
     start_time = time.time()
     criterion = algorithm.get_loss()
     metric = algorithm.get_metric()
-    if use_scheduler:
-        optimizer = algorithm.get_optimizer(net, scheduler.params_list[start_epoch])
-    else:
-        optimizer = algorithm.get_optimizer(net)
+    optimizer = algorithm.get_optimizer(net)
 
     best_accuracy = 0.0
 
     for epoch_idx in range(start_epoch, epoch_count):
-        net.train()
-
         if use_scheduler:
-            algorithm.update_optimizer(optimizer, scheduler.params_list[epoch_idx])
+            algorithm.update_optimizer(optimizer, scheduler.get_params())
+
+        # Finish training if scheduler thinks it's time
+        if not scheduler.active:
+            break
+
+        net.train()
 
         average_loss = 0.0
         train_accuracy = 0
@@ -37,7 +40,11 @@ def train(net: nn.Module, epoch_count: int, start_epoch: int=0,
 
         iter_bar = pyprind.ProgBar(total, title="Train", stream=sys.stdout)
         
-        for _, data in enumerate(ds.train_loader, 0):
+        for sample_id, data in enumerate(ds.train_loader, 0):
+            if use_warmup and warmup.active:
+                algorithm.update_optimizer(optimizer,
+                                           warmup.get_params(epoch_idx, sample_id))
+
             inputs, gt = data
             inputs = inputs.cuda()
             gt = gt.cuda()
@@ -60,7 +67,8 @@ def train(net: nn.Module, epoch_count: int, start_epoch: int=0,
         train_accuracy /= total
 
         net.eval()
-        test_accuracy, test_loss, prediction = validation.valid(net)
+        test_accuracy, test_loss, images = validation.valid(net, save_images=True)
+        scheduler.add_metrics(test_accuracy)
 
         # Print useful numbers
         print('[%d, %5d] train loss: %.3f, test loss: %.3f' %
@@ -74,10 +82,21 @@ def train(net: nn.Module, epoch_count: int, start_epoch: int=0,
             torch.save(net.state_dict(), PATH)
             print('Model saved!')
 
-        log.add(epoch_idx, (train_accuracy, test_accuracy,
-                            average_loss, test_loss, scheduler.params_list[epoch_idx][0]),
-                (prediction, ))
+        # Prepare train samples for export
+        inputs = torch.clamp(F.interpolate(
+            inputs[0, :, :, :], scale_factor=(2, 2), mode='bicubic'
+        ).squeeze(0) / 2 + 0.5, min=0, max=1)
+        outputs = torch.clamp(outputs[0, :, :, :].squeeze(0) / 2 + 0.5, min=0, max=1)
+        gt = torch.clamp(gt[0, :, :, :].squeeze(0) / 2 + 0.5, min=0, max=1)
+
+        # Save log
+        log.add(epoch_idx=epoch_idx,
+                scalars=(train_accuracy, test_accuracy,
+                         average_loss, test_loss, scheduler.lr),
+                images=tuple(images + [inputs, outputs, gt]))
         log.save()
+
+    # Finish training
     total_time = int(time.time() - start_time)
     print('Complete!\n')
     print('Average epoch train time:', str(timedelta(
