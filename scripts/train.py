@@ -84,10 +84,10 @@ def train(net: nn.Module, epoch_count: int, start_epoch: int=0,
 
         # Prepare train samples for export
         inputs = torch.clamp(F.interpolate(
-            inputs[0, :, :, :], scale_factor=(2, 2), mode='bicubic'
+            inputs[0, :, :, :].unsqueeze(0), scale_factor=(2, 2), mode='bicubic'
         ).squeeze(0) / 2 + 0.5, min=0, max=1)
-        outputs = torch.clamp(outputs[0, :, :, :].squeeze(0) / 2 + 0.5, min=0, max=1)
-        gt = torch.clamp(gt[0, :, :, :].squeeze(0) / 2 + 0.5, min=0, max=1)
+        outputs = torch.clamp(outputs[0, :, :, :] / 2 + 0.5, min=0, max=1)
+        gt = torch.clamp(gt[0, :, :, :] / 2 + 0.5, min=0, max=1)
 
         # Save log
         log.add(epoch_idx=epoch_idx,
