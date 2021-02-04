@@ -23,13 +23,13 @@ epoch_counter = 0
 
 def compute_diff(metrics: list, window_size: int) -> float:
     avg1 = 0
-    for i in range(window_size // 2):
-        avg1 += metrics[i]
-    avg1 /= window_size // 2
-    avg2 = 0
     for i in range(window_size // 2, window_size):
-        avg2 += metrics[i]
-    avg2 /= window_size - window_size // 2
+        avg1 += metrics[-i]
+    avg1 /= window_size - window_size // 2
+    avg2 = 0
+    for i in range(window_size // 2):
+        avg2 += metrics[-i]
+    avg2 /= window_size // 2
     return (avg2 - avg1) * 2.0
 
 

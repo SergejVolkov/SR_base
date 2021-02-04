@@ -71,7 +71,7 @@ class Dataset(BaseDataset):
 
 def get_training_augmentation(crop_size: int):
     return albu.Compose([
-
+        albu.RandomCrop(height=crop_size, width=crop_size, always_apply=True),
         albu.HorizontalFlip(p=0.5),
         # albu.ShiftScaleRotate(scale_limit=0.5, rotate_limit=0, shift_limit=0.1, p=1, border_mode=0),
         # albu.IAAAdditiveGaussianNoise(p=0.2),
@@ -101,9 +101,7 @@ def get_training_augmentation(crop_size: int):
         #         albu.HueSaturationValue(p=1),
         #     ],
         #     p=0.5,
-        # ),
-
-        albu.RandomCrop(height=crop_size, width=crop_size, always_apply=True)
+        # )
     ])
 
 
