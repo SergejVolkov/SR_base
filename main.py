@@ -38,8 +38,14 @@ if __name__ == "__main__":
 
     # Train model
     train(net, epoch_count=100, start_epoch=0, use_scheduler=True, use_warmup=True)
-    # acc, loss, pred = valid(None)
-    # print(acc, loss)
+
+    # Test model on raw data
+    # ds.valid_set.in_aug = None
+    # net.eval()
+    # acc, loss, pred = valid(net, title="Valid not aug")
+    # print('Test loss: %.3f, test accuracy: %.3f' % (acc, loss))
+
+    # Inference model on images in 'predict' folder
     # predict(net)
 
     # Save our beautiful model for future generations

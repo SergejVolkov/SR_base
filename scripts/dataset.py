@@ -112,8 +112,8 @@ def get_validation_augmentation(crop_size: int):
     ])
 
 
-def get_input_image_augmentation():
-    return albu.Blur(blur_limit=3, p=1)
+def get_input_image_augmentation(blur_limit: int):
+    return albu.Blur(blur_limit=blur_limit, p=1)
 
 
 # os.environ['CUDA_VISIBLE_DEVICES'] = '0'
@@ -131,17 +131,22 @@ valid_batch_size = 1
 crop_size = 64
 scale = 2
 
+valid_img_size = 1140
+blur_limit = 3
+
 train_set = Dataset(train_dir, scale=scale,
-                    augmentation=get_training_augmentation(crop_size))
+                    augmentation=get_training_augmentation(crop_size),
+                    in_aug=get_input_image_augmentation(blur_limit))
 # train_set = Subset(train_set, list(range(128)))
 train_loader = torch.utils.data.DataLoader(train_set, batch_size=train_batch_size,
                                            shuffle=True, num_workers=12)
 
 valid_set = Dataset(valid_dir, scale=scale,
-                    augmentation=get_validation_augmentation(1140))
+                    augmentation=get_validation_augmentation(valid_img_size),
+                    in_aug=get_input_image_augmentation(blur_limit))
 valid_set = Subset(valid_set, list(range(10)))
 valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=valid_batch_size,
-                                           shuffle=False, num_workers=4)
+                                           shuffle=False, num_workers=0)
 
 
 # Look at images we have
