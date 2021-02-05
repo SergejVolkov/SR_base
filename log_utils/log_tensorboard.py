@@ -58,4 +58,4 @@ def add(epoch_idx: int, scalars: tuple=None,
         for i in range(len(constants)):
             writer.add_scalar(constant_labels[i], constants[i], epoch_idx)
             constant_value[i] = constants[i]
-    print("Epoch", epoch_idx, "added to board log")
+    # print("Epoch", epoch_idx, "added to board log")

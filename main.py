@@ -21,6 +21,7 @@ if __name__ == "__main__":
     naive = Bicubic()
     naive.to(device)
     naive_acc, naive_loss, _ = valid(naive, title="Valid Bicubic")
+    print('Bicubic loss: %.3f, bicubic accuracy: %.3f' % (naive_loss, naive_acc))
     log.add(epoch_idx=0, constants=(naive_acc, naive_loss))
 
     # Add static images to log
@@ -28,6 +29,7 @@ if __name__ == "__main__":
 
     # Create an instance of the model
     net = RDN(ds.scale, 3, 64, 64, 16, 8)
+    # net = sr_resnet18()
     net.to(device)
 
     # Load pretrained weights
@@ -35,7 +37,7 @@ if __name__ == "__main__":
     net.load_state_dict(torch.load(PATH))
 
     # Train model
-    train(net, epoch_count=100, start_epoch=0, use_scheduler=True)
+    train(net, epoch_count=100, start_epoch=0, use_scheduler=True, use_warmup=True)
     # acc, loss, pred = valid(None)
     # print(acc, loss)
     # predict(net)

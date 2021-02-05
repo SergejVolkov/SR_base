@@ -70,9 +70,13 @@ def train(net: nn.Module, epoch_count: int, start_epoch: int=0,
         test_accuracy, test_loss, images = validation.valid(net, save_images=True)
         scheduler.add_metrics(test_accuracy)
 
+        log_lr = scheduler.lr
+        if use_warmup and warmup.active:
+            log_lr = warmup.lr
+
         # Print useful numbers
-        print('[%d, %5d] train loss: %.3f, test loss: %.3f' %
-              (epoch_idx, total, average_loss, test_loss))
+        print('Epoch %3d: train loss: %.3f, test loss: %.3f, lr: %f' %
+              (epoch_idx, average_loss, test_loss, log_lr))
         print('Train accuracy: %.2f %%' % train_accuracy)
         print('Test accuracy: %.2f %%' % test_accuracy)
 
@@ -90,10 +94,6 @@ def train(net: nn.Module, epoch_count: int, start_epoch: int=0,
         gt = torch.clamp(gt[0, :, :, :] / 2 + 0.5, min=0, max=1)
 
         # Save log
-        log_lr = scheduler.lr
-        if warmup.active:
-            log_lr = warmup.lr
-
         log.add(epoch_idx=epoch_idx,
                 scalars=(train_accuracy, test_accuracy,
                          average_loss, test_loss, log_lr),

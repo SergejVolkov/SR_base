@@ -21,7 +21,8 @@ class ResNet(nn.Module):
         self.layer2 = self._make_layer(block, 128, layers[1])
         self.layer3 = self._make_layer(block, 256, layers[2])
         self.layer4 = self._make_layer(block, 512, layers[3])
-        self.deconv1 = nn.ConvTranspose2d(512, 3, kernel_size=3, stride=2, padding=1)
+        self.deconv1 = nn.ConvTranspose2d(512, 64, kernel_size=4, stride=2, padding=1)
+        self.conv2 = nn.Conv2d(64, 3, kernel_size=3, stride=1, padding=1)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -63,7 +64,8 @@ class ResNet(nn.Module):
         x = self.layer4(x)
 
         x = self.deconv1(x)
-        # x = self.relu(x)
+        x = self.relu(x)
+        x = self.conv2(x)
 
         return x
 
