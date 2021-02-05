@@ -75,7 +75,7 @@ def train(net: nn.Module, epoch_count: int, start_epoch: int=0,
             log_lr = warmup.lr
 
         # Print useful numbers
-        print('Epoch %3d: train loss: %.3f, test loss: %.3f, lr: %f' %
+        print('Epoch %3d: train loss: %.3f, test loss: %.3f, lr: %g' %
               (epoch_idx, average_loss, test_loss, log_lr))
         print('Train accuracy: %.2f %%' % train_accuracy)
         print('Test accuracy: %.2f %%' % test_accuracy)
@@ -88,7 +88,7 @@ def train(net: nn.Module, epoch_count: int, start_epoch: int=0,
 
         # Prepare train samples for export
         inputs = torch.clamp(F.interpolate(
-            inputs[0, :, :, :].unsqueeze(0), scale_factor=(2, 2), mode='bicubic'
+            inputs[0, :, :, :].unsqueeze(0), scale_factor=(ds.scale, ds.scale), mode='bicubic'
         ).squeeze(0) / 2 + 0.5, min=0, max=1)
         outputs = torch.clamp(outputs[0, :, :, :] / 2 + 0.5, min=0, max=1)
         gt = torch.clamp(gt[0, :, :, :] / 2 + 0.5, min=0, max=1)
@@ -104,5 +104,5 @@ def train(net: nn.Module, epoch_count: int, start_epoch: int=0,
     total_time = int(time.time() - start_time)
     print('Complete!\n')
     print('Average epoch train time:', str(timedelta(
-        seconds=total_time // (epoch_count - start_epoch))))
+        seconds=total_time // (epoch_idx - start_epoch))))
     print('Total time:', str(timedelta(seconds=total_time)))

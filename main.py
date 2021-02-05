@@ -7,7 +7,7 @@ from models.Algo import Bicubic
 from scripts.train import train
 from scripts.validation import valid
 from scripts.validation import get_static_images
-# from training.predict import predict
+# from scripts.predict import predict
 
 
 if __name__ == "__main__":
@@ -33,8 +33,8 @@ if __name__ == "__main__":
     net.to(device)
 
     # Load pretrained weights
-    PATH = '../drive/MyDrive/model_instances/RDN_27.67_L1_x0.5.pth'
-    net.load_state_dict(torch.load(PATH))
+    # PATH = '../drive/MyDrive/model_instances/RDN_27.67_(32.35_x1)_L1_x0.5.pth'
+    # net.load_state_dict(torch.load(PATH))
 
     # Train model
     train(net, epoch_count=100, start_epoch=0, use_scheduler=True, use_warmup=True)

@@ -13,7 +13,7 @@ min_lr = 0.00001
 last_n_epoch = 10
 
 # If diff is less than this, decrease learning rate
-threshold = 0.12
+threshold = 0.06
 
 
 active = True

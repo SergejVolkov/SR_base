@@ -45,7 +45,7 @@ def get_static_images() -> list:
         # Add LR sample
         images.append(
             torch.clamp(F.interpolate(
-                inputs, scale_factor=(2, 2), mode='bicubic'
+                inputs, scale_factor=(ds.scale, ds.scale), mode='bicubic'
             ).squeeze(0) / 2 + 0.5, min=0, max=1)
         )
         # Add HR sample

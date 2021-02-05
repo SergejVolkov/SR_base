@@ -129,21 +129,19 @@ train_batch_size = 32
 valid_batch_size = 1
 
 crop_size = 64
-scale = 2
+scale = 4
 
 valid_img_size = 1140
-blur_limit = 3
+# blur_limit = 3
 
 train_set = Dataset(train_dir, scale=scale,
-                    augmentation=get_training_augmentation(crop_size),
-                    in_aug=get_input_image_augmentation(blur_limit))
+                    augmentation=get_training_augmentation(crop_size))
 # train_set = Subset(train_set, list(range(128)))
 train_loader = torch.utils.data.DataLoader(train_set, batch_size=train_batch_size,
                                            shuffle=True, num_workers=12)
 
 valid_set = Dataset(valid_dir, scale=scale,
-                    augmentation=get_validation_augmentation(valid_img_size),
-                    in_aug=get_input_image_augmentation(blur_limit))
+                    augmentation=get_validation_augmentation(valid_img_size))
 valid_set = Subset(valid_set, list(range(10)))
 valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=valid_batch_size,
                                            shuffle=False, num_workers=0)
