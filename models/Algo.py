@@ -1,3 +1,4 @@
+import scripts.dataset as ds
 import torch.nn.functional as F
 from torch import nn
 
@@ -8,4 +9,4 @@ class Bicubic(nn.Module):
         self.eval()
 
     def forward(self, x):
-        return F.interpolate(x, scale_factor=(2, 2), mode='bicubic')
+        return F.interpolate(x, scale_factor=(ds.scale, ds.scale), mode='bicubic')

@@ -128,7 +128,7 @@ test_dir = os.path.join(DATA_DIR, 'DIV2K_test_HR')
 train_batch_size = 32
 valid_batch_size = 1
 
-crop_size = 64
+crop_size = 128
 scale = 4
 
 valid_img_size = 1140
