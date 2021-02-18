@@ -1,6 +1,7 @@
 """Tensorboard log utils"""
 
 from torch.utils.tensorboard import SummaryWriter
+from scripts.dataset import SAVE_DIR
 
 # Create writer and name scalars
 writer = None  # SummaryWriter("log/not_categorized")
@@ -19,7 +20,7 @@ def init(exp_id: str) -> None:
             exp_id: name of experiment
         Returns: """
     global writer
-    writer = SummaryWriter("../drive/MyDrive/log/" + exp_id)
+    writer = SummaryWriter(SAVE_DIR + "log/" + exp_id)
 
 
 def save() -> None:

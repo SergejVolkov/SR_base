@@ -15,7 +15,7 @@ from datetime import timedelta
 
 
 # Train model for 'epoch_count' epochs
-def train(net: nn.Module, epoch_count: int, start_epoch: int=0,
+def train(net: nn.Module, device: torch.device, epoch_count: int, start_epoch: int=0,
           use_scheduler: bool=False, use_warmup: bool=False) -> None:
     start_time = time.time()
     criterion = algorithm.get_loss()
@@ -46,8 +46,8 @@ def train(net: nn.Module, epoch_count: int, start_epoch: int=0,
                                            warmup.get_params(epoch_idx, sample_id))
 
             inputs, gt = data
-            inputs = inputs.cuda()
-            gt = gt.cuda()
+            inputs = inputs.to(device)
+            gt = gt.to(device)
 
             optimizer.zero_grad()
 
@@ -67,7 +67,7 @@ def train(net: nn.Module, epoch_count: int, start_epoch: int=0,
         train_accuracy /= total
 
         net.eval()
-        test_accuracy, test_loss, images = validation.valid(net, save_images=True)
+        test_accuracy, test_loss, images = validation.valid(net, device, save_images=True)
         scheduler.add_metrics(test_accuracy)
 
         log_lr = scheduler.lr
@@ -82,7 +82,7 @@ def train(net: nn.Module, epoch_count: int, start_epoch: int=0,
 
         if test_accuracy > best_accuracy:
             best_accuracy = test_accuracy
-            PATH = '../drive/MyDrive/model_instances/net_tmp_epoch_%d_acc_%.2f.pth' % (epoch_idx, test_accuracy)
+            PATH = ds.SAVE_DIR + 'model_instances/net_tmp_epoch_%d_acc_%.2f.pth' % (epoch_idx, test_accuracy)
             torch.save(net.state_dict(), PATH)
             print('Model saved!')
 

@@ -40,10 +40,7 @@ class Dataset(BaseDataset):
 
         self.augmentation = augmentation
         self.in_aug = in_aug
-        self.normalization = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-        ])
+        self.normalization = get_normalization()
 
         self.scale = scale
 
@@ -67,6 +64,13 @@ class Dataset(BaseDataset):
 
     def __len__(self):
         return len(self.ids)
+
+
+def get_normalization() -> torch.nn.Module:
+    return transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ])
 
 
 def get_training_augmentation(crop_size: int):
@@ -116,9 +120,31 @@ def get_input_image_augmentation(blur_limit: int):
     return albu.Blur(blur_limit=blur_limit, p=1)
 
 
+def cut_image(image: Tensor) -> list:
+    _, c, h, w = image.shape
+    h //= piece_count
+    w //= piece_count
+    pieces = []
+    for i in range(piece_count):
+        for j in range(piece_count):
+            pieces.append(image[:, :, i * h:(i + 1) * h,
+                          j * w:(j + 1) * w])
+    return pieces
+
+
+def glue_image(pieces: list) -> Tensor:
+    # Temporary code
+    horiz = torch.cat((pieces[0], pieces[1]), 2)
+    vert = torch.cat((pieces[2], pieces[3]), 2)
+    image = torch.cat((horiz, vert), 3)
+
+    return image
+
+
 # os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 DATA_DIR = 'data/DIV2K/'
+SAVE_DIR = '../drive/MyDrive/'
 
 train_dir = os.path.join(DATA_DIR, 'DIV2K_train_HR')
 valid_dir = os.path.join(DATA_DIR, 'DIV2K_valid_HR')
@@ -128,10 +154,11 @@ test_dir = os.path.join(DATA_DIR, 'DIV2K_test_HR')
 train_batch_size = 32
 valid_batch_size = 1
 
-crop_size = 128
-scale = 4
+crop_size = 64
+scale = 2
 
 valid_img_size = 1140
+piece_count = 2
 # blur_limit = 3
 
 train_set = Dataset(train_dir, scale=scale,

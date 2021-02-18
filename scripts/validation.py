@@ -9,7 +9,7 @@ import torch.nn.functional as F
 images_to_save = 3
 
 
-def valid(net: torch.nn.Module, save_images=False,
+def valid(net: torch.nn.Module, device: torch.device, save_images=False,
           title="Valid") -> (int, float, list):
     criterion = algorithm.get_loss()
     metric = algorithm.get_metric()
@@ -23,8 +23,8 @@ def valid(net: torch.nn.Module, save_images=False,
     with torch.no_grad():
         for data in ds.valid_loader:
             inputs, gt = data
-            inputs = inputs.cuda()
-            gt = gt.cuda()
+            inputs = inputs.to(device)
+            gt = gt.to(device)
             outputs = net(inputs)
             if save_images and len(images) < images_to_save:
                 images.append(
