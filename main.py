@@ -1,19 +1,19 @@
 import sys
 import torch
-import log_utils.log_tensorboard as log
+# import log_utils.log_tensorboard as log
 import scripts.dataset as ds
 from models.RDN import RDN
-from models.Algo import Bicubic
-from scripts.train import train
-from scripts.validation import valid
-from scripts.validation import get_static_images
-from scripts.predict import predict
+# from models.Algo import Bicubic
+# from scripts.train import train
+# from scripts.validation import valid
+# from scripts.validation import get_static_images
+# from scripts.predict import predict
 from scripts.inference import inference
 
 
 if __name__ == "__main__":
     mode = 'local'
-    if len(sys.argv) > 2:
+    if len(sys.argv) > 1:
         mode = sys.argv[1]
     if mode == 'local':
         ds.SAVE_DIR = ''
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     # predict(net, device)
 
     # Process video in 'video' folder
-    inference(net, device, 60)
+    inference(net, device, 1, 256)
 
     # Save our beautiful model for future generations
     # PATH = 'model_instances/cifar_net_tmp.pth'

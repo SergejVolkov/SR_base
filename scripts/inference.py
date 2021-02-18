@@ -5,19 +5,26 @@ import torch
 import scripts.dataset as ds
 import numpy as np
 
+from google.colab.patches import cv2_imshow
 
-def inference(net: torch.nn.Module, device: torch.device, length: int=0) -> None:
+
+def inference(net: torch.nn.Module, device: torch.device, length: int=0, start: int=0) -> None:
     cap = cv2.VideoCapture(ds.SAVE_DIR + 'data/video/input.mp4')
-    total = cap.get(cv2.CAP_PROP_FRAME_COUNT)
-    iter_bar = pyprind.ProgBar(total, title='Predict', stream=sys.stdout)
+    cv2.set(cv2.CV_CAP_PROP_POS_FRAMES, start)
     norm = ds.get_normalization()
 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     fps = cap.get(cv2.CAP_PROP_FPS)
-    w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) * ds.scale
+    h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) * ds.scale
     out = cv2.VideoWriter(ds.SAVE_DIR + 'data/video/output.mp4', fourcc, fps, (w, h))
     i = 0
+
+    if length != 0:
+        total = length * fps
+    else:
+        total = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+    iter_bar = pyprind.ProgBar(total, title='Inference', stream=sys.stdout)
 
     with torch.no_grad():
         while True:
@@ -31,12 +38,12 @@ def inference(net: torch.nn.Module, device: torch.device, length: int=0) -> None
             # for piece in pieces:
             #     out_pieces.append(torch.clamp(net(piece) / 2 + 0.5, min=0, max=1))
             # output = ds.glue_image(out_pieces).squeeze(0)
-            output = torch.clamp(net(frame) / 2 + 0.5, min=0, max=1)
-            output = np.transpose(output.cpu().numpy(), (1, 2, 0)) * 255
+            output = torch.clamp(net(frame) / 2 + 0.5, min=0, max=1).squeeze(0)
+            output = np.uint8(np.transpose(output.cpu().numpy(), (1, 2, 0)) * 255)
             output = cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
+            cv2_imshow(output)
             out.write(output)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
             i += 1
             iter_bar.update()
+    out.release()
     iter_bar.update()
