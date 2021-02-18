@@ -5,16 +5,14 @@ import torch
 import scripts.dataset as ds
 import numpy as np
 
-from google.colab.patches import cv2_imshow
-
 
 def inference(net: torch.nn.Module, device: torch.device, length: int=0, start: int=0) -> None:
     cap = cv2.VideoCapture(ds.SAVE_DIR + 'data/video/input.mp4')
-    cv2.set(cv2.CV_CAP_PROP_POS_FRAMES, start)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    cap.set(cv2.CAP_PROP_POS_FRAMES, start * fps)
     norm = ds.get_normalization()
 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    fps = cap.get(cv2.CAP_PROP_FPS)
     w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) * ds.scale
     h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) * ds.scale
     out = cv2.VideoWriter(ds.SAVE_DIR + 'data/video/output.mp4', fourcc, fps, (w, h))
@@ -41,7 +39,6 @@ def inference(net: torch.nn.Module, device: torch.device, length: int=0, start: 
             output = torch.clamp(net(frame) / 2 + 0.5, min=0, max=1).squeeze(0)
             output = np.uint8(np.transpose(output.cpu().numpy(), (1, 2, 0)) * 255)
             output = cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
-            cv2_imshow(output)
             out.write(output)
             i += 1
             iter_bar.update()

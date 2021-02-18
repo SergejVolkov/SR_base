@@ -60,7 +60,7 @@ if __name__ == "__main__":
     # predict(net, device)
 
     # Process video in 'video' folder
-    inference(net, device, 1, 256)
+    inference(net, device, 5, 256)
 
     # Save our beautiful model for future generations
     # PATH = 'model_instances/cifar_net_tmp.pth'
