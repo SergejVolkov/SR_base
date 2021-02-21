@@ -120,35 +120,66 @@ def get_input_image_augmentation(blur_limit: int):
     return albu.Blur(blur_limit=blur_limit, p=1)
 
 
-def cut_image(image: Tensor) -> list:
-    _, c, h, w = image.shape
-    h //= piece_count
-    w //= piece_count
-    pieces = []
-    for i in range(piece_count):
-        for j in range(piece_count):
-            pieces.append(image[:, :, i * h:(i + 1) * h,
-                          j * w:(j + 1) * w])
-    return pieces
+# def cut_image(image: Tensor) -> list:
+#     _, c, h, w = image.shape
+#     h //= piece_count
+#     w //= piece_count
+#     pieces = []
+#     for i in range(piece_count):
+#         for j in range(piece_count):
+#             pieces.append(image[:, :, i * h:(i + 1) * h,
+#                           j * w:(j + 1) * w])
+#     return pieces
+#
+#
+# def glue_image(pieces: list) -> Tensor:
+#     # Temporary code
+#     horiz_1 = torch.cat((pieces[0], pieces[1]), 3)
+#     horiz_2 = torch.cat((pieces[2], pieces[3]), 3)
+#     image = torch.cat((horiz_1, horiz_2), 2)
+#
+#     return image
 
 
-def glue_image(pieces: list) -> Tensor:
-    # Temporary code
-    horiz = torch.cat((pieces[0], pieces[1]), 2)
-    vert = torch.cat((pieces[2], pieces[3]), 2)
-    image = torch.cat((horiz, vert), 3)
+def init_data():
+    global train_set, train_loader, valid_set, valid_loader
+    train_set = Dataset(train_dir, scale=scale,
+                        augmentation=get_training_augmentation(crop_size))
+    if train_set_size != 0:
+        train_set = Subset(train_set, list(range(train_set_size)))
+    train_loader = torch.utils.data.DataLoader(train_set, batch_size=train_batch_size,
+                                               shuffle=True, num_workers=12)
 
-    return image
+    valid_set = Dataset(valid_dir, scale=scale)
+    if valid_set_size != 0:
+        valid_set = Subset(valid_set, list(range(valid_set_size)))
+    valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=valid_batch_size,
+                                               shuffle=False, num_workers=0)
+
+    # Look at images we have
+
+    # not_aug_set = Dataset(train_dir, scale=scale,
+    #                       in_aug=get_input_image_augmentation())
+    #
+    # image_in, image_out = not_aug_set[0]  # get some sample
+    # imshow(image_in)
+    # imshow(image_out)
+
+    # Visualize augmented images
+
+    # for i in range(3):
+    #     image_in, image_out = train_set[0]
+    #     imshow(image_in)
+    #     imshow(image_out)
 
 
 # os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
-DATA_DIR = 'data/DIV2K/'
-SAVE_DIR = '../drive/MyDrive/'
+DATA_DIR = '/cache/DIV2K/'
+SAVE_DIR = '/cache/Foma_HSE/'
 
 train_dir = os.path.join(DATA_DIR, 'DIV2K_train_HR')
 valid_dir = os.path.join(DATA_DIR, 'DIV2K_valid_HR')
-test_dir = os.path.join(DATA_DIR, 'DIV2K_test_HR')
 
 # Load datasets
 train_batch_size = 32
@@ -157,35 +188,10 @@ valid_batch_size = 1
 crop_size = 64
 scale = 2
 
-valid_img_size = 1140
-piece_count = 2
-# blur_limit = 3
+train_set_size = 0
+valid_set_size = 0
 
-train_set = Dataset(train_dir, scale=scale,
-                    augmentation=get_training_augmentation(crop_size))
-# train_set = Subset(train_set, list(range(128)))
-train_loader = torch.utils.data.DataLoader(train_set, batch_size=train_batch_size,
-                                           shuffle=True, num_workers=12)
-
-valid_set = Dataset(valid_dir, scale=scale,
-                    augmentation=get_validation_augmentation(valid_img_size))
-valid_set = Subset(valid_set, list(range(10)))
-valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=valid_batch_size,
-                                           shuffle=False, num_workers=0)
-
-
-# Look at images we have
-
-# not_aug_set = Dataset(train_dir, scale=scale,
-#                       in_aug=get_input_image_augmentation())
-#
-# image_in, image_out = not_aug_set[0]  # get some sample
-# imshow(image_in)
-# imshow(image_out)
-
-# Visualize augmented images
-
-# for i in range(3):
-#     image_in, image_out = train_set[0]
-#     imshow(image_in)
-#     imshow(image_out)
+train_set = None
+train_loader = None
+valid_set = None
+valid_loader = None

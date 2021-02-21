@@ -9,10 +9,15 @@ epoch_count = 4
 active = True
 
 # Dataset size
-total_samples = len(ds.train_loader)
+total_samples = 0
 
 # Current learning rate
 lr = 0
+
+
+def init():
+    global total_samples
+    total_samples = len(ds.train_loader)
 
 
 def get_params(epoch_idx: int, sample_id: int) -> tuple:

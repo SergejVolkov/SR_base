@@ -1,7 +1,7 @@
-# Initial leraning rate
+# Initial learning rate
 lr = 0.001
 
-# Divide lr by this number if mertics have platoed
+# Divide lr by this number if metrics have platoed
 power = 10.0
 
 # Minimum lerning rate, stop training if reached below
@@ -9,11 +9,11 @@ min_lr = 0.00001
 
 # How many epoch to consider in diff computation.
 # At least this number of epochs will be run with constant lr.
-# Better if even number
+# Works better with even number
 last_n_epoch = 10
 
 # If diff is less than this, decrease learning rate
-threshold = 0.06
+threshold = 0.02
 
 
 active = True

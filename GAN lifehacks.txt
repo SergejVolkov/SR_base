@@ -1,0 +1,5 @@
+GAN lifehacks
+
+1) Discriminator lr should be low to avoid numerical instability, e. g. gen_lr = 0.001, dis_lr = 0.0001 or lower;
+2) StyleGAN provides a great example of default Adam params;
+3) Good luck, have fun, stay tuned, and watch some great animes!

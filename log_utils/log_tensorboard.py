@@ -5,7 +5,8 @@ from scripts.dataset import SAVE_DIR
 
 # Create writer and name scalars
 writer = None  # SummaryWriter("log/not_categorized")
-scalar_labels = ["Train Acc", "Test Acc", "Train Loss", "Test Loss", "Learning Rate"]
+scalar_labels = ["Train Acc", "Test Acc", "Train Gen Loss", "Train Dis Loss",
+                 "Test Gen Loss", "Test Dis Loss", "Learning Rate"]
 constant_labels = ["Bicubic Acc", "Bicubic Loss"]
 image_labels = ["Valid Pred 1", "Valid Pred 2", "Valid Pred 3",
                 "Train LR", "Train Pred", "Train HR",
