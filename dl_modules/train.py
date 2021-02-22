@@ -121,7 +121,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         # Print useful numbers
         print('Epoch %3d:\nTrain:  GEN lr: %g, DIS lr: %g\nGEN loss: %.3f, DIS loss: %.3f\n'
               'Valid: GEN loss: %.3f, DIS loss: %.3f' %
-              (epoch_idx, average_gen_loss, average_dis_loss, gen_lr, dis_lr, valid_gen_loss, valid_dis_loss))
+              (epoch_idx, gen_lr, dis_lr, average_gen_loss, average_dis_loss, valid_gen_loss, valid_dis_loss))
         print('Train metric: %.2f %%' % train_accuracy)
         print('Valid metric: %.2f %%' % valid_accuracy)
 
