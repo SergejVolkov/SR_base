@@ -64,7 +64,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
 
             # Conditional GAN (see paper for further explanations)
             scaled_inputs = F.interpolate(
-                inputs, scale_factor=(ds.scale, ds.scale), mode='bicubic'
+                inputs, scale_factor=(ds.scale, ds.scale), mode='bicubic', align_corners=True
             )
             concat_outputs = torch.cat((outputs, scaled_inputs), 1)
             concat_gt = torch.cat((gt, scaled_inputs), 1)
@@ -104,23 +104,26 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
 
         gen_model.eval()
         dis_model.eval()
-        test_accuracy, test_gen_loss, test_dis_loss, images = validation.valid(gen_model, discriminator,
+        test_accuracy, test_gen_loss, test_dis_loss, images = validation.valid(gen_model, dis_model,
                                                                                device, save_images=True)
 
         if use_scheduler:
             scheduler.add_metrics(test_accuracy)
-            log_lr = scheduler.lr
+            gen_lr = scheduler.gen_lr
+            dis_lr = scheduler.dis_lr
         else:
-            log_lr = gen_opt.param_groups[0]['lr']
+            gen_lr = gen_opt.param_groups[0]['lr']
+            dis_lr = dis_opt.param_groups[0]['lr']
         if use_warmup and warmup.active:
-            log_lr = warmup.lr
+            gen_lr = warmup.gen_lr
+            dis_lr = warmup.dis_lr
 
         # Print useful numbers
-        print('Epoch %3d: train gen loss: %.3f, train dis loss: %.3f,\n'
-              'test gen loss: %.3f, test dis loss: %.3f, lr: %g' %
-              (epoch_idx, average_gen_loss, average_dis_loss, test_gen_loss, test_dis_loss, log_lr))
-        print('Train accuracy: %.2f %%' % train_accuracy)
-        print('Test accuracy: %.2f %%' % test_accuracy)
+        print('Epoch %3d:\nTrain:  GEN lr: %g, DIS lr: %g\nGEN loss: %.3f, DIS loss: %.3f\n'
+              'Valid: GEN loss: %.3f, DIS loss: %.3f' %
+              (epoch_idx, average_gen_loss, average_dis_loss, gen_lr, dis_lr, test_gen_loss, test_dis_loss))
+        print('Train metric: %.2f %%' % train_accuracy)
+        print('Valid metric: %.2f %%' % test_accuracy)
 
         if test_accuracy > best_accuracy:
             best_accuracy = test_accuracy
@@ -145,7 +148,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         # Save log
         log.add(epoch_idx=epoch_idx,
                 scalars=(train_accuracy, test_accuracy, average_gen_loss, average_dis_loss,
-                         test_gen_loss, test_dis_loss, log_lr),
+                         test_gen_loss, test_dis_loss, gen_lr, dis_lr),
                 images=tuple(images + [inputs, outputs, gt]))
         log.save()
 

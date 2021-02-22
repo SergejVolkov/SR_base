@@ -32,7 +32,7 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
             outputs = gen_model(inputs)
 
             scaled_inputs = F.interpolate(
-                inputs, scale_factor=(ds.scale, ds.scale), mode='bicubic'
+                inputs, scale_factor=(ds.scale, ds.scale), mode='bicubic', align_corners=True
             )
             concat_outputs = torch.cat((outputs, scaled_inputs), 1)
             concat_gt = torch.cat((gt, scaled_inputs), 1)
@@ -63,7 +63,7 @@ def get_static_images() -> list:
         # Add LR sample
         images.append(
             torch.clamp(F.interpolate(
-                inputs, scale_factor=(ds.scale, ds.scale), mode='bicubic'
+                inputs, scale_factor=(ds.scale, ds.scale), mode='bicubic', align_corners=True
             ).squeeze(0) / 2 + 0.5, min=0, max=1)
         )
         # Add HR sample

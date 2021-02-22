@@ -95,6 +95,7 @@ if __name__ == "__main__":
         discriminator.load_state_dict(checkpoint['discriminator'])
         algorithm.gen_opt_state_dict = checkpoint['gen_optimizer']
         algorithm.dis_opt_state_dict = checkpoint['dis_optimizer']
+        use_warmup = False
     elif pretrained is not None:
         PATH = ds.SAVE_DIR + 'model_instances/' + pretrained + '.pth'
         generator.load_state_dict(torch.load(PATH))
