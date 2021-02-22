@@ -108,9 +108,10 @@ if __name__ == "__main__":
     if ds.valid_set_size != 0:
         generator.eval()
         discriminator.eval()
-        acc, loss, pred = valid(generator, discriminator, device,
-                                save_images=False, title="Valid Full")
-        print('Test loss: %.3f, test accuracy: %.3f' % (acc, loss))
+        acc, gen_loss, dis_loss, _ = valid(generator, discriminator, device,
+                                           save_images=False, title="Valid Full")
+        print('Full valid: GEN loss: %.3f, DIS loss: %.3f' % (gen_loss, dis_loss))
+        print('Full valid metric: %.2f\n' % acc)
 
     # Inference model on images in 'predict' folder
     # predict(net, device)
