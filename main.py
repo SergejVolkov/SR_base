@@ -90,7 +90,7 @@ if __name__ == "__main__":
     if resume:
         PATH = ds.SAVE_DIR + 'model_instances/checkpoint.pth'
         checkpoint = torch.load(PATH)
-        start_epoch = checkpoint['epoch']
+        start_epoch = checkpoint['epoch'] + 1
         generator.load_state_dict(checkpoint['generator'])
         discriminator.load_state_dict(checkpoint['discriminator'])
         algorithm.gen_opt_state_dict = checkpoint['gen_optimizer']
@@ -99,6 +99,10 @@ if __name__ == "__main__":
     elif pretrained is not None:
         PATH = ds.SAVE_DIR + 'model_instances/' + pretrained + '.pth'
         generator.load_state_dict(torch.load(PATH))
+
+    if start_epoch == epoch_count:
+        print('Cannot resume training, already reached last epoch!')
+        exit(0)
 
     # Train model
     train(generator, discriminator, device, epoch_count=epoch_count, start_epoch=start_epoch,
