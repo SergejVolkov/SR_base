@@ -1,5 +1,5 @@
-import scripts.scheduler as scheduler
-import scripts.dataset as ds
+import dl_modules.scheduler as scheduler
+import dl_modules.dataset as ds
 
 
 # Number of warmup epochs

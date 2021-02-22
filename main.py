@@ -1,17 +1,16 @@
-import io
 import sys
 import torch
 import os.path
 import log_utils.log_tensorboard as log
-import scripts.dataset as ds
-import scripts.algorithm as algorithm
+import dl_modules.dataset as ds
+import dl_modules.algorithm as algorithm
 import resources.manual as man
 from models.RDN import RDN
 from models.SimpleDiscr import ConvDiscr
 # from models.Algo import Bicubic
-from scripts.train import train
-from scripts.validation import valid
-from scripts.validation import get_static_images
+from dl_modules.train import train
+from dl_modules.validation import valid
+from dl_modules.validation import get_static_images
 # from scripts.predict import predict
 # from scripts.inference import inference
 
@@ -42,6 +41,7 @@ if __name__ == "__main__":
     start_epoch = 0
     use_scheduler = use_warmup = True
     resume = False
+    cuda_id = 0
     for arg in sys.argv[3:]:
         if arg == '-r' or arg == '--resume':
             PATH = ds.SAVE_DIR + 'model_instances/checkpoint.pth'
@@ -63,11 +63,18 @@ if __name__ == "__main__":
             ds.valid_set_size = int(arg[arg.index('=') + 1:])
         elif arg.startswith('-t=') or arg.startswith('--train='):
             ds.train_set_size = int(arg[arg.index('=') + 1:])
+        elif arg.startswith('-g=') or arg.startswith('--gpu='):
+            cuda_id = int(arg[arg.index('=') + 1:])
+        else:
+            print('Unexpected argument "' + arg + '"!')
+            exit(0)
 
     # Try to use GPU
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    os.environ['CUDA_VISIBLE_DEVICES'] = str(cuda_id)
+    device = torch.device("cuda:%d" % cuda_id if torch.cuda.is_available() else "cpu")
     print(device)
 
+    # Init datasets and logger
     ds.init_data()
     log.init(exp_name)
     if not resume:

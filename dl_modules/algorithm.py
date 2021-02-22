@@ -1,7 +1,7 @@
 import torch.optim as optim
 import torch.nn as nn
-from scripts.metric import PSNR
-from scripts.loss import VGGPerceptual, LSGANDisLoss, LSGANGenLoss
+from dl_modules.metric import PSNR
+from dl_modules.loss import VGGPerceptual, LSGANDisLoss, LSGANGenLoss
 
 
 gen_opt_state_dict = None

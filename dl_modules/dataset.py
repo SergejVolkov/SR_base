@@ -173,8 +173,6 @@ def init_data():
     #     imshow(image_out)
 
 
-# os.environ['CUDA_VISIBLE_DEVICES'] = '0'
-
 DATA_DIR = '/cache/DIV2K/'
 SAVE_DIR = '/cache/Foma_HSE/'
 

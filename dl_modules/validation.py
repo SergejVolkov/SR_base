@@ -1,8 +1,8 @@
 import sys
 import pyprind
 import torch
-import scripts.dataset as ds
-import scripts.algorithm as algorithm
+import dl_modules.dataset as ds
+import dl_modules.algorithm as algorithm
 import torch.nn.functional as F
 
 

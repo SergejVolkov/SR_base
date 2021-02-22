@@ -1,7 +1,8 @@
-import scripts.dataset as ds
+import dl_modules.dataset as ds
 
 usage = 'USAGE\n\npython main.py '\
         'EPOCH_COUNT EXP_NAME [OPTIONS]\n\n' \
+        '       -g=CUDA_DEVICE_NUMBER, --gpu=CUDA_DEVICE_NUMBER\n              set CUDA device to use (default 0)\n\n' \
         '       -r, --resume\n              continue training from last checkpoint\n\n' \
         '       -s, --no_scheduler\n              do not use scheduler\n\n'\
         '       -w, --no_warmup\n              do not use warmup\n\n' \

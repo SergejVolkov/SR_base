@@ -3,11 +3,11 @@ import time
 import pyprind
 import torch
 import torch.nn as nn
-import scripts.dataset as ds
-import scripts.algorithm as algorithm
-import scripts.scheduler as scheduler
-import scripts.warmup as warmup
-import scripts.validation as validation
+import dl_modules.dataset as ds
+import dl_modules.algorithm as algorithm
+import dl_modules.scheduler as scheduler
+import dl_modules.warmup as warmup
+import dl_modules.validation as validation
 import log_utils.log_tensorboard as log
 import torch.nn.functional as F
 

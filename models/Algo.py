@@ -1,4 +1,4 @@
-import scripts.dataset as ds
+import dl_modules.dataset as ds
 import torch.nn.functional as F
 from torch import nn
 

@@ -2,7 +2,7 @@ import cv2
 import sys
 import pyprind
 import torch
-import scripts.dataset as ds
+import dl_modules.dataset as ds
 import numpy as np
 
 

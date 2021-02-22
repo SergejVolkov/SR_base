@@ -1,7 +1,7 @@
 """Tensorboard log utils"""
 
 from torch.utils.tensorboard import SummaryWriter
-from scripts.dataset import SAVE_DIR
+from dl_modules.dataset import SAVE_DIR
 
 # Create writer and name scalars
 writer = None  # SummaryWriter("log/not_categorized")
