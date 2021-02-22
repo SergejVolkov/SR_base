@@ -1,7 +1,7 @@
 import sys
 import torch
 import os.path
-import log_utils.log_tensorboard as log
+import log_utils.log_tb as log
 import dl_modules.dataset as ds
 import dl_modules.algorithm as algorithm
 import resources.manual as man
@@ -9,8 +9,8 @@ from models.RDN import RDN
 from models.SimpleDiscr import ConvDiscr
 # from models.Algo import Bicubic
 from dl_modules.train import train
-from dl_modules.validation import valid
-from dl_modules.validation import get_static_images
+from dl_modules.valid import valid
+from dl_modules.valid import get_static_images
 # from scripts.predict import predict
 # from scripts.inference import inference
 
