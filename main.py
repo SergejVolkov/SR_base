@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
     # Resume from the last checkpoint or load pretrained weights
     if resume:
-        PATH = ds.SAVE_DIR + 'model_instances/checkpoint.pth'
+        PATH = ds.SAVE_DIR + 'model_instances/checkpoint'
         checkpoint = torch.load(PATH)
         start_epoch = checkpoint['epoch'] + 1
         generator.load_state_dict(checkpoint['generator'])

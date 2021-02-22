@@ -7,9 +7,11 @@ from dl_modules.loss import VGGPerceptual, LSGANDisLoss, LSGANGenLoss
 gen_opt_state_dict = None
 dis_opt_state_dict = None
 
+gan_loss_coeff = 0.1
+
 
 def get_super_loss() -> nn.Module:
-    return VGGPerceptual(l1_coeff=0.01, features_coeff=0.1)
+    return VGGPerceptual(l1_coeff=0.01, features_coeff=1)
 
 
 def get_gen_loss() -> nn.Module:

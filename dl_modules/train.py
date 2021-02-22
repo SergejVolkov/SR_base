@@ -72,7 +72,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             # Generator step
             dis_model.requires_grad(False)
 
-            gen_loss = super_criterion(outputs, gt) + \
+            gen_loss = super_criterion(outputs, gt) + algorithm.gan_loss_coeff * \
                        gen_criterion(dis_model(concat_outputs), dis_model(concat_gt))
 
             # Discriminator step
@@ -140,7 +140,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             'gen_optimizer': gen_opt.state_dict(),
             'dis_optimizer': dis_opt.state_dict()
         }
-        torch.save(checkpoint, ds.SAVE_DIR + 'model_instances/checkpoint.pth')
+        torch.save(checkpoint, ds.SAVE_DIR + 'model_instances/checkpoint')
 
         # Prepare train samples for export
         inputs = torch.clamp(scaled_inputs[0, :, :, :] / 2 + 0.5, min=0, max=1)

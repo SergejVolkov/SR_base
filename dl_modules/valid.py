@@ -37,7 +37,7 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
             concat_outputs = torch.cat((outputs, scaled_inputs), 1)
             concat_gt = torch.cat((gt, scaled_inputs), 1)
 
-            gen_loss = super_criterion(outputs, gt) + \
+            gen_loss = super_criterion(outputs, gt) + algorithm.gan_loss_coeff * \
                        gen_criterion(dis_model(concat_outputs), dis_model(concat_gt))
             dis_loss = dis_criterion(dis_model(concat_outputs), dis_model(concat_gt))
 
