@@ -71,8 +71,8 @@ if __name__ == "__main__":
 
     # Try to use GPU
     os.environ['CUDA_VISIBLE_DEVICES'] = str(cuda_id)
-    device = torch.device("cuda:%d" % cuda_id if torch.cuda.is_available() else "cpu")
-    print(device)
+    device = torch.device('cuda:0' if torch.cuda.is_available() else "cpu")
+    print(device, 'hardware:%d' % cuda_id)
 
     # Init datasets and logger
     ds.init_data()
