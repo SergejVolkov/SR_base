@@ -102,11 +102,13 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         average_dis_loss /= total
         train_accuracy /= total
 
+        # Eval model
         gen_model.eval()
         dis_model.eval()
         valid_accuracy, valid_gen_loss, valid_dis_loss, images = \
             validation.valid(gen_model, dis_model, device, save_images=True)
 
+        # Get lr
         if use_scheduler:
             scheduler.add_metrics(valid_accuracy)
             gen_lr = scheduler.gen_lr
@@ -119,20 +121,24 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             dis_lr = warmup.dis_lr
 
         # Print useful numbers
-        print('Epoch %3d:\nTrain:  GEN lr: %g, DIS lr: %g\n'
+        print('Epoch %3d:\nTrain: GEN lr: %g, DIS lr: %g\n'
               '       GEN loss: %.3f, DIS loss: %.3f\n'
               'Valid: GEN loss: %.3f, DIS loss: %.3f' %
               (epoch_idx, gen_lr, dis_lr, average_gen_loss, average_dis_loss, valid_gen_loss, valid_dis_loss))
         print('Train metric: %.2f\n'
-              'Valid metric: %.2f\n' % (train_accuracy, valid_accuracy))
+              'Valid metric: %.2f' % (train_accuracy, valid_accuracy))
 
+        # Save model is better results
         if valid_accuracy > best_accuracy:
             best_accuracy = valid_accuracy
             PATH = ds.SAVE_DIR + 'model_instances/gen_epoch_%d_acc_%.2f.pth' % (epoch_idx, valid_accuracy)
             torch.save(gen_model.state_dict(), PATH)
             PATH = ds.SAVE_DIR + 'model_instances/dis_epoch_%d_acc_%.2f.pth' % (epoch_idx, valid_accuracy)
             torch.save(dis_model.state_dict(), PATH)
+            print('Model saved!')
+        print('\n', end='')
 
+        # Save checkpoint
         checkpoint = {
             'epoch': epoch_idx,
             'generator': gen_model.state_dict(),
