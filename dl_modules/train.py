@@ -136,9 +136,9 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         # Save model is better results
         if valid_gen_loss < best_accuracy:
             best_accuracy = valid_gen_loss
-            PATH = ds.SAVE_DIR + 'model_instances/gen_epoch_%d_acc_%.2f.pth' % (epoch_idx, valid_accuracy)
+            PATH = ds.SAVE_DIR + 'model_instances/gen_epoch_%d_loss_%.3f.pth' % (epoch_idx, valid_gen_loss)
             torch.save(gen_model.state_dict(), PATH)
-            PATH = ds.SAVE_DIR + 'model_instances/dis_epoch_%d_acc_%.2f.pth' % (epoch_idx, valid_accuracy)
+            PATH = ds.SAVE_DIR + 'model_instances/dis_epoch_%d_loss_%.3f.pth' % (epoch_idx, valid_gen_loss)
             torch.save(dis_model.state_dict(), PATH)
             print('Model saved!')
         print('\n', end='')

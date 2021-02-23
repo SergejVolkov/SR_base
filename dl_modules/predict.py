@@ -7,9 +7,11 @@ import numpy as np
 
 
 def predict(net: torch.nn.Module, device: torch.device) -> None:
+    net.eval()
+
     dataset = ds.Dataset(ds.SAVE_DIR + 'data/predict', scale=2)
     loader = torch.utils.data.DataLoader(dataset, batch_size=ds.valid_batch_size,
-                                               shuffle=False, num_workers=0)
+                                         shuffle=False, num_workers=0)
     total = len(loader)
     iter_bar = pyprind.ProgBar(total, title="Predict", stream=sys.stdout)
     i = 0

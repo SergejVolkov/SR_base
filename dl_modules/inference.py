@@ -7,6 +7,8 @@ import numpy as np
 
 
 def inference(net: torch.nn.Module, device: torch.device, length: int=0, start: int=0) -> None:
+    net.eval()
+
     cap = cv2.VideoCapture(ds.SAVE_DIR + 'data/video/input.mp4')
     fps = cap.get(cv2.CAP_PROP_FPS)
     cap.set(cv2.CAP_PROP_POS_FRAMES, start * fps)
