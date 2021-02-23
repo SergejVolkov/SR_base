@@ -12,7 +12,8 @@ active = True
 total_samples = 0
 
 # Current learning rate
-lr = 0
+gen_lr = 0
+dis_lr = 0
 
 
 def init():
@@ -21,11 +22,13 @@ def init():
 
 
 def get_params(epoch_idx: int, sample_id: int) -> tuple:
-    global active, lr
+    global active, gen_lr, dis_lr
     if epoch_idx == epoch_count:
         active = False
-        lr = scheduler.lr
+        gen_lr = scheduler.gen_lr
+        dis_lr = scheduler.dis_lr
     else:
-        lr = scheduler.lr * (epoch_idx +
-                             (sample_id + 1) / total_samples) / epoch_count
-    return lr,
+        coeff = (epoch_idx + (sample_id + 1) / total_samples) / epoch_count
+        gen_lr = scheduler.gen_lr * coeff
+        dis_lr = scheduler.dis_lr * coeff
+    return gen_lr, dis_lr

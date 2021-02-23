@@ -1,6 +1,6 @@
-import sys
+# import sys
 import time
-import pyprind
+# import pyprind
 import torch
 import torch.nn as nn
 import dl_modules.dataset as ds
@@ -30,8 +30,10 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
     epoch_idx = start_epoch
 
     for epoch_idx in range(start_epoch, epoch_count):
-        if use_scheduler:
-            algorithm.update_optimizer(gen_opt, scheduler.get_params())
+        if use_scheduler and not (use_warmup and warmup.active):
+            gen_lr, dis_lr = scheduler.get_params()
+            algorithm.update_optimizer(gen_opt, (gen_lr, ))
+            algorithm.update_optimizer(dis_opt, (dis_lr, ))
 
             # Finish training if scheduler thinks it's time
             if not scheduler.active:
@@ -46,12 +48,13 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         total = len(ds.train_loader)
         scaled_inputs = outputs = gt = None
 
-        iter_bar = pyprind.ProgBar(total, title="Train", stream=sys.stdout)
+        # iter_bar = pyprind.ProgBar(total, title="Train", stream=sys.stdout)
         
         for sample_id, data in enumerate(ds.train_loader, 0):
             if use_warmup and warmup.active:
-                algorithm.update_optimizer(gen_opt,
-                                           warmup.get_params(epoch_idx, sample_id))
+                gen_lr, dis_lr = warmup.get_params(epoch_idx, sample_id)
+                algorithm.update_optimizer(gen_opt, (gen_lr, ))
+                algorithm.update_optimizer(dis_opt, (dis_lr, ))
 
             inputs, gt = data
             inputs = inputs.to(device)
@@ -94,9 +97,9 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             average_dis_loss += dis_loss.item()
             train_accuracy += metric(outputs, gt).item()
 
-            iter_bar.update()
+            # iter_bar.update()
 
-        iter_bar.update()
+        # iter_bar.update()
 
         average_gen_loss /= total
         average_dis_loss /= total
@@ -110,7 +113,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
 
         # Get lr
         if use_scheduler:
-            scheduler.add_metrics(valid_accuracy)
+            scheduler.add_metrics(valid_gen_loss)
             gen_lr = scheduler.gen_lr
             dis_lr = scheduler.dis_lr
         else:
@@ -121,7 +124,8 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             dis_lr = warmup.dis_lr
 
         # Print useful numbers
-        print('Epoch %3d:\nTrain: GEN lr: %g, DIS lr: %g\n'
+        print('Epoch %3d:\n'
+              'Train: GEN lr: %g, DIS lr: %g\n'
               '       GEN loss: %.3f, DIS loss: %.3f\n'
               'Valid: GEN loss: %.3f, DIS loss: %.3f' %
               (epoch_idx, gen_lr, dis_lr, average_gen_loss, average_dis_loss, valid_gen_loss, valid_dis_loss))

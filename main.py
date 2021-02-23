@@ -110,6 +110,8 @@ if __name__ == "__main__":
 
     # Test model on all valid data
     if ds.valid_set_size != 0:
+        ds.valid_set_size = 0
+        ds.init_data()
         generator.eval()
         discriminator.eval()
         acc, gen_loss, dis_loss, _ = valid(generator, discriminator, device,

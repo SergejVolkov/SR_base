@@ -1,5 +1,5 @@
-import sys
-import pyprind
+# import sys
+# import pyprind
 import torch
 import dl_modules.dataset as ds
 import dl_modules.algorithm as algorithm
@@ -20,7 +20,7 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
     accuracy = 0.0
     total = len(ds.valid_loader)
 
-    iter_bar = pyprind.ProgBar(total, title=title, stream=sys.stdout)
+    # iter_bar = pyprind.ProgBar(total, title=title, stream=sys.stdout)
     images = []
 
     with torch.no_grad():
@@ -50,8 +50,8 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
                     torch.clamp(outputs.squeeze(0) / 2 + 0.5, min=0, max=1)
                 )
 
-            iter_bar.update()
-    iter_bar.update()
+            # iter_bar.update()
+    # iter_bar.update()
     return accuracy / total, average_gen_loss / total, average_dis_loss / total, images
 
 

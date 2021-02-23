@@ -8,6 +8,8 @@ gen_opt_state_dict = None
 dis_opt_state_dict = None
 
 gan_loss_coeff = 0.1
+init_gen_lr = 0.001
+init_dis_lr = 0.0001
 
 
 def get_super_loss() -> nn.Module:
@@ -28,7 +30,7 @@ def get_metric():
 
 def get_gen_optimizer(net: nn.Module) -> optim.Optimizer:
     global gen_opt_state_dict
-    optimizer = optim.Adam(net.parameters(), lr=0.001, betas=(0.5, 0.999))
+    optimizer = optim.Adam(net.parameters(), lr=init_gen_lr, betas=(0.5, 0.999))
     if gen_opt_state_dict is not None:
         optimizer.load_state_dict(gen_opt_state_dict)
     return optimizer
@@ -36,7 +38,7 @@ def get_gen_optimizer(net: nn.Module) -> optim.Optimizer:
 
 def get_dis_optimizer(net: nn.Module) -> optim.Optimizer:
     global dis_opt_state_dict
-    optimizer = optim.Adam(net.parameters(), lr=0.0001, betas=(0.5, 0.999))
+    optimizer = optim.Adam(net.parameters(), lr=init_dis_lr, betas=(0.5, 0.999))
     if dis_opt_state_dict is not None:
         optimizer.load_state_dict(dis_opt_state_dict)
     return optimizer
