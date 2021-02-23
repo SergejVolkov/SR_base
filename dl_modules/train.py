@@ -16,8 +16,8 @@ from datetime import timedelta
 
 # Train model for 'epoch_count' epochs
 def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
-          epoch_count: int, start_epoch: int=0,
-          use_scheduler: bool=False, use_warmup: bool=False) -> None:
+          epoch_count: int, start_epoch: int=0, use_scheduler: bool=False,
+          use_warmup: bool=False, best_accuracy: float=float('inf')) -> None:
     start_time = time.time()
     super_criterion = algorithm.get_super_loss()
     gen_criterion = algorithm.get_gen_loss()
@@ -26,7 +26,6 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
     dis_opt = algorithm.get_dis_optimizer(dis_model)
     metric = algorithm.get_metric()
 
-    best_accuracy = 0.0
     epoch_idx = start_epoch
 
     for epoch_idx in range(start_epoch, epoch_count):
@@ -133,8 +132,8 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
               'Valid metric: %.2f' % (train_accuracy, valid_accuracy))
 
         # Save model is better results
-        if valid_accuracy > best_accuracy:
-            best_accuracy = valid_accuracy
+        if valid_gen_loss < best_accuracy:
+            best_accuracy = valid_gen_loss
             PATH = ds.SAVE_DIR + 'model_instances/gen_epoch_%d_acc_%.2f.pth' % (epoch_idx, valid_accuracy)
             torch.save(gen_model.state_dict(), PATH)
             PATH = ds.SAVE_DIR + 'model_instances/dis_epoch_%d_acc_%.2f.pth' % (epoch_idx, valid_accuracy)
@@ -145,6 +144,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         # Save checkpoint
         checkpoint = {
             'epoch': epoch_idx,
+            'best_acc': best_accuracy,
             'generator': gen_model.state_dict(),
             'discriminator': dis_model.state_dict(),
             'gen_optimizer': gen_opt.state_dict(),

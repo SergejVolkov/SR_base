@@ -39,6 +39,7 @@ if __name__ == "__main__":
     exp_name = sys.argv[2]
     pretrained = None
     start_epoch = 0
+    best_result = float('inf')
     use_scheduler = use_warmup = True
     resume = False
     cuda_id = 0
@@ -91,6 +92,7 @@ if __name__ == "__main__":
         PATH = ds.SAVE_DIR + 'model_instances/checkpoint'
         checkpoint = torch.load(PATH)
         start_epoch = checkpoint['epoch'] + 1
+        best_result = checkpoint['best_acc']
         generator.load_state_dict(checkpoint['generator'])
         discriminator.load_state_dict(checkpoint['discriminator'])
         algorithm.gen_opt_state_dict = checkpoint['gen_optimizer']
@@ -106,7 +108,7 @@ if __name__ == "__main__":
 
     # Train model
     train(generator, discriminator, device, epoch_count=epoch_count, start_epoch=start_epoch,
-          use_scheduler=use_scheduler, use_warmup=use_warmup)
+          use_scheduler=use_scheduler, use_warmup=use_warmup, best_accuracy=best_result)
 
     # Test model on all valid data
     if ds.valid_set_size != 0:

@@ -8,15 +8,15 @@ gen_lr = algotithm.init_gen_lr
 dis_lr = algotithm.init_dis_lr
 
 # Divide lr by this number if metrics have platoed
-power = 10.0
+power = 2.0
 
 # Minimum lerning rate, stop training if reached below
-min_gen_lr = 0.000001
+min_gen_lr = 0.00001
 
 # How many epoch to consider in diff computation.
 # At least this number of epochs will be run with constant lr.
 # Works better with even number
-last_n_epoch = 16
+last_n_epoch = 30
 
 # If diff is less than this, decrease learning rate
 threshold = 0.001
@@ -56,7 +56,7 @@ def get_params() -> tuple:
         epoch_counter = 0
         gen_lr /= power
         dis_lr /= power
-        print('Learning rate descreased!')
+        print('Learning rate decreased!\n')
     if gen_lr < min_gen_lr:
         active = False
     return gen_lr, dis_lr
