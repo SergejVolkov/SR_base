@@ -44,7 +44,7 @@ if __name__ == "__main__":
     cuda_id = 0
     for arg in sys.argv[3:]:
         if arg == '-r' or arg == '--resume':
-            PATH = ds.SAVE_DIR + 'model_instances/checkpoint.pth'
+            PATH = ds.SAVE_DIR + 'model_instances/checkpoint'
             if not os.path.isfile(PATH):
                 print('Cannot resume training, no saved checkpoint found!')
                 exit(0)
