@@ -120,25 +120,25 @@ def get_input_image_augmentation(blur_limit: int):
     return albu.Blur(blur_limit=blur_limit, p=1)
 
 
-# def cut_image(image: Tensor) -> list:
-#     _, c, h, w = image.shape
-#     h //= piece_count
-#     w //= piece_count
-#     pieces = []
-#     for i in range(piece_count):
-#         for j in range(piece_count):
-#             pieces.append(image[:, :, i * h:(i + 1) * h,
-#                           j * w:(j + 1) * w])
-#     return pieces
-#
-#
-# def glue_image(pieces: list) -> Tensor:
-#     # Temporary code
-#     horiz_1 = torch.cat((pieces[0], pieces[1]), 3)
-#     horiz_2 = torch.cat((pieces[2], pieces[3]), 3)
-#     image = torch.cat((horiz_1, horiz_2), 2)
-#
-#     return image
+def cut_image(image: Tensor) -> list:
+    _, c, h, w = image.shape
+    h //= piece_count
+    w //= piece_count
+    pieces = []
+    for i in range(piece_count):
+        for j in range(piece_count):
+            pieces.append(image[:, :, i * h:(i + 1) * h,
+                          j * w:(j + 1) * w])
+    return pieces
+
+
+def glue_image(pieces: list) -> Tensor:
+    # Temporary code
+    horiz_1 = torch.cat((pieces[0], pieces[1]), 3)
+    horiz_2 = torch.cat((pieces[2], pieces[3]), 3)
+    image = torch.cat((horiz_1, horiz_2), 2)
+
+    return image
 
 
 def init_data():
@@ -185,6 +185,7 @@ valid_batch_size = 1
 
 crop_size = 64
 scale = 2
+piece_count = 2
 
 train_set_size = 0
 valid_set_size = 0
