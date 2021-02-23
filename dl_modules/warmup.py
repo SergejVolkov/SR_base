@@ -22,7 +22,7 @@ def init():
 
 
 def get_params(epoch_idx: int, sample_id: int) -> tuple:
-    global active, gen_lr, dis_lr
+    global active, gen_lr, dis_lr, epoch_count
     if epoch_idx == epoch_count:
         active = False
         gen_lr = scheduler.gen_lr

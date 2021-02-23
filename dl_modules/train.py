@@ -27,6 +27,8 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
     metric = algorithm.get_metric()
 
     epoch_idx = start_epoch
+    if use_warmup:
+        warmup.init()
 
     for epoch_idx in range(start_epoch, epoch_count):
         if use_scheduler and not (use_warmup and warmup.active):
