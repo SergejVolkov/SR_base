@@ -5,16 +5,16 @@ from dl_modules.dataset import SAVE_DIR
 
 # Create writer and name scalars
 writer = None  # SummaryWriter("log/not_categorized")
-scalar_labels = ["Train PSNR", "Train SSIM", "Train LPIPS",
-                 "Valid PSNR", "Valid SSIM", "Valid LPIPS",
-                 "GEN Train Loss", "DIS Train Loss",
-                 "GEN Valid Loss", "DIS Valid Loss",
-                 "GEN Learning Rate", "DIS Learning Rate"]
-constant_labels = ["Bicubic Acc", "Bicubic Loss"]
-image_labels = ["Valid Pred 1", "Valid Pred 2", "Valid Pred 3",
-                "Train LR", "Train Pred", "Train HR",
-                "Valid LR 1", "Valid HR 1", "Valid LR 2",
-                "Valid HR 2", "Valid LR 3", "Valid HR 3"]
+scalar_labels = ["mtr PSNR", "mtr SSIM", "mtr LPIPS",
+                 "mval PSNR", "mval SSIM", "mval LPIPS",
+                 "ltr GEN", "ltr DIS",
+                 "lval GEN", "lval DIS",
+                 "lr GEN", "lr DIS"]
+constant_labels = ["l Bicubic", "l Bicubic"]
+image_labels = ["ival 1 Pred", "ival 3 Pred", "ival 3 Pred",
+                "itr LR", "itr Pred", "itr HR",
+                "ival 1 LR", "ival 1 HR", "ival 2 LR",
+                "ival 2 HR", "ival 3 LR", "ival 3 HR"]
 constant_value = [None] * len(constant_labels)
 
 

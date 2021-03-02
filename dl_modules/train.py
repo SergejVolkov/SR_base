@@ -127,15 +127,15 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
 
         # Print useful numbers
         print('Epoch %3d:\n'
-              'Train: GEN lr: %g, DIS lr: %g\n'
-              '       GEN loss: %.3f, DIS loss: %.3f\n'
-              '       PSNR: %.2f, SSIM: %.4f, LPIPS: %.4f\n'
-              'Valid: GEN loss: %.3f, DIS loss: %.3f\n'
-              '       PSNR: %.2f, SSIM: %.4f, LPIPS: %.4f' %
+              'GEN lr: %g, DIS lr: %g\n\n'
+              'Train: GEN loss: %.3f, DIS loss: %.3f\n'
+              'Valid: GEN loss: %.3f, DIS loss: %.3f\n\n'
+              'Train: PSNR: %.2f, SSIM: %.4f, LPIPS: %.4f\n'
+              'Valid: PSNR: %.2f, SSIM: %.4f, LPIPS: %.4f' %
               (epoch_idx, gen_lr, dis_lr,
                average_gen_loss, average_dis_loss,
-               train_psnr, train_ssim, train_lpips,
                valid_gen_loss, valid_dis_loss,
+               train_psnr, train_ssim, train_lpips,
                valid_psnr, valid_ssim, valid_lpips))
 
         # Save model is better results
