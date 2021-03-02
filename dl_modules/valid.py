@@ -13,8 +13,6 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
     super_criterion = algorithm.get_super_loss()
     gen_criterion = algorithm.get_gen_loss()
     dis_criterion = algorithm.get_dis_loss()
-    lpips.to(device)
-
     average_gen_loss = 0.0
     average_dis_loss = 0.0
     valid_psnr = valid_ssim = valid_lpips = 0.0
