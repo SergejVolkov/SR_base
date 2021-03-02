@@ -2,17 +2,18 @@ import sys
 import torch
 import os.path
 import log_utils.log_tb as log
+import resources.manual as man
 import dl_modules.dataset as ds
 import dl_modules.algorithm as algorithm
-import resources.manual as man
-from models.RDN import RDN
-from models.SimpleDiscr import ConvDiscr
-# from models.Algo import Bicubic
+import dl_modules.scheduler as scheduler
 from dl_modules.train import train
 from dl_modules.valid import valid
 from dl_modules.valid import get_static_images
-from dl_modules.predict import predict
-from dl_modules.inference import inference
+from cm_modules.predict import predict
+from cm_modules.inference import inference
+from models.RDN import RDN
+from models.RevDiscr import RevDiscr
+# from models.Algo import Bicubic
 
 
 def train_start_log():
@@ -42,7 +43,7 @@ def start_train():
     cuda_id = 0
     for arg in sys.argv[3:]:
         if arg == '-r' or arg == '--resume':
-            PATH = ds.SAVE_DIR + 'model_instances/checkpoint'
+            PATH = ds.SAVE_DIR + 'weights/checkpoint'
             if not os.path.isfile(PATH):
                 print('Cannot resume training, no saved checkpoint found!')
                 exit(0)
@@ -67,6 +68,9 @@ def start_train():
             print('Unexpected argument "' + arg + '"!')
             return
 
+    if use_scheduler:
+        scheduler.total_epoch = epoch_count
+
     # Try to use GPU
     os.environ['CUDA_VISIBLE_DEVICES'] = str(cuda_id)
     device = torch.device('cuda:0' if torch.cuda.is_available() else "cpu")
@@ -81,12 +85,12 @@ def start_train():
     # Create an instance of the model
     generator = RDN(ds.scale, 3, 64, 64, 16, 8)
     generator.to(device)
-    discriminator = ConvDiscr(6, 64)
+    discriminator = RevDiscr(6, 64)
     discriminator.to(device)
 
     # Resume from the last checkpoint or load pretrained weights
     if resume:
-        PATH = ds.SAVE_DIR + 'model_instances/checkpoint'
+        PATH = ds.SAVE_DIR + 'weights/checkpoint'
         checkpoint = torch.load(PATH)
         start_epoch = checkpoint['epoch'] + 1
         best_result = checkpoint['best_acc']
@@ -96,7 +100,7 @@ def start_train():
         algorithm.dis_opt_state_dict = checkpoint['dis_optimizer']
         use_warmup = False
     elif pretrained is not None:
-        PATH = ds.SAVE_DIR + 'model_instances/' + pretrained + '.pth'
+        PATH = ds.SAVE_DIR + 'weights/' + pretrained + '.pth'
         generator.load_state_dict(torch.load(PATH))
 
     if start_epoch == epoch_count:
@@ -147,7 +151,7 @@ def start_predict():
     generator = RDN(ds.scale, 3, 64, 64, 16, 8)
     generator.to(device)
 
-    PATH = ds.SAVE_DIR + 'model_instances/' + pretrained + '.pth'
+    PATH = ds.SAVE_DIR + 'weights/' + pretrained + '.pth'
     generator.load_state_dict(torch.load(PATH))
 
     # Inference model on images in 'predict' folder
@@ -155,14 +159,15 @@ def start_predict():
 
 
 def start_inference():
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 4:
         print('Wrong number of params!\nTry "python main.py --help" for usage info')
         return
 
     pretrained = sys.argv[1]
+    name = sys.argv[2]
     length = start = 0
     cuda_id = 0
-    for arg in sys.argv[2:]:
+    for arg in sys.argv[3:]:
         if arg == '-i' or arg == '--inference':
             pass
         elif arg.startswith('-g=') or arg.startswith('--gpu='):
@@ -184,16 +189,16 @@ def start_inference():
     generator = RDN(ds.scale, 3, 64, 64, 16, 8)
     generator.to(device)
 
-    PATH = ds.SAVE_DIR + 'model_instances/' + pretrained + '.pth'
+    PATH = ds.SAVE_DIR + 'weights/' + pretrained + '.pth'
     generator.load_state_dict(torch.load(PATH))
 
     # Process video in 'video' folder
-    inference(generator, device, length, start)
+    inference(name, generator, device, length, start)
 
 
 if __name__ == "__main__":
     if sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
-        print(man.usage)
+        print(man.main)
     elif sys.argv.__contains__('--predict'):
         start_predict()
     elif sys.argv.__contains__('--inference') or sys.argv.__contains__('-i'):

@@ -2,7 +2,7 @@
 __pycache__
 data
 log
-model_instances
+weights
 *.iml
 *.ipynb
 *.pth

@@ -5,13 +5,15 @@ metric_type = 'loss'
 
 # Initial learning rate
 gen_lr = algotithm.init_gen_lr
-dis_lr = algotithm.init_dis_lr
 
 # Divide lr by this number if metrics have platoed
 power = 2.0
 
 # Minimum lerning rate, stop training if reached below
 min_gen_lr = 0.00001
+
+# Training epoch, sets automatically
+total_epoch = 0
 
 # How many epoch to consider in diff computation.
 # At least this number of epochs will be run with constant lr.
@@ -20,6 +22,9 @@ last_n_epoch = 30
 
 # If diff is less than this, decrease learning rate
 threshold = 0.001
+
+# Get reduce coeff for smooth method
+times_reduce = (min_gen_lr / gen_lr) ** (1 / total_epoch)
 
 
 active = True
@@ -46,8 +51,15 @@ def add_metrics(metrics: float) -> None:
     epoch_counter += 1
 
 
-def get_params() -> tuple:
-    global gen_lr, dis_lr, epoch_counter, active, metric_type
+def get_params_smooth() -> tuple:
+    global gen_lr, epoch_counter
+    if epoch_counter != 0:
+        gen_lr *= times_reduce
+    return gen_lr
+
+
+def get_params_leap() -> tuple:
+    global gen_lr, epoch_counter, active, metric_type
     sign = 1
     if metric_type == 'loss':
         sign = -1
@@ -55,8 +67,7 @@ def get_params() -> tuple:
             sign * compute_diff(history, last_n_epoch) < threshold):
         epoch_counter = 0
         gen_lr /= power
-        dis_lr /= power
         print('Learning rate decreased!\n')
     if gen_lr < min_gen_lr:
         active = False
-    return gen_lr, dis_lr
+    return gen_lr

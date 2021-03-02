@@ -6,10 +6,11 @@ import dl_modules.dataset as ds
 import numpy as np
 
 
-def inference(net: torch.nn.Module, device: torch.device, length: int=0, start: int=0) -> None:
+def inference(name: str, net: torch.nn.Module, device: torch.device,
+              length: int=0, start: int=0) -> None:
     net.eval()
 
-    cap = cv2.VideoCapture(ds.SAVE_DIR + 'data/video/input.mp4')
+    cap = cv2.VideoCapture(ds.SAVE_DIR + 'data/video/' + name + '.mp4')
     fps = cap.get(cv2.CAP_PROP_FPS)
     cap.set(cv2.CAP_PROP_POS_FRAMES, start * fps)
     norm = ds.get_normalization()
@@ -17,7 +18,7 @@ def inference(net: torch.nn.Module, device: torch.device, length: int=0, start: 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) * ds.scale
     h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) * ds.scale
-    out = cv2.VideoWriter(ds.SAVE_DIR + 'data/video/output.mp4', fourcc, fps, (w, h))
+    out = cv2.VideoWriter(ds.SAVE_DIR + 'data/output/' + name + '.mp4', fourcc, fps, (w, h))
     i = 0
 
     if length != 0:
@@ -44,5 +45,6 @@ def inference(net: torch.nn.Module, device: torch.device, length: int=0, start: 
             out.write(output)
             i += 1
             iter_bar.update()
+    cap.release()
     out.release()
     iter_bar.update()

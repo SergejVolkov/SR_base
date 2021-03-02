@@ -33,14 +33,18 @@ class Dataset(BaseDataset):
             images_dir,
             scale,
             augmentation=None,
-            in_aug=None
+            in_aug=None,
+            normalization=None
     ):
         self.ids = os.listdir(images_dir)
         self.images_fps = [os.path.join(images_dir, image_id) for image_id in self.ids]
 
         self.augmentation = augmentation
         self.in_aug = in_aug
-        self.normalization = get_normalization()
+        if normalization is None:
+            self.normalization = get_normalization()
+        else:
+            self.normalization = normalization
 
         self.scale = scale
 
@@ -117,7 +121,11 @@ def get_validation_augmentation(crop_size: int):
 
 
 def get_input_image_augmentation(blur_limit: int):
-    return albu.Blur(blur_limit=blur_limit, p=1)
+    return albu.Compose([
+        albu.Blur(blur_limit=blur_limit, p=1),
+        albu.IAAAdditiveGaussianNoise(p=0.2),
+        albu.Downscale(scale_min=0.5, scale_max=0.5, interpolation=cv2.INTER_AREA, p=0.5)
+    ])
 
 
 def cut_image(image: Tensor) -> list:
@@ -173,11 +181,11 @@ def init_data():
     #     imshow(image_out)
 
 
-DATA_DIR = '/cache/DIV2K/'
-SAVE_DIR = '/cache/Foma_HSE/'
+DATA_DIR = '../drive/MyDrive/data/Bakemonogatari/'
+SAVE_DIR = '../drive/MyDrive/'
 
-train_dir = os.path.join(DATA_DIR, 'DIV2K_train_HR')
-valid_dir = os.path.join(DATA_DIR, 'DIV2K_valid_HR')
+train_dir = os.path.join(DATA_DIR, 'Bakemonogatari_train_HR')
+valid_dir = os.path.join(DATA_DIR, 'Bakemonogatari_valid_HR')
 
 # Load datasets
 train_batch_size = 32

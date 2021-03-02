@@ -10,7 +10,9 @@ import dl_modules.warmup as warmup
 import dl_modules.valid as validation
 import log_utils.log_tb as log
 import torch.nn.functional as F
-
+from dl_modules.metric.psnr import PSNR
+from dl_modules.metric.ssim import SSIM
+from lpips_pytorch import LPIPS
 from datetime import timedelta
 
 
@@ -24,7 +26,9 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
     dis_criterion = algorithm.get_dis_loss()
     gen_opt = algorithm.get_gen_optimizer(gen_model)
     dis_opt = algorithm.get_dis_optimizer(dis_model)
-    metric = algorithm.get_metric()
+    psnr = PSNR()
+    ssim = SSIM()
+    lpips = LPIPS()
 
     epoch_idx = start_epoch
     if use_warmup:
@@ -32,10 +36,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
 
     for epoch_idx in range(start_epoch, epoch_count):
         if use_scheduler and not (use_warmup and warmup.active):
-            gen_lr, dis_lr = scheduler.get_params()
-            algorithm.update_optimizer(gen_opt, (gen_lr, ))
-            algorithm.update_optimizer(dis_opt, (dis_lr, ))
-
+            algorithm.update_optimizer(gen_opt, scheduler.get_params_smooth())
             # Finish training if scheduler thinks it's time
             if not scheduler.active:
                 break
@@ -45,7 +46,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
 
         average_gen_loss = 0.0
         average_dis_loss = 0.0
-        train_accuracy = 0
+        train_psnr = train_ssim = train_lpips = 0.0
         total = len(ds.train_loader)
         scaled_inputs = outputs = gt = None
 
@@ -53,9 +54,8 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         
         for sample_id, data in enumerate(ds.train_loader, 0):
             if use_warmup and warmup.active:
-                gen_lr, dis_lr = warmup.get_params(epoch_idx, sample_id)
-                algorithm.update_optimizer(gen_opt, (gen_lr, ))
-                algorithm.update_optimizer(dis_opt, (dis_lr, ))
+                algorithm.update_optimizer(gen_opt,
+                                           warmup.get_params(epoch_idx, sample_id))
 
             inputs, gt = data
             inputs = inputs.to(device)
@@ -96,7 +96,11 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             # Gather stats
             average_gen_loss += gen_loss.item()
             average_dis_loss += dis_loss.item()
-            train_accuracy += metric(outputs, gt).item()
+            norm_out = torch.clamp(outputs.data / 2 + 0.5, min=0, max=1)
+            norm_gt = torch.clamp(gt.data / 2 + 0.5, min=0, max=1)
+            train_psnr += psnr(norm_out, norm_gt).item()
+            train_ssim += ssim(norm_out, norm_gt).item()
+            train_lpips += lpips(norm_out, norm_gt).item()
 
             # iter_bar.update()
 
@@ -104,41 +108,45 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
 
         average_gen_loss /= total
         average_dis_loss /= total
-        train_accuracy /= total
+        train_psnr /= total
+        train_ssim /= total
+        train_lpips /= total
 
         # Eval model
         gen_model.eval()
         dis_model.eval()
-        valid_accuracy, valid_gen_loss, valid_dis_loss, images = \
+        valid_psnr, valid_ssim, valid_lpips, valid_gen_loss, valid_dis_loss, images = \
             validation.valid(gen_model, dis_model, device, save_images=True)
 
         # Get lr
-        if use_scheduler:
-            scheduler.add_metrics(valid_gen_loss)
-            gen_lr = scheduler.gen_lr
-            dis_lr = scheduler.dis_lr
-        else:
-            gen_lr = gen_opt.param_groups[0]['lr']
-            dis_lr = dis_opt.param_groups[0]['lr']
+        dis_lr = dis_opt.param_groups[0]['lr']
         if use_warmup and warmup.active:
             gen_lr = warmup.gen_lr
-            dis_lr = warmup.dis_lr
+        elif use_scheduler:
+            scheduler.add_metrics(valid_gen_loss)
+            gen_lr = scheduler.gen_lr
+        else:
+            gen_lr = gen_opt.param_groups[0]['lr']
 
         # Print useful numbers
         print('Epoch %3d:\n'
               'Train: GEN lr: %g, DIS lr: %g\n'
               '       GEN loss: %.3f, DIS loss: %.3f\n'
-              'Valid: GEN loss: %.3f, DIS loss: %.3f' %
-              (epoch_idx, gen_lr, dis_lr, average_gen_loss, average_dis_loss, valid_gen_loss, valid_dis_loss))
-        print('Train metric: %.2f\n'
-              'Valid metric: %.2f' % (train_accuracy, valid_accuracy))
+              '       PSNR: %.2f, SSIM: %.4f, LPIPS: %.4f'
+              'Valid: GEN loss: %.3f, DIS loss: %.3f'
+              '       PSNR: %.2f, SSIM: %.4f, LPIPS: %.4f' %
+              (epoch_idx, gen_lr, dis_lr,
+               average_gen_loss, average_dis_loss,
+               train_psnr, train_ssim, train_lpips,
+               valid_gen_loss, valid_dis_loss,
+               valid_psnr, valid_ssim, valid_lpips))
 
         # Save model is better results
         if valid_gen_loss < best_accuracy:
             best_accuracy = valid_gen_loss
-            PATH = ds.SAVE_DIR + 'model_instances/gen_epoch_%d_loss_%.3f.pth' % (epoch_idx, valid_gen_loss)
+            PATH = ds.SAVE_DIR + 'weights/gen_epoch_%d_loss_%.3f.pth' % (epoch_idx, valid_gen_loss)
             torch.save(gen_model.state_dict(), PATH)
-            PATH = ds.SAVE_DIR + 'model_instances/dis_epoch_%d_loss_%.3f.pth' % (epoch_idx, valid_gen_loss)
+            PATH = ds.SAVE_DIR + 'weights/dis_epoch_%d_loss_%.3f.pth' % (epoch_idx, valid_gen_loss)
             torch.save(dis_model.state_dict(), PATH)
             print('Model saved!')
         print('\n', end='')
@@ -152,7 +160,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             'gen_optimizer': gen_opt.state_dict(),
             'dis_optimizer': dis_opt.state_dict()
         }
-        torch.save(checkpoint, ds.SAVE_DIR + 'model_instances/checkpoint')
+        torch.save(checkpoint, ds.SAVE_DIR + 'weights/checkpoint')
 
         # Prepare train samples for export
         inputs = torch.clamp(scaled_inputs[0, :, :, :] / 2 + 0.5, min=0, max=1)
@@ -161,8 +169,11 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
 
         # Save log
         log.add(epoch_idx=epoch_idx,
-                scalars=(train_accuracy, valid_accuracy, average_gen_loss, average_dis_loss,
-                         valid_gen_loss, valid_dis_loss, gen_lr, dis_lr),
+                scalars=(train_psnr, train_ssim, train_lpips,
+                         valid_psnr, valid_ssim, valid_lpips,
+                         average_gen_loss, average_dis_loss,
+                         valid_gen_loss, valid_dis_loss,
+                         gen_lr, dis_lr),
                 images=tuple(images + [inputs, outputs, gt]))
         log.save()
 

@@ -4,7 +4,9 @@ import torch
 import dl_modules.dataset as ds
 import dl_modules.algorithm as algorithm
 import torch.nn.functional as F
-
+from dl_modules.metric.psnr import PSNR
+from dl_modules.metric.ssim import SSIM
+from lpips_pytorch import LPIPS
 
 images_to_save = 3
 
@@ -14,10 +16,12 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
     super_criterion = algorithm.get_super_loss()
     gen_criterion = algorithm.get_gen_loss()
     dis_criterion = algorithm.get_dis_loss()
-    metric = algorithm.get_metric()
+    psnr = PSNR()
+    ssim = SSIM()
+    lpips = LPIPS()
     average_gen_loss = 0.0
     average_dis_loss = 0.0
-    accuracy = 0.0
+    valid_psnr = valid_ssim = valid_lpips = 0.0
     total = len(ds.valid_loader)
 
     # iter_bar = pyprind.ProgBar(total, title=title, stream=sys.stdout)
@@ -43,7 +47,11 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
 
             average_gen_loss += gen_loss.item()
             average_dis_loss += dis_loss.item()
-            accuracy += metric(outputs, gt).item()
+            norm_out = torch.clamp(outputs.data / 2 + 0.5, min=0, max=1)
+            norm_gt = torch.clamp(gt.data / 2 + 0.5, min=0, max=1)
+            valid_psnr += psnr(norm_out, norm_gt).item()
+            valid_ssim += ssim(norm_out, norm_gt).item()
+            valid_lpips += lpips(norm_out, norm_gt).item()
 
             if save_images and len(images) < images_to_save:
                 images.append(
@@ -52,7 +60,8 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
 
             # iter_bar.update()
     # iter_bar.update()
-    return accuracy / total, average_gen_loss / total, average_dis_loss / total, images
+    return (valid_psnr / total, valid_ssim / total, valid_lpips / total,
+            average_gen_loss / total, average_dis_loss / total, images)
 
 
 def get_static_images() -> list:

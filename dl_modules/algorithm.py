@@ -1,6 +1,5 @@
 import torch.optim as optim
 import torch.nn as nn
-from dl_modules.metric import PSNR
 from dl_modules.loss import VGGPerceptual, LSGANDisLoss, LSGANGenLoss
 
 
@@ -22,10 +21,6 @@ def get_gen_loss() -> nn.Module:
 
 def get_dis_loss() -> nn.Module:
     return LSGANDisLoss()
-
-
-def get_metric():
-    return PSNR()
 
 
 def get_gen_optimizer(net: nn.Module) -> optim.Optimizer:
