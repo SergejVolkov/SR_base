@@ -54,7 +54,7 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
             norm_gt = torch.clamp(gt.data / 2 + 0.5, min=0, max=1)
             valid_psnr += psnr(norm_out, norm_gt).item()
             valid_ssim += ssim(norm_out, norm_gt).item()
-            valid_lpips += lpips(norm_out.cpu(), norm_gt.cpu()).item()
+            valid_lpips += lpips(torch.clamp(outputs.data, -1, 1), gt).item()
 
             if save_images and len(images) < images_to_save:
                 images.append(
