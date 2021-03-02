@@ -1,5 +1,8 @@
 import torch.optim as optim
 import torch.nn as nn
+from dl_modules.metric.psnr import PSNR
+from dl_modules.metric.ssim import SSIM
+from lpips import LPIPS
 from dl_modules.loss import VGGPerceptual, LSGANDisLoss, LSGANGenLoss
 
 
@@ -8,7 +11,11 @@ dis_opt_state_dict = None
 
 gan_loss_coeff = 0.1
 init_gen_lr = 0.001
-init_dis_lr = 0.0001
+dis_lr = 0.0001
+
+psnr = PSNR()
+ssim = SSIM()
+lpips = LPIPS()
 
 
 def get_super_loss() -> nn.Module:
@@ -33,7 +40,7 @@ def get_gen_optimizer(net: nn.Module) -> optim.Optimizer:
 
 def get_dis_optimizer(net: nn.Module) -> optim.Optimizer:
     global dis_opt_state_dict
-    optimizer = optim.Adam(net.parameters(), lr=init_dis_lr, betas=(0.5, 0.999))
+    optimizer = optim.Adam(net.parameters(), lr=dis_lr, betas=(0.5, 0.999))
     if dis_opt_state_dict is not None:
         optimizer.load_state_dict(dis_opt_state_dict)
     return optimizer

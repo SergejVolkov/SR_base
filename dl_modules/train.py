@@ -10,9 +10,7 @@ import dl_modules.warmup as warmup
 import dl_modules.valid as validation
 import log_utils.log_tb as log
 import torch.nn.functional as F
-from dl_modules.metric.psnr import PSNR
-from dl_modules.metric.ssim import SSIM
-from lpips import LPIPS
+
 from datetime import timedelta
 
 
@@ -26,9 +24,6 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
     dis_criterion = algorithm.get_dis_loss()
     gen_opt = algorithm.get_gen_optimizer(gen_model)
     dis_opt = algorithm.get_dis_optimizer(dis_model)
-    psnr = PSNR()
-    ssim = SSIM()
-    lpips = LPIPS()
     lpips.to(device)
 
     epoch_idx = start_epoch
@@ -100,9 +95,11 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             average_dis_loss += dis_loss.item()
             norm_out = torch.clamp(outputs.data / 2 + 0.5, min=0, max=1)
             norm_gt = torch.clamp(gt.data / 2 + 0.5, min=0, max=1)
-            train_psnr += psnr(norm_out, norm_gt).item()
-            train_ssim += ssim(norm_out, norm_gt).item()
-            train_lpips += lpips(torch.clamp(outputs.data, -1, 1), gt).item()
+            train_psnr += algorithm.psnr(norm_out, norm_gt).item()
+            train_ssim += algorithm.ssim(norm_out, norm_gt).item()
+            train_lpips += torch.mean(algorithm.lpips(
+                torch.clamp(outputs.data, -1, 1), gt
+            )).item()
 
             if bars:
                 iter_bar.update()
@@ -120,14 +117,14 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             validation.valid(gen_model, dis_model, device, save_images=True, bars=bars)
 
         # Get lr
-        dis_lr = dis_opt.param_groups[0]['lr']
+        dis_lr = algorithm.dis_lr
         if use_warmup and warmup.active:
             gen_lr = warmup.gen_lr
         elif use_scheduler:
             scheduler.add_metrics(valid_gen_loss)
             gen_lr = scheduler.gen_lr
         else:
-            gen_lr = gen_opt.param_groups[0]['lr']
+            gen_lr = algorithm.init_gen_lr
 
         # Print useful numbers
         print('Epoch %3d:\n'

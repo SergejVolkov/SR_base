@@ -55,6 +55,12 @@ def start_train():
             use_warmup = True
         elif arg == '--bars':
             use_bars = True
+        elif arg.startswith('--gen_lr='):
+            algorithm.init_gen_lr = arg[arg.index('=') + 1:]
+        elif arg.startswith('--min_gen_lr='):
+            scheduler.min_gen_lr = arg[arg.index('=') + 1:]
+        elif arg.startswith('--dis_lr='):
+            algorithm.dis_lr = arg[arg.index('=') + 1:]
         elif arg.startswith('-p=') or arg.startswith('--pretrained='):
             pretrained = arg[arg.index('=') + 1:]
         elif arg.startswith('-b=') or arg.startswith('--batch='):

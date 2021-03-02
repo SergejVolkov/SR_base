@@ -4,9 +4,6 @@ import torch
 import dl_modules.dataset as ds
 import dl_modules.algorithm as algorithm
 import torch.nn.functional as F
-from dl_modules.metric.psnr import PSNR
-from dl_modules.metric.ssim import SSIM
-from lpips import LPIPS
 
 images_to_save = 3
 
@@ -16,9 +13,6 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
     super_criterion = algorithm.get_super_loss()
     gen_criterion = algorithm.get_gen_loss()
     dis_criterion = algorithm.get_dis_loss()
-    psnr = PSNR()
-    ssim = SSIM()
-    lpips = LPIPS()
     lpips.to(device)
 
     average_gen_loss = 0.0
@@ -52,9 +46,11 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
             average_dis_loss += dis_loss.item()
             norm_out = torch.clamp(outputs.data / 2 + 0.5, min=0, max=1)
             norm_gt = torch.clamp(gt.data / 2 + 0.5, min=0, max=1)
-            valid_psnr += psnr(norm_out, norm_gt).item()
-            valid_ssim += ssim(norm_out, norm_gt).item()
-            valid_lpips += lpips(torch.clamp(outputs.data, -1, 1), gt).item()
+            valid_psnr += algorithm.psnr(norm_out, norm_gt).item()
+            valid_ssim += algorithm.ssim(norm_out, norm_gt).item()
+            valid_lpips += torch.mean(algorithm.lpips(
+                torch.clamp(outputs.data, -1, 1), gt
+            )).item()
 
             if save_images and len(images) < images_to_save:
                 images.append(
