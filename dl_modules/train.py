@@ -132,8 +132,8 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         print('Epoch %3d:\n'
               'Train: GEN lr: %g, DIS lr: %g\n'
               '       GEN loss: %.3f, DIS loss: %.3f\n'
-              '       PSNR: %.2f, SSIM: %.4f, LPIPS: %.4f'
-              'Valid: GEN loss: %.3f, DIS loss: %.3f'
+              '       PSNR: %.2f, SSIM: %.4f, LPIPS: %.4f\n'
+              'Valid: GEN loss: %.3f, DIS loss: %.3f\n'
               '       PSNR: %.2f, SSIM: %.4f, LPIPS: %.4f' %
               (epoch_idx, gen_lr, dis_lr,
                average_gen_loss, average_dis_loss,
