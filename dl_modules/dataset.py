@@ -122,9 +122,11 @@ def get_validation_augmentation(crop_size: int):
 
 def get_input_image_augmentation(blur_limit: int):
     return albu.Compose([
-        albu.Blur(blur_limit=blur_limit, p=1),
+        albu.Blur(blur_limit=blur_limit, p=0.2),
         albu.IAAAdditiveGaussianNoise(p=0.2),
-        albu.Downscale(scale_min=0.5, scale_max=0.5, interpolation=cv2.INTER_AREA, p=0.5)
+        albu.IAASharpen(p=0.2),
+        albu.Downscale(scale_min=0.5, scale_max=0.5, interpolation=cv2.INTER_AREA, p=0.5),
+        albu.ImageCompression(quality_lower=95, p=0.7)
     ])
 
 
@@ -152,7 +154,8 @@ def glue_image(pieces: list) -> Tensor:
 def init_data():
     global train_set, train_loader, valid_set, valid_loader
     train_set = Dataset(train_dir, scale=scale,
-                        augmentation=get_training_augmentation(crop_size))
+                        augmentation=get_training_augmentation(crop_size),
+                        in_aug=get_input_image_augmentation(3))
     if train_set_size != 0:
         train_set = Subset(train_set, list(range(train_set_size)))
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=train_batch_size,
