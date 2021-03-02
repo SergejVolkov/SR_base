@@ -23,9 +23,6 @@ last_n_epoch = 30
 # If diff is less than this, decrease learning rate
 threshold = 0.001
 
-# Get reduce coeff for smooth method
-times_reduce = (min_gen_lr / gen_lr) ** (1 / total_epoch)
-
 
 active = True
 history = []
@@ -54,7 +51,8 @@ def add_metrics(metrics: float) -> None:
 def get_params_smooth() -> tuple:
     global gen_lr, epoch_counter
     if epoch_counter != 0:
-        gen_lr *= times_reduce
+        times_decay = (min_gen_lr / algotithm.init_gen_lr) ** (1 / total_epoch)
+        gen_lr *= times_decay
     return gen_lr
 
 
