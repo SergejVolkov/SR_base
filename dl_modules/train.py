@@ -12,7 +12,7 @@ import log_utils.log_tb as log
 import torch.nn.functional as F
 from dl_modules.metric.psnr import PSNR
 from dl_modules.metric.ssim import SSIM
-from lpips_pytorch import LPIPS
+from lpips import LPIPS
 from datetime import timedelta
 
 
@@ -29,6 +29,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
     psnr = PSNR()
     ssim = SSIM()
     lpips = LPIPS()
+    lpips.to(device)
 
     epoch_idx = start_epoch
     if use_warmup:
@@ -116,7 +117,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         gen_model.eval()
         dis_model.eval()
         valid_psnr, valid_ssim, valid_lpips, valid_gen_loss, valid_dis_loss, images = \
-            validation.valid(gen_model, dis_model, device, save_images=True)
+            validation.valid(gen_model, dis_model, device, save_images=True, bars=bars)
 
         # Get lr
         dis_lr = dis_opt.param_groups[0]['lr']

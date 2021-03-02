@@ -6,7 +6,7 @@ import dl_modules.algorithm as algorithm
 import torch.nn.functional as F
 from dl_modules.metric.psnr import PSNR
 from dl_modules.metric.ssim import SSIM
-from lpips_pytorch import LPIPS
+from lpips import LPIPS
 
 images_to_save = 3
 
@@ -19,6 +19,8 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
     psnr = PSNR()
     ssim = SSIM()
     lpips = LPIPS()
+    lpips.to(device)
+
     average_gen_loss = 0.0
     average_dis_loss = 0.0
     valid_psnr = valid_ssim = valid_lpips = 0.0

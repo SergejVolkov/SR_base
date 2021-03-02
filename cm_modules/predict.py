@@ -26,4 +26,3 @@ def predict(net: torch.nn.Module, device: torch.device) -> None:
             cv2.imwrite(ds.SAVE_DIR + 'data/output/' + dataset.ids[i][:-4] + 'x2.png', cv2.cvtColor(output, cv2.COLOR_RGB2BGR))
             iter_bar.update()
             i += 1
-    iter_bar.update()

@@ -47,4 +47,3 @@ def inference(name: str, net: torch.nn.Module, device: torch.device,
             iter_bar.update()
     cap.release()
     out.release()
-    iter_bar.update()
