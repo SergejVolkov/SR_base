@@ -101,7 +101,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             norm_gt = torch.clamp(gt.data / 2 + 0.5, min=0, max=1)
             train_psnr += psnr(norm_out, norm_gt).item()
             train_ssim += ssim(norm_out, norm_gt).item()
-            train_lpips += lpips(norm_out, norm_gt).item()
+            train_lpips += lpips(norm_out.cpu(), norm_gt.cpu()).item()
 
             if bars:
                 iter_bar.update()
