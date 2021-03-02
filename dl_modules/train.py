@@ -24,7 +24,6 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
     dis_criterion = algorithm.get_dis_loss()
     gen_opt = algorithm.get_gen_optimizer(gen_model)
     dis_opt = algorithm.get_dis_optimizer(dis_model)
-    lpips.to(device)
 
     epoch_idx = start_epoch
     if use_warmup:

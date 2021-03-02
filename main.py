@@ -85,8 +85,9 @@ def start_train():
     device = torch.device('cuda:0' if torch.cuda.is_available() else "cpu")
     print(device, 'hardware:%d' % cuda_id)
 
-    # Init datasets and logger
+    # Init datasets, metrics and logger
     ds.init_data()
+    algorithm.lpips.to(device)
     log.init(exp_name)
     if not resume:
         train_start_log()
