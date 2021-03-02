@@ -3,13 +3,14 @@ import dl_modules.dataset as ds
 main = 'USAGE\n\npython main.py EPOCH_COUNT EXP_NAME [OPTIONS]\n\n' \
        '       -g=CUDA_DEVICE_NUMBER, --gpu=CUDA_DEVICE_NUMBER\n              CUDA device to use (default 0)\n\n' \
        '       -r, --resume\n              continue training from last checkpoint\n\n' \
-       '       -s, --no_scheduler\n              do not use scheduler\n\n' \
-       '       -w, --no_warmup\n              do not use warmup\n\n' \
+       '       -s, --scheduler\n              use scheduler\n\n' \
+       '       -w, --warmup\n              use warmup\n\n' \
        '       -p=MODEL_NAME, --pretrained=MODEL_NAME\n              load pretrained generator weights\n\n' \
        '       -b=COUNT, --batch=COUNT\n              train batch size (default %d)\n\n' \
        '       -c=SIZE, --crop=SIZE\n              train crop size (default %d)\n\n' \
        '       -t=SIZE, --train=SIZE\n              train subset (default len(TRAIN_SET))\n\n' \
        '       -v=SIZE, --valid=SIZE\n              valid subset (default len(VALID_SET))\n\n' \
+       '       --bars\n              show progressbars\n\n' \
        '       -h, --help\n              show manual\n\n' \
        'python main.py MODEL_NAME --predict [OPTIONS]\n\n' \
        '       -g=CUDA_DEVICE_NUMBER, --gpu=CUDA_DEVICE_NUMBER\n              CUDA device to use (default 0)\n\n' \

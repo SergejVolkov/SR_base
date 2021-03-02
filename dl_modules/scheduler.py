@@ -53,7 +53,7 @@ def get_params_smooth() -> tuple:
     if epoch_counter != 0:
         times_decay = (min_gen_lr / algotithm.init_gen_lr) ** (1 / total_epoch)
         gen_lr *= times_decay
-    return gen_lr
+    return gen_lr,
 
 
 def get_params_leap() -> tuple:
@@ -68,4 +68,4 @@ def get_params_leap() -> tuple:
         print('Learning rate decreased!\n')
     if gen_lr < min_gen_lr:
         active = False
-    return gen_lr
+    return gen_lr,

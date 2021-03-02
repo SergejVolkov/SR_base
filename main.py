@@ -38,7 +38,8 @@ def start_train():
     pretrained = None
     start_epoch = 0
     best_result = float('inf')
-    use_scheduler = use_warmup = True
+    use_scheduler = use_warmup = False
+    use_bars = False
     resume = False
     cuda_id = 0
     for arg in sys.argv[3:]:
@@ -48,10 +49,12 @@ def start_train():
                 print('Cannot resume training, no saved checkpoint found!')
                 exit(0)
             resume = True
-        elif arg == '-s' or arg == '--no_scheduler':
-            use_scheduler = False
-        elif arg == '-w' or arg == '--no_warmup':
-            use_warmup = False
+        elif arg == '-s' or arg == '--scheduler':
+            use_scheduler = True
+        elif arg == '-w' or arg == '--warmup':
+            use_warmup = True
+        elif arg == '--bars':
+            use_bars = True
         elif arg.startswith('-p=') or arg.startswith('--pretrained='):
             pretrained = arg[arg.index('=') + 1:]
         elif arg.startswith('-b=') or arg.startswith('--batch='):
@@ -109,7 +112,7 @@ def start_train():
 
     # Train model
     train(generator, discriminator, device, epoch_count=epoch_count, start_epoch=start_epoch,
-          use_scheduler=use_scheduler, use_warmup=use_warmup, best_accuracy=best_result)
+          use_scheduler=use_scheduler, use_warmup=use_warmup, best_accuracy=best_result, bars=use_bars)
 
     # Test model on all valid data
     if ds.valid_set_size != 0:
@@ -118,7 +121,7 @@ def start_train():
         generator.eval()
         discriminator.eval()
         acc, gen_loss, dis_loss, _ = valid(generator, discriminator, device,
-                                           save_images=False, title="Valid Full")
+                                           save_images=False, bars=True, title="Valid Full")
         print('Full valid: GEN loss: %.3f, DIS loss: %.3f' % (gen_loss, dis_loss))
         print('Full valid metric: %.2f\n' % acc)
 

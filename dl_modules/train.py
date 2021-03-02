@@ -1,6 +1,6 @@
-# import sys
+import sys
 import time
-# import pyprind
+import pyprind
 import torch
 import torch.nn as nn
 import dl_modules.dataset as ds
@@ -19,7 +19,7 @@ from datetime import timedelta
 # Train model for 'epoch_count' epochs
 def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
           epoch_count: int, start_epoch: int=0, use_scheduler: bool=False,
-          use_warmup: bool=False, best_accuracy: float=float('inf')) -> None:
+          use_warmup: bool=False, best_accuracy: float=float('inf'), bars: bool=False) -> None:
     start_time = time.time()
     super_criterion = algorithm.get_super_loss()
     gen_criterion = algorithm.get_gen_loss()
@@ -50,7 +50,8 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         total = len(ds.train_loader)
         scaled_inputs = outputs = gt = None
 
-        # iter_bar = pyprind.ProgBar(total, title="Train", stream=sys.stdout)
+        if bars:
+            iter_bar = pyprind.ProgBar(total, title="Train", stream=sys.stdout)
         
         for sample_id, data in enumerate(ds.train_loader, 0):
             if use_warmup and warmup.active:
@@ -102,9 +103,8 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             train_ssim += ssim(norm_out, norm_gt).item()
             train_lpips += lpips(norm_out, norm_gt).item()
 
-            # iter_bar.update()
-
-        # iter_bar.update()
+            if bars:
+                iter_bar.update()
 
         average_gen_loss /= total
         average_dis_loss /= total

@@ -1,5 +1,5 @@
-# import sys
-# import pyprind
+import sys
+import pyprind
 import torch
 import dl_modules.dataset as ds
 import dl_modules.algorithm as algorithm
@@ -12,7 +12,7 @@ images_to_save = 3
 
 
 def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.device,
-          save_images=False, title="Valid") -> (int, float, list):
+          save_images=False, bars: bool=False, title="Valid") -> (int, float, list):
     super_criterion = algorithm.get_super_loss()
     gen_criterion = algorithm.get_gen_loss()
     dis_criterion = algorithm.get_dis_loss()
@@ -24,7 +24,8 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
     valid_psnr = valid_ssim = valid_lpips = 0.0
     total = len(ds.valid_loader)
 
-    # iter_bar = pyprind.ProgBar(total, title=title, stream=sys.stdout)
+    if bars:
+        iter_bar = pyprind.ProgBar(total, title=title, stream=sys.stdout)
     images = []
 
     with torch.no_grad():
@@ -58,8 +59,8 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
                     torch.clamp(outputs.squeeze(0) / 2 + 0.5, min=0, max=1)
                 )
 
-            # iter_bar.update()
-    # iter_bar.update()
+            if bars:
+                iter_bar.update()
     return (valid_psnr / total, valid_ssim / total, valid_lpips / total,
             average_gen_loss / total, average_dis_loss / total, images)
 
