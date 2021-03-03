@@ -10,7 +10,7 @@ scalar_labels = ["mtr PSNR", "mtr SSIM", "mtr LPIPS",
                  "ltr GEN", "ltr DIS",
                  "lval GEN", "lval DIS",
                  "lr GEN", "lr DIS"]
-constant_labels = ["l Bicubic", "l Bicubic"]
+constant_labels = ["mbic PSNR", "mbic SSIM", "mbic LPIPS"]
 image_labels = ["ival 1 Pred", "ival 2 Pred", "ival 3 Pred",
                 "itr LR", "itr Pred", "itr HR",
                 "ival 1 LR", "ival 1 HR", "ival 2 LR",

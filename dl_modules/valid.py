@@ -9,7 +9,7 @@ images_to_save = 3
 
 
 def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.device,
-          save_images=False, bars: bool=False, title="Valid") -> (int, float, list):
+          save_images=False, bars: bool=False, title="Valid") -> tuple:
     super_criterion = algorithm.get_super_loss()
     gen_criterion = algorithm.get_gen_loss()
     dis_criterion = algorithm.get_dis_loss()
@@ -59,6 +59,35 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
                 iter_bar.update()
     return (valid_psnr / total, valid_ssim / total, valid_lpips / total,
             average_gen_loss / total, average_dis_loss / total, images)
+
+
+def simple_eval(gen_model: torch.nn.Module, device: torch.device,
+          bars: bool=False, title="Valid") -> tuple:
+    valid_psnr = valid_ssim = valid_lpips = 0.0
+    total = len(ds.valid_loader)
+
+    if bars:
+        iter_bar = pyprind.ProgBar(total, title=title, stream=sys.stdout)
+
+    with torch.no_grad():
+        for data in ds.valid_loader:
+            inputs, gt = data
+            inputs = inputs.to(device)
+            gt = gt.to(device)
+
+            outputs = gen_model(inputs)
+
+            norm_out = torch.clamp(outputs.data / 2 + 0.5, min=0, max=1)
+            norm_gt = torch.clamp(gt.data / 2 + 0.5, min=0, max=1)
+            valid_psnr += algorithm.psnr(norm_out, norm_gt).item()
+            valid_ssim += algorithm.ssim(norm_out, norm_gt).item()
+            valid_lpips += torch.mean(algorithm.lpips(
+                torch.clamp(outputs.data, -1, 1), gt
+            )).item()
+
+            if bars:
+                iter_bar.update()
+    return valid_psnr / total, valid_ssim / total, valid_lpips / total
 
 
 def get_static_images() -> list:

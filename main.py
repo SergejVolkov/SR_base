@@ -7,22 +7,24 @@ import dl_modules.dataset as ds
 import dl_modules.algorithm as algorithm
 import dl_modules.scheduler as scheduler
 from dl_modules.train import train
-from dl_modules.valid import valid
+from dl_modules.valid import valid, simple_eval
 from dl_modules.valid import get_static_images
 from cm_modules.predict import predict
 from cm_modules.inference import inference
 from models.RDN import RDN
 from models.RevDiscr import RevDiscr
-# from models.Algo import Bicubic
+from models.Algo import Bicubic
 
 
-def train_start_log():
+def train_start_log(device: torch.device):
     # Evaluate naive solution for future comparison
-    # naive = Bicubic()
-    # naive.to(device)
-    # naive_acc, naive_loss, _ = valid(naive, device, save_images=False, title="Valid Bicubic")
-    # print('Bicubic loss: %.3f, bicubic accuracy: %.3f' % (naive_loss, naive_acc))
-    # log.add(epoch_idx=0, constants=(naive_acc, naive_loss))
+    naive = Bicubic()
+    naive.to(device)
+    valid_psnr, valid_ssim, valid_lpips = \
+        simple_eval(naive, device, bars=True, title="Valid Bicubic")
+    print('Bicubic: PSNR: %.2f, SSIM: %.4f, LPIPS: %.4f' %
+          (valid_psnr, valid_ssim, valid_lpips))
+    # log.add(epoch_idx=0, constants=(valid_psnr, valid_ssim, valid_lpips))
 
     # Add static images to log
     log.add(epoch_idx=0, images=tuple(get_static_images()), im_start=6)
@@ -90,7 +92,7 @@ def start_train():
     algorithm.lpips.to(device)
     log.init(exp_name)
     if not resume:
-        train_start_log()
+        train_start_log(device)
 
     # Create an instance of the model
     generator = RDN(ds.scale, 3, 64, 64, 16, 8)

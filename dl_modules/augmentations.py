@@ -22,20 +22,20 @@ def get_input_image_augmentation():
         albu.OneOf(
             [
                 albu.Compose([
-                    albu.Blur(blur_limit=3, p=1),
-                    albu.IAASharpen(alpha=(0.2, 0.4), lightness=(0.9, 1.0), p=1)
+                    albu.Blur(blur_limit=2, p=1),
+                    albu.IAASharpen(alpha=(0.2, 0.5), lightness=(0.9, 1.0), p=1)
                 ], p=1),
                 albu.Compose([
                     albu.GaussianBlur(blur_limit=(3, 3), p=1),
-                    albu.IAASharpen(alpha=(0.2, 0.4), lightness=(0.9, 1.0), p=1)
+                    albu.IAASharpen(alpha=(0.2, 0.5), lightness=(0.9, 1.0), p=1)
                 ], p=1),
-                albu.Downscale(scale_min=0.5, scale_max=0.75, interpolation=cv2.INTER_LINEAR, p=1)
+                albu.Downscale(scale_min=0.5, scale_max=0.5, interpolation=cv2.INTER_LINEAR, p=1)
             ],
             p=0.75
         ),
         albu.OneOf(
             [
-                albu.IAAAdditiveGaussianNoise(scale=(0.005 * 255, 0.005 * 255), p=1),
+                albu.IAAAdditiveGaussianNoise(scale=(0.01 * 255, 0.01 * 255), p=1),
                 albu.GaussNoise(var_limit=(5.0, 20.0), p=1),
                 albu.ImageCompression(quality_lower=98,
                                       compression_type=ImageCompression.ImageCompressionType.JPEG, p=1),
