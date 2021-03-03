@@ -7,9 +7,9 @@ main = 'USAGE\n\npython main.py EPOCH_COUNT EXP_NAME [OPTIONS]\n\n' \
        '       -r, --resume\n              continue training from last checkpoint\n\n' \
        '       -s, --scheduler\n              use scheduler\n\n' \
        '       -w, --warmup\n              use warmup\n\n' \
-       '       --gen_lr=LR\n              initial generator learning rate (default %d)\n\n' \
-       '       --min_gen_lr=LR\n              minimum generator learning rate at the end of training (default %d)\n\n' \
-       '       --dis_lr=LR\n              discriminator learning rate (default %d)\n\n' \
+       '       --gen_lr=LR\n              initial generator learning rate (default %g)\n\n' \
+       '       --min_gen_lr=LR\n              minimum generator learning rate at the end of training (default %g)\n\n' \
+       '       --dis_lr=LR\n              discriminator learning rate (default %g)\n\n' \
        '       -p=MODEL_NAME, --pretrained=MODEL_NAME\n              load pretrained generator weights\n\n' \
        '       -b=COUNT, --batch=COUNT\n              train batch size (default %d)\n\n' \
        '       -c=SIZE, --crop=SIZE\n              train crop size (default %d)\n\n' \
