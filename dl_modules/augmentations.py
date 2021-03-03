@@ -1,7 +1,6 @@
 import cv2
 import albumentations as albu
-import albumentations.augmentations.transforms.ImageCompression.ImageCompressionType \
-        as CompressionType
+from albumentations.augmentations.transforms import ImageCompression
 
 
 def get_training_augmentation(crop_size: int):
@@ -39,9 +38,9 @@ def get_input_image_augmentation():
                 albu.IAAAdditiveGaussianNoise(scale=(0.005 * 255, 0.005 * 255), p=1),
                 albu.GaussNoise(var_limit=(5.0, 20.0), p=1),
                 albu.ImageCompression(quality_lower=98,
-                                      compression_type=CompressionType.JPEG, p=1),
+                                      compression_type=ImageCompression.ImageCompressionType.JPEG, p=1),
                 albu.ImageCompression(quality_lower=98,
-                                      compression_type=CompressionType.WEBP, p=1)
+                                      compression_type=ImageCompression.ImageCompressionType.WEBP, p=1)
             ],
             p=1
         )
