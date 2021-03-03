@@ -172,7 +172,7 @@ def init_data():
     global train_set, train_loader, valid_set, valid_loader
     train_set = Dataset(train_dir, scale=scale,
                         augmentation=get_training_augmentation(crop_size),
-                        in_aug=get_input_image_augmentation(3))
+                        in_aug=get_input_image_augmentation())
     if train_set_size != 0:
         train_set = Subset(train_set, list(range(train_set_size)))
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=train_batch_size,
