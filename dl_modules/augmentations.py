@@ -30,11 +30,11 @@ def get_input_image_augmentation():
                 ], p=1),
                 albu.Downscale(scale_min=0.5, scale_max=0.5, interpolation=cv2.INTER_AREA, p=1)
             ],
-            p=1
+            p=0.75
         ),
         albu.OneOf(
             [
-                albu.IAAAdditiveGaussianNoise(p=1),
+                albu.IAAAdditiveGaussianNoise(scale=(0.01 * 255, 0.01 * 255), p=1),
                 albu.GaussNoise(var_limit=(5.0, 25.0), p=1),
                 albu.ImageCompression(quality_lower=98, p=1)
             ],

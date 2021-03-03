@@ -29,7 +29,7 @@ def train_start_log():
 
 
 def start_train():
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 3:
         print('Wrong number of params!\nTry "python main.py --help" for usage info')
         return
 
@@ -127,14 +127,17 @@ def start_train():
         ds.init_data()
         generator.eval()
         discriminator.eval()
-        acc, gen_loss, dis_loss, _ = valid(generator, discriminator, device,
-                                           save_images=False, bars=True, title="Valid Full")
-        print('Full valid: GEN loss: %.3f, DIS loss: %.3f' % (gen_loss, dis_loss))
-        print('Full valid metric: %.2f\n' % acc)
+        valid_psnr, valid_ssim, valid_lpips, valid_gen_loss,\
+            valid_dis_loss, _ = valid(generator, discriminator, device,
+                                      save_images=False, bars=True, title="Valid Full")
+        print('Full valid: GEN loss: %.3f, DIS loss: %.3f\n'
+              'Full valid: PSNR: %.2f, SSIM: %.4f, LPIPS: %.4f' %
+              (valid_gen_loss, valid_dis_loss,
+               valid_psnr, valid_ssim, valid_lpips))
 
 
 def start_predict():
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 2:
         print('Wrong number of params!\nTry "python main.py --help" for usage info')
         return
 
@@ -169,7 +172,7 @@ def start_predict():
 
 
 def start_inference():
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 3:
         print('Wrong number of params!\nTry "python main.py --help" for usage info')
         return
 
