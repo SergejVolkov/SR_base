@@ -129,7 +129,7 @@ def get_input_image_augmentation():
                     albu.IAASharpen(alpha=(0.5, 0.8), lightness=(0.9, 1.0), p=1)
                 ], p=1),
                 albu.Compose([
-                    albu.GaussianBlur(blur_limit=4, p=1),
+                    albu.GaussianBlur(blur_limit=3, p=1),
                     albu.IAASharpen(alpha=(0.5, 0.8), lightness=(0.9, 1.0), p=1)
                 ], p=1),
                 albu.Downscale(scale_min=0.5, scale_max=0.5, interpolation=cv2.INTER_AREA, p=1)
