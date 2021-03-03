@@ -2,11 +2,10 @@ import os
 import numpy as np
 import cv2
 import torch
-import albumentations as albu
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
+import dl_modules.augmentations as aug
 import torch.tensor as Tensor
-
 from torch.utils.data import Dataset as BaseDataset
 from torch.utils.data import Subset
 
@@ -77,76 +76,6 @@ def get_normalization() -> torch.nn.Module:
     ])
 
 
-def get_training_augmentation(crop_size: int):
-    return albu.Compose([
-        albu.RandomCrop(height=crop_size, width=crop_size, always_apply=True),
-        albu.HorizontalFlip(p=0.5),
-        # albu.ShiftScaleRotate(scale_limit=0.5, rotate_limit=0, shift_limit=0.1, p=1, border_mode=0),
-        # albu.IAAAdditiveGaussianNoise(p=0.2),
-        # albu.IAAPerspective(p=0.5),
-
-        # albu.OneOf(
-        #     [
-        #         albu.CLAHE(p=1),
-        #         albu.RandomBrightness(p=1),
-        #         albu.RandomGamma(p=1),
-        #     ],
-        #     p=0.5,
-        # ),
-
-        # albu.OneOf(
-        #     [
-        #         albu.IAASharpen(p=1),
-        #         albu.Blur(blur_limit=7, p=1),
-        #         albu.MotionBlur(blur_limit=7, p=1),
-        #     ],
-        #     p=0.5,
-        # ),
-
-        # albu.OneOf(
-        #     [
-        #         albu.RandomContrast(p=1),
-        #         albu.HueSaturationValue(p=1),
-        #     ],
-        #     p=0.5,
-        # )
-    ])
-
-
-def get_validation_augmentation(crop_size: int):
-    return albu.Compose([
-        albu.PadIfNeeded(min_height=crop_size, min_width=crop_size, always_apply=True),
-        albu.CenterCrop(height=crop_size, width=crop_size, always_apply=True)
-    ])
-
-
-def get_input_image_augmentation():
-    return albu.Compose([
-        albu.OneOf(
-            [
-                albu.Compose([
-                    albu.Blur(blur_limit=2, p=1),
-                    albu.IAASharpen(alpha=(0.5, 0.8), lightness=(0.9, 1.0), p=1)
-                ], p=1),
-                albu.Compose([
-                    albu.GaussianBlur(blur_limit=3, p=1),
-                    albu.IAASharpen(alpha=(0.5, 0.8), lightness=(0.9, 1.0), p=1)
-                ], p=1),
-                albu.Downscale(scale_min=0.5, scale_max=0.5, interpolation=cv2.INTER_AREA, p=1)
-            ],
-            p=1
-        ),
-        albu.OneOf(
-            [
-                albu.IAAAdditiveGaussianNoise(p=1),
-                albu.GaussNoise(var_limit=(5.0, 25.0), p=1),
-                albu.ImageCompression(quality_lower=98, p=1)
-            ],
-            p=1
-        )
-    ])
-
-
 def cut_image(image: Tensor) -> list:
     _, c, h, w = image.shape
     h //= piece_count
@@ -171,8 +100,8 @@ def glue_image(pieces: list) -> Tensor:
 def init_data():
     global train_set, train_loader, valid_set, valid_loader
     train_set = Dataset(train_dir, scale=scale,
-                        augmentation=get_training_augmentation(crop_size),
-                        in_aug=get_input_image_augmentation())
+                        augmentation=aug.get_training_augmentation(crop_size),
+                        in_aug=aug.get_input_image_augmentation())
     if train_set_size != 0:
         train_set = Subset(train_set, list(range(train_set_size)))
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=train_batch_size,
