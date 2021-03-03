@@ -3,13 +3,14 @@ import time
 import pyprind
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import dl_modules.dataset as ds
 import dl_modules.algorithm as algorithm
 import dl_modules.scheduler as scheduler
 import dl_modules.warmup as warmup
 import dl_modules.valid as validation
+import dl_modules.checkpoint as checkpoint
 import log_utils.log_tb as log
-import torch.nn.functional as F
 
 from datetime import timedelta
 
@@ -19,6 +20,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
           epoch_count: int, start_epoch: int=0, use_scheduler: bool=False,
           use_warmup: bool=False, best_accuracy: float=float('inf'), bars: bool=False) -> None:
     start_time = time.time()
+    explosion_count = 0
     super_criterion = algorithm.get_super_loss()
     gen_criterion = algorithm.get_gen_loss()
     dis_criterion = algorithm.get_dis_loss()
@@ -138,6 +140,19 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
                train_psnr, train_ssim, train_lpips,
                valid_psnr, valid_ssim, valid_lpips))
 
+        # Check whether the model has exploded
+        if average_gen_loss > 50:
+            scheduler.discard_smooth()
+            checkpoint.load(gen_model, dis_model, gen_opt, dis_opt)
+            if explosion_count >= 20:
+                print('Explosion limit exceeded with number %d, aborting training...\n' % explosion_count)
+                break
+            print('Model exploded, reverting epoch...\nExplosion index %d\n' % explosion_count)
+            epoch_idx -= 1
+            explosion_count += 1
+            continue
+        explosion_count = 0
+
         # Save model is better results
         if valid_lpips < best_accuracy:
             best_accuracy = valid_lpips
@@ -149,15 +164,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         print('\n', end='')
 
         # Save checkpoint
-        checkpoint = {
-            'epoch': epoch_idx,
-            'best_acc': best_accuracy,
-            'generator': gen_model.state_dict(),
-            'discriminator': dis_model.state_dict(),
-            'gen_optimizer': gen_opt.state_dict(),
-            'dis_optimizer': dis_opt.state_dict()
-        }
-        torch.save(checkpoint, ds.SAVE_DIR + 'weights/checkpoint')
+        checkpoint.save(epoch_idx, best_accuracy, gen_model, dis_model, gen_opt, dis_opt)
 
         # Prepare train samples for export
         inputs = torch.clamp(scaled_inputs[0, :, :, :] / 2 + 0.5, min=0, max=1)

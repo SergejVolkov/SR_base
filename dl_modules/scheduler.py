@@ -69,3 +69,16 @@ def get_params_leap() -> tuple:
     if gen_lr < min_gen_lr:
         active = False
     return gen_lr,
+
+
+def discard_smooth():
+    global gen_lr, epoch_counter
+    if epoch_counter > 1:
+        gen_lr /= (min_gen_lr / algotithm.init_gen_lr) ** (1 / total_epoch)
+    epoch_counter -= 1
+
+
+def discard_leap():
+    global history, epoch_counter
+    history.pop(-1)
+    epoch_counter -= 1
