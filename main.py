@@ -12,7 +12,7 @@ from dl_modules.valid import get_static_images
 from cm_modules.predict import predict
 from cm_modules.inference import inference
 from models.RDN import RDN
-from models.SimpleDiscr import ConvDiscr
+from models.RevDiscr import RevDiscr
 # from models.Algo import Bicubic
 
 
@@ -95,7 +95,7 @@ def start_train():
     # Create an instance of the model
     generator = RDN(ds.scale, 3, 64, 64, 16, 8)
     generator.to(device)
-    discriminator = ConvDiscr(6, 64)
+    discriminator = RevDiscr(6, 64)
     discriminator.to(device)
 
     # Resume from the last checkpoint or load pretrained weights
