@@ -184,6 +184,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
     # Finish training
     total_time = int(time.time() - start_time)
     print('Complete!\n')
-    print('Average epoch train time:', str(timedelta(
-        seconds=total_time // (epoch_idx - start_epoch))))
+    if epoch_idx - start_epoch > 0:
+        print('Average epoch train time:', str(timedelta(
+            seconds=total_time // (epoch_idx - start_epoch))))
     print('Total time:', str(timedelta(seconds=total_time)))
