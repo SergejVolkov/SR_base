@@ -23,12 +23,12 @@ def get_input_image_augmentation():
         albu.OneOf(
             [
                 albu.Compose([
-                    albu.Blur(blur_limit=2, p=1),
-                    albu.IAASharpen(alpha=(0.5, 0.8), lightness=(0.9, 1.0), p=1)
+                    albu.Blur(blur_limit=3, p=1),
+                    albu.IAASharpen(alpha=(0.2, 0.4), lightness=(0.9, 1.0), p=1)
                 ], p=1),
                 albu.Compose([
                     albu.GaussianBlur(blur_limit=(3, 3), p=1),
-                    albu.IAASharpen(alpha=(0.5, 0.8), lightness=(0.9, 1.0), p=1)
+                    albu.IAASharpen(alpha=(0.2, 0.4), lightness=(0.9, 1.0), p=1)
                 ], p=1),
                 albu.Downscale(scale_min=0.5, scale_max=0.5, interpolation=cv2.INTER_LINEAR, p=1)
             ],
