@@ -36,8 +36,8 @@ def get_input_image_augmentation():
         albu.OneOf(
             [
                 albu.IAAAdditiveGaussianNoise(scale=(0.01 * 255, 0.03 * 255), p=1),
-                albu.GaussNoise(var_limit=(5.0, 25.0), p=1),
-                albu.ImageCompression(quality_lower=98,
+                albu.GaussNoise(var_limit=(5.0, 30.0), p=1),
+                albu.ImageCompression(quality_lower=95,
                                       compression_type=ImageCompression.ImageCompressionType.JPEG, p=1)
             ],
             p=1
