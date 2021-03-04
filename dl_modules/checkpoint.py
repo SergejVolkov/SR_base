@@ -9,7 +9,7 @@ def save(epoch_idx: int, best_accuracy: float, gen_model: nn.Module,
     checkpoint = {
         'epoch': epoch_idx,
         'best_acc': best_accuracy,
-        'lr': scheduler.gen_lr
+        'lr': scheduler.gen_lr,
         'generator': gen_model.state_dict(),
         'discriminator': dis_model.state_dict(),
         'gen_optimizer': gen_opt.state_dict(),
