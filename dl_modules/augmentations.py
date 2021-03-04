@@ -22,7 +22,7 @@ def get_input_image_augmentation():
         albu.OneOf(
             [
                 albu.Compose([
-                    albu.Blur(blur_limit=2, p=1),
+                    albu.Blur(blur_limit=3, p=1),
                     albu.IAASharpen(alpha=(0.2, 0.5), lightness=(0.9, 1.0), p=1)
                 ], p=1),
                 albu.Compose([
