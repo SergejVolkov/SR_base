@@ -3,8 +3,8 @@ import dl_modules.algorithm as algotithm
 # Metric type, 'loss' or 'acc'
 metric_type = 'loss'
 
-# Initial learning rate
-gen_lr = algotithm.init_gen_lr
+# Current learning rate, sets automatically
+gen_lr = 0.0
 
 # Divide lr by this number if metrics have platoed
 power = 2.0
@@ -53,11 +53,16 @@ def get_params_smooth() -> tuple:
     if epoch_counter != 0:
         times_decay = (min_gen_lr / algotithm.init_gen_lr) ** (1 / total_epoch)
         gen_lr *= times_decay
+    else:
+        gen_lr = algotithm.init_gen_lr
     return gen_lr,
 
 
 def get_params_leap() -> tuple:
     global gen_lr, epoch_counter, active, metric_type
+    if epoch_counter == 0:
+        gen_lr = algotithm.init_gen_lr
+        return gen_lr,
     sign = 1
     if metric_type == 'loss':
         sign = -1
@@ -72,9 +77,7 @@ def get_params_leap() -> tuple:
 
 
 def discard_smooth():
-    global gen_lr, epoch_counter
-    if epoch_counter > 1:
-        gen_lr /= (min_gen_lr / algotithm.init_gen_lr) ** (1 / total_epoch)
+    global epoch_counter
     epoch_counter -= 1
 
 
