@@ -106,7 +106,7 @@ def start_train():
         checkpoint = torch.load(PATH)
         start_epoch = checkpoint['epoch'] + 1
         best_result = checkpoint['best_acc']
-        scheduler.gen_lr = 0.000835  # checkpoint['lr']
+        algorithm.init_gen_lr = scheduler.gen_lr = 0.000835  # checkpoint['lr']
         generator.load_state_dict(checkpoint['generator'])
         discriminator.load_state_dict(checkpoint['discriminator'])
         algorithm.gen_opt_state_dict = checkpoint['gen_optimizer']
