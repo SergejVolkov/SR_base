@@ -8,6 +8,7 @@ writer = None  # SummaryWriter("log/not_categorized")
 scalar_labels = ["mtr PSNR", "mtr SSIM", "mtr LPIPS",
                  "mval PSNR", "mval SSIM", "mval LPIPS",
                  "ltr GEN", "ltr DIS",
+                 "ltr DIS Fake", "ltr DIS Real",
                  "lval GEN", "lval DIS",
                  "lr GEN", "lr DIS"]
 constant_labels = ["mbic PSNR", "mbic SSIM", "mbic LPIPS"]

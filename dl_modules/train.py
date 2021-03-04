@@ -23,7 +23,8 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
     explosion_count = 0
     super_criterion = algorithm.get_super_loss()
     gen_criterion = algorithm.get_gen_loss()
-    dis_criterion = algorithm.get_dis_loss()
+    dis_fake_criterion = algorithm.get_dis_fake_loss()
+    dis_real_criterion = algorithm.get_dis_real_loss()
     gen_opt = algorithm.get_gen_optimizer(gen_model)
     dis_opt = algorithm.get_dis_optimizer(dis_model)
 
@@ -42,7 +43,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         dis_model.train()
 
         average_gen_loss = 0.0
-        average_dis_loss = 0.0
+        average_dis_loss = avg_fake_loss = avg_real_loss = 0.0
         train_psnr = train_ssim = train_lpips = 0.0
         total = len(ds.train_loader)
         scaled_inputs = outputs = gt = None
@@ -81,7 +82,9 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             dis_model.requires_grad(True)
             concat_outputs = concat_outputs.detach()
 
-            dis_loss = dis_criterion(dis_model(concat_outputs), dis_model(concat_gt))
+            dis_fake_loss = dis_fake_criterion(dis_model(concat_outputs))
+            dis_real_loss = dis_real_criterion(dis_model(concat_gt))
+            dis_loss = dis_fake_loss + dis_real_loss
 
             # Compute gradients
             gen_loss.backward()
@@ -94,6 +97,8 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             # Gather stats
             average_gen_loss += gen_loss.item()
             average_dis_loss += dis_loss.item()
+            avg_fake_loss += dis_fake_loss.item()
+            avg_real_loss += dis_real_loss.item()
             norm_out = torch.clamp(outputs.data / 2 + 0.5, min=0, max=1)
             norm_gt = torch.clamp(gt.data / 2 + 0.5, min=0, max=1)
             train_psnr += algorithm.psnr(norm_out, norm_gt).item()
@@ -107,6 +112,8 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
 
         average_gen_loss /= total
         average_dis_loss /= total
+        avg_fake_loss /= total
+        avg_real_loss /= total
         train_psnr /= total
         train_ssim /= total
         train_lpips /= total
@@ -129,12 +136,14 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
 
         # Print useful numbers
         print('Epoch %3d:\n'
-              'GEN lr: %g, DIS lr: %g\n\n'
+              'GEN lr: %g, DIS lr: %g\n'
+              'DIS: Fake loss: %.3f, Real loss: %.3f\n\n'
               'Train: GEN loss: %.3f, DIS loss: %.3f\n'
               'Valid: GEN loss: %.3f, DIS loss: %.3f\n\n'
               'Train: PSNR: %.2f, SSIM: %.4f, LPIPS: %.4f\n'
               'Valid: PSNR: %.2f, SSIM: %.4f, LPIPS: %.4f' %
               (epoch_idx, gen_lr, dis_lr,
+               avg_fake_loss, avg_real_loss,
                average_gen_loss, average_dis_loss,
                valid_gen_loss, valid_dis_loss,
                train_psnr, train_ssim, train_lpips,
@@ -144,7 +153,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         if average_gen_loss > 50:
             scheduler.discard_smooth()
             checkpoint.load(gen_model, dis_model, gen_opt, dis_opt)
-            if explosion_count >= 20:
+            if explosion_count >= 10:
                 print('Explosion limit exceeded with number %d, aborting training...\n' % explosion_count)
                 break
             print('Model exploded, reverting epoch...\nExplosion index %d\n' % explosion_count)
@@ -176,6 +185,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
                 scalars=(train_psnr, train_ssim, train_lpips,
                          valid_psnr, valid_ssim, valid_lpips,
                          average_gen_loss, average_dis_loss,
+                         avg_fake_loss, avg_real_loss,
                          valid_gen_loss, valid_dis_loss,
                          gen_lr, dis_lr),
                 images=tuple(images + [inputs, outputs, gt]))

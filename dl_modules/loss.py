@@ -43,3 +43,19 @@ class LSGANDisLoss(nn.Module):
 
     def forward(self, fake: Tensor, real: Tensor) -> Tensor:
         return torch.mean(fake ** 2 + (real - 1) ** 2)
+
+
+class LSGANDisFakeLoss(nn.Module):
+    def __init__(self):
+        super(LSGANDisFakeLoss, self).__init__()
+
+    def forward(self, fake: Tensor) -> Tensor:
+        return torch.mean(fake ** 2)
+
+
+class LSGANDisRealLoss(nn.Module):
+    def __init__(self):
+        super(LSGANDisRealLoss, self).__init__()
+
+    def forward(self, real: Tensor) -> Tensor:
+        return torch.mean((real - 1) ** 2)

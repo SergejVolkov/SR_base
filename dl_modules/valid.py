@@ -1,4 +1,5 @@
 import sys
+import random
 import pyprind
 import torch
 import dl_modules.dataset as ds
@@ -17,6 +18,8 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
     average_dis_loss = 0.0
     valid_psnr = valid_ssim = valid_lpips = 0.0
     total = len(ds.valid_loader)
+
+    random.seed(7)
 
     if bars:
         iter_bar = pyprind.ProgBar(total, title=title, stream=sys.stdout)
@@ -57,6 +60,8 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
 
             if bars:
                 iter_bar.update()
+
+    random.seed()
     return (valid_psnr / total, valid_ssim / total, valid_lpips / total,
             average_gen_loss / total, average_dis_loss / total, images)
 
@@ -68,6 +73,8 @@ def simple_eval(gen_model: torch.nn.Module, device: torch.device,
 
     if bars:
         iter_bar = pyprind.ProgBar(total, title=title, stream=sys.stdout)
+
+    random.seed(7)
 
     with torch.no_grad():
         for data in ds.valid_loader:
@@ -87,6 +94,8 @@ def simple_eval(gen_model: torch.nn.Module, device: torch.device,
 
             if bars:
                 iter_bar.update()
+
+    random.seed()
     return valid_psnr / total, valid_ssim / total, valid_lpips / total
 
 

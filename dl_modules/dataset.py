@@ -107,7 +107,8 @@ def init_data():
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=train_batch_size,
                                                shuffle=True, num_workers=12)
 
-    valid_set = Dataset(valid_dir, scale=scale)
+    valid_set = Dataset(valid_dir, scale=scale,
+                        augmentation=aug.get_input_image_augmentation())
     if valid_set_size != 0:
         valid_set = Subset(valid_set, list(range(valid_set_size)))
     valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=valid_batch_size,

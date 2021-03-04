@@ -3,7 +3,8 @@ import torch.nn as nn
 from dl_modules.metric.psnr import PSNR
 from dl_modules.metric.ssim import SSIM
 from lpips import LPIPS
-from dl_modules.loss import VGGPerceptual, LSGANDisLoss, LSGANGenLoss
+from dl_modules.loss import VGGPerceptual, LSGANGenLoss, \
+    LSGANDisLoss, LSGANDisFakeLoss, LSGANDisRealLoss
 
 
 gen_opt_state_dict = None
@@ -28,6 +29,14 @@ def get_gen_loss() -> nn.Module:
 
 def get_dis_loss() -> nn.Module:
     return LSGANDisLoss()
+
+
+def get_dis_fake_loss() -> nn.Module:
+    return LSGANDisFakeLoss()
+
+
+def get_dis_real_loss() -> nn.Module:
+    return LSGANDisRealLoss()
 
 
 def get_gen_optimizer(net: nn.Module) -> optim.Optimizer:
