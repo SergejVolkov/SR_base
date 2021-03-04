@@ -71,10 +71,10 @@ def simple_eval(gen_model: torch.nn.Module, device: torch.device,
     valid_psnr = valid_ssim = valid_lpips = 0.0
     total = len(ds.valid_loader)
 
+    random.seed(7)
+
     if bars:
         iter_bar = pyprind.ProgBar(total, title=title, stream=sys.stdout)
-
-    random.seed(7)
 
     with torch.no_grad():
         for data in ds.valid_loader:
@@ -102,6 +102,8 @@ def simple_eval(gen_model: torch.nn.Module, device: torch.device,
 def get_static_images() -> list:
     images = []
 
+    random.seed(7)
+
     for data in ds.valid_loader:
         inputs, gt = data
         # Add LR sample
@@ -115,4 +117,5 @@ def get_static_images() -> list:
         if len(images) >= images_to_save * 2:
             break
 
+    random.seed()
     return images
