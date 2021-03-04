@@ -201,11 +201,14 @@ def start_inference():
     print(device, 'hardware:%d' % cuda_id)
 
     # Create an instance of the model
-    generator = RDN(ds.scale, 3, 64, 64, 16, 8)
-    generator.to(device)
-
-    PATH = ds.SAVE_DIR + 'weights/' + pretrained + '.pth'
-    generator.load_state_dict(torch.load(PATH))
+    if pretrained == 'algo':
+        generator = Bicubic()
+        generator.to(device)
+    else:
+        generator = RDN(ds.scale, 3, 64, 64, 16, 8)
+        generator.to(device)
+        PATH = ds.SAVE_DIR + 'weights/' + pretrained + '.pth'
+        generator.load_state_dict(torch.load(PATH))
 
     # Process video in 'video' folder
     inference(name, generator, device, length, start)
