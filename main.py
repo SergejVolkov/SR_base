@@ -6,6 +6,7 @@ import resources.manual as man
 import dl_modules.dataset as ds
 import dl_modules.algorithm as algorithm
 import dl_modules.scheduler.exp as scheduler
+import dl_modules.warmup as warmup
 from dl_modules.train import train
 from dl_modules.valid import valid, simple_eval
 from dl_modules.valid import get_static_images
@@ -53,10 +54,11 @@ def start_train():
             resume = True
         elif arg == '-s' or arg == '--scheduler':
             use_scheduler = True
-        elif arg == '-w' or arg == '--warmup':
-            use_warmup = True
         elif arg == '--bars':
             use_bars = True
+        elif arg.startswith('-w=') or arg.startswith('--warmup='):
+            use_warmup = True
+            warmup.period = int(arg[arg.index('=') + 1:])
         elif arg.startswith('--gen_lr='):
             algorithm.init_gen_lr = float(arg[arg.index('=') + 1:])
         elif arg.startswith('--min_gen_lr='):
