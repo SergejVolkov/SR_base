@@ -1,4 +1,4 @@
-import dl_modules.scheduler as scheduler
+import dl_modules.algorithm as algorithm
 import dl_modules.dataset as ds
 
 
@@ -24,8 +24,8 @@ def get_params(epoch_idx: int, sample_id: int) -> tuple:
     global active, gen_lr, epoch_count
     if epoch_idx == epoch_count:
         active = False
-        gen_lr = scheduler.gen_lr
+        gen_lr = algorithm.init_gen_lr
     else:
         coeff = (epoch_idx + (sample_id + 1) / total_samples) / epoch_count
-        gen_lr = scheduler.gen_lr * coeff
+        gen_lr = algorithm.init_gen_lr * coeff
     return gen_lr,

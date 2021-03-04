@@ -1,4 +1,4 @@
-import dl_modules.algorithm as algotithm
+import dl_modules.algorithm as algorithm
 
 # Metric type, 'loss' or 'acc'
 metric_type = 'loss'
@@ -51,17 +51,17 @@ def add_metrics(metrics: float) -> None:
 def get_params_smooth() -> tuple:
     global gen_lr, epoch_counter
     if epoch_counter != 0:
-        times_decay = (min_gen_lr / algotithm.init_gen_lr) ** (1 / total_epoch)
+        times_decay = (min_gen_lr / algorithm.init_gen_lr) ** (1 / total_epoch)
         gen_lr *= times_decay
     else:
-        gen_lr = algotithm.init_gen_lr
+        gen_lr = algorithm.init_gen_lr
     return gen_lr,
 
 
 def get_params_leap() -> tuple:
     global gen_lr, epoch_counter, active, metric_type
     if epoch_counter == 0:
-        gen_lr = algotithm.init_gen_lr
+        gen_lr = algorithm.init_gen_lr
         return gen_lr,
     sign = 1
     if metric_type == 'loss':
