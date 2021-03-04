@@ -3,7 +3,7 @@ import dl_modules.dataset as ds
 
 
 # Number of warmup epochs
-epoch_count = 4
+period = 4
 
 # Warmup state
 active = True
@@ -21,11 +21,11 @@ def init():
 
 
 def get_params(epoch_idx: int, sample_id: int) -> tuple:
-    global active, gen_lr, epoch_count
-    if epoch_idx == epoch_count:
+    global active, gen_lr, period
+    if epoch_idx == period:
         active = False
         gen_lr = algorithm.init_gen_lr
     else:
-        coeff = (epoch_idx + (sample_id + 1) / total_samples) / epoch_count
+        coeff = (epoch_idx + (sample_id + 1) / total_samples) / period
         gen_lr = algorithm.init_gen_lr * coeff
     return gen_lr,

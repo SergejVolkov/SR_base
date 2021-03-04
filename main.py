@@ -5,7 +5,7 @@ import log_utils.log_tb as log
 import resources.manual as man
 import dl_modules.dataset as ds
 import dl_modules.algorithm as algorithm
-import dl_modules.scheduler as scheduler
+import dl_modules.scheduler.exp as scheduler
 from dl_modules.train import train
 from dl_modules.valid import valid, simple_eval
 from dl_modules.valid import get_static_images
@@ -78,9 +78,6 @@ def start_train():
         else:
             print('Unexpected argument "' + arg + '"!')
             return
-
-    if use_scheduler:
-        scheduler.total_epoch = epoch_count
 
     # Try to use GPU
     os.environ['CUDA_VISIBLE_DEVICES'] = str(cuda_id)

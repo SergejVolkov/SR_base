@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import dl_modules.dataset as ds
 import dl_modules.algorithm as algorithm
-import dl_modules.scheduler as scheduler
+import dl_modules.scheduler.exp as scheduler
 import dl_modules.warmup as warmup
 import dl_modules.valid as validation
 import dl_modules.checkpoint as checkpoint
@@ -28,13 +28,15 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
     gen_opt = algorithm.get_gen_optimizer(gen_model)
     dis_opt = algorithm.get_dis_optimizer(dis_model)
 
-    scheduler.epoch_counter = epoch_idx = start_epoch
+    epoch_idx = start_epoch
+    if use_scheduler:
+        scheduler.init(start_epoch, epoch_count, use_warmup)
     if use_warmup:
         warmup.init()
 
     for epoch_idx in range(start_epoch, epoch_count):
         if use_scheduler and not (use_warmup and warmup.active):
-            algorithm.update_optimizer(gen_opt, scheduler.get_params_smooth())
+            algorithm.update_optimizer(gen_opt, scheduler.get_params())
             # Finish training if scheduler thinks it's time
             if not scheduler.active:
                 break
@@ -42,8 +44,8 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         gen_model.train()
         dis_model.train()
 
-        average_gen_loss = 0.0
-        average_dis_loss = avg_fake_loss = avg_real_loss = 0.0
+        train_gen_loss = 0.0
+        train_dis_loss = train_fake_loss = train_real_loss = 0.0
         train_psnr = train_ssim = train_lpips = 0.0
         total = len(ds.train_loader)
         scaled_inputs = outputs = gt = None
@@ -95,10 +97,10 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             dis_opt.step()
 
             # Gather stats
-            average_gen_loss += gen_loss.item()
-            average_dis_loss += dis_loss.item()
-            avg_fake_loss += dis_fake_loss.item()
-            avg_real_loss += dis_real_loss.item()
+            train_gen_loss += gen_loss.item()
+            train_dis_loss += dis_loss.item()
+            train_fake_loss += dis_fake_loss.item()
+            train_real_loss += dis_real_loss.item()
             norm_out = torch.clamp(outputs.data / 2 + 0.5, min=0, max=1)
             norm_gt = torch.clamp(gt.data / 2 + 0.5, min=0, max=1)
             train_psnr += algorithm.psnr(norm_out, norm_gt).item()
@@ -110,13 +112,28 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             if bars:
                 iter_bar.update()
 
-        average_gen_loss /= total
-        average_dis_loss /= total
-        avg_fake_loss /= total
-        avg_real_loss /= total
+        train_gen_loss /= total
+        train_dis_loss /= total
+        train_fake_loss /= total
+        train_real_loss /= total
         train_psnr /= total
         train_ssim /= total
         train_lpips /= total
+
+        # Check whether the model has exploded
+        if train_gen_loss > 50:
+            scheduler.discard()
+            checkpoint.load(gen_model, dis_model, gen_opt, dis_opt)
+            print('Train: GEN loss: %.3f, DIS loss: %.3f\n' %
+                  (train_gen_loss, train_dis_loss))
+            if explosion_count >= 10:
+                print('Explosion limit exceeded with number %d, aborting training...\n' % explosion_count)
+                break
+            print('Model exploded, reverting epoch...\nExplosion index %d\n' % explosion_count)
+            epoch_idx -= 1
+            explosion_count += 1
+            continue
+        explosion_count = 0
 
         # Eval model
         gen_model.eval()
@@ -129,7 +146,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         if use_warmup and warmup.active:
             gen_lr = warmup.gen_lr
         elif use_scheduler:
-            scheduler.add_metrics(valid_gen_loss)
+            scheduler.add_metrics(valid_lpips)
             gen_lr = scheduler.gen_lr
         else:
             gen_lr = algorithm.init_gen_lr
@@ -143,24 +160,11 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
               'Train: PSNR: %.2f, SSIM: %.4f, LPIPS: %.4f\n'
               'Valid: PSNR: %.2f, SSIM: %.4f, LPIPS: %.4f' %
               (epoch_idx, gen_lr, dis_lr,
-               avg_fake_loss, avg_real_loss,
-               average_gen_loss, average_dis_loss,
+               train_fake_loss, train_real_loss,
+               train_gen_loss, train_dis_loss,
                valid_gen_loss, valid_dis_loss,
                train_psnr, train_ssim, train_lpips,
                valid_psnr, valid_ssim, valid_lpips))
-
-        # Check whether the model has exploded
-        if average_gen_loss > 50:
-            scheduler.discard_smooth()
-            checkpoint.load(gen_model, dis_model, gen_opt, dis_opt)
-            if explosion_count >= 10:
-                print('Explosion limit exceeded with number %d, aborting training...\n' % explosion_count)
-                break
-            print('Model exploded, reverting epoch...\nExplosion index %d\n' % explosion_count)
-            epoch_idx -= 1
-            explosion_count += 1
-            continue
-        explosion_count = 0
 
         # Save model is better results
         if valid_lpips < best_accuracy:
@@ -184,8 +188,8 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         log.add(epoch_idx=epoch_idx,
                 scalars=(train_psnr, train_ssim, train_lpips,
                          valid_psnr, valid_ssim, valid_lpips,
-                         average_gen_loss, average_dis_loss,
-                         avg_fake_loss, avg_real_loss,
+                         train_gen_loss, train_dis_loss,
+                         train_fake_loss, train_real_loss,
                          valid_gen_loss, valid_dis_loss,
                          gen_lr, dis_lr),
                 images=tuple(images + [inputs, outputs, gt]))

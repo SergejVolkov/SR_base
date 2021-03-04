@@ -1,6 +1,6 @@
 import dl_modules.dataset as ds
 import dl_modules.algorithm as algorithm
-import dl_modules.scheduler as scheduler
+import dl_modules.scheduler.exp as scheduler
 
 main = 'USAGE\n\npython main.py EPOCH_COUNT EXP_NAME [OPTIONS]\n\n' \
        '       -g=CUDA_DEVICE_NUMBER, --gpu=CUDA_DEVICE_NUMBER\n              CUDA device to use (default 0)\n\n' \

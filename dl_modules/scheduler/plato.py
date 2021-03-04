@@ -1,10 +1,8 @@
 import dl_modules.algorithm as algorithm
+import dl_modules.warmup as warmup
 
 # Metric type, 'loss' or 'acc'
 metric_type = 'loss'
-
-# Current learning rate, sets automatically
-gen_lr = 0.0
 
 # Divide lr by this number if metrics have platoed
 power = 2.0
@@ -12,21 +10,25 @@ power = 2.0
 # Minimum lerning rate, stop training if reached below
 min_gen_lr = 0.00001
 
-# Training epoch, sets automatically
-total_epoch = 0
-
 # How many epoch to consider in diff computation.
 # At least this number of epochs will be run with constant lr.
 # Works better with even number
 last_n_epoch = 30
 
 # If diff is less than this, decrease learning rate
-threshold = 0.001
+threshold = 0.00001
 
 
 active = True
 history = []
+gen_lr = 0.0
 epoch_counter = 0
+
+
+def init(start_epoch: int, epoch_count: int, use_warmup: bool):
+    global gen_lr
+    if start_epoch == 0:
+        gen_lr = algorithm.init_gen_lr
 
 
 def compute_diff(metrics: list, window_size: int) -> float:
@@ -48,21 +50,8 @@ def add_metrics(metrics: float) -> None:
     epoch_counter += 1
 
 
-def get_params_smooth() -> tuple:
-    global gen_lr, epoch_counter
-    if epoch_counter != 0:
-        times_decay = (min_gen_lr / algorithm.init_gen_lr) ** (1 / total_epoch)
-        gen_lr *= times_decay
-    else:
-        gen_lr = algorithm.init_gen_lr
-    return gen_lr,
-
-
-def get_params_leap() -> tuple:
+def get_params() -> tuple:
     global gen_lr, epoch_counter, active, metric_type
-    if epoch_counter == 0:
-        gen_lr = algorithm.init_gen_lr
-        return gen_lr,
     sign = 1
     if metric_type == 'loss':
         sign = -1
@@ -76,12 +65,7 @@ def get_params_leap() -> tuple:
     return gen_lr,
 
 
-def discard_smooth():
-    global epoch_counter
-    epoch_counter -= 1
-
-
-def discard_leap():
+def discard():
     global history, epoch_counter
     history.pop(-1)
     epoch_counter -= 1

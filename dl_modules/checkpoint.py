@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 # import torch.tensor as Tensor
 import dl_modules.dataset as ds
-import dl_modules.scheduler as scheduler
+import dl_modules.scheduler.exp as scheduler
 
 
 def save(epoch_idx: int, best_accuracy: float, gen_model: nn.Module,
