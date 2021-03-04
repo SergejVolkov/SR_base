@@ -16,7 +16,7 @@ def init(start_epoch: int, epoch_count: int, use_warmup: bool):
         epoch_count -= warmup.period
     times_decay = (min_gen_lr / algorithm.init_gen_lr) ** (1 / epoch_count)
     if start_epoch == 0:
-        gen_lr = algorithm.init_gen_lr / times_decay
+        gen_lr = algorithm.init_gen_lr
 
 
 def add_metrics(metrics: float) -> None:
