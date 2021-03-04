@@ -11,6 +11,9 @@ class RevDiscr(nn.Module):
         self.stride = 2
         self.kernel_size = 3
         self.drop = nn.Dropout2d(0.2)
+        self.batch1 = nn.BatchNorm2d(self.num_filters)
+        self.batch2 = nn.BatchNorm2d(self.num_filters)
+        self.batch3 = nn.BatchNorm2d(self.num_filters)
         self.conv1 = nn.Conv2d(in_channels=self.in_channels, out_channels=self.num_filters,
                                kernel_size=self.kernel_size, padding=1,
                                stride=self.stride)
@@ -38,11 +41,11 @@ class RevDiscr(nn.Module):
     def forward(self, x: Tensor) -> Tensor:
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
-        x = self.drop(x)
+        x = self.batch1(x)
         x = F.relu(self.conv3(x))
-        x = self.drop(x)
+        x = self.batch2(x)
         x = F.relu(self.conv4(x))
-        x = self.drop(x)
+        x = self.batch3(x)
         x = F.relu(self.conv5(x))
         x = self.conv6(x)
         return x
