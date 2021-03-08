@@ -1,5 +1,4 @@
 import sys
-import random
 import pyprind
 import torch
 import dl_modules.dataset as ds
@@ -18,8 +17,6 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
     average_dis_loss = 0.0
     valid_psnr = valid_ssim = valid_lpips = 0.0
     total = len(ds.valid_loader)
-
-    random.seed(7)
 
     if bars:
         iter_bar = pyprind.ProgBar(total, title=title, stream=sys.stdout)
@@ -61,7 +58,6 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
             if bars:
                 iter_bar.update()
 
-    random.seed()
     return (valid_psnr / total, valid_ssim / total, valid_lpips / total,
             average_gen_loss / total, average_dis_loss / total, images)
 
@@ -70,8 +66,6 @@ def simple_eval(gen_model: torch.nn.Module, device: torch.device,
           bars: bool=False, title="Valid") -> tuple:
     valid_psnr = valid_ssim = valid_lpips = 0.0
     total = len(ds.valid_loader)
-
-    random.seed(7)
 
     if bars:
         iter_bar = pyprind.ProgBar(total, title=title, stream=sys.stdout)
@@ -95,14 +89,11 @@ def simple_eval(gen_model: torch.nn.Module, device: torch.device,
             if bars:
                 iter_bar.update()
 
-    random.seed()
     return valid_psnr / total, valid_ssim / total, valid_lpips / total
 
 
 def get_static_images() -> list:
     images = []
-
-    random.seed(7)
 
     for data in ds.valid_loader:
         inputs, gt = data
@@ -117,5 +108,4 @@ def get_static_images() -> list:
         if len(images) >= images_to_save * 2:
             break
 
-    random.seed()
     return images

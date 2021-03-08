@@ -2,7 +2,7 @@ import sys
 import torch
 import os.path
 import log_utils.log_tb as log
-import resources.manual as man
+import resources.dl_manual as man
 import dl_modules.dataset as ds
 import dl_modules.algorithm as algorithm
 import dl_modules.scheduler.exp as scheduler
@@ -215,6 +215,7 @@ def start_inference():
 
 
 if __name__ == "__main__":
+    ds.init_data()
     if sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
         print(man.main)
     elif sys.argv.__contains__('--predict'):

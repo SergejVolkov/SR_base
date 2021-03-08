@@ -11,7 +11,7 @@ import dl_modules.dataset as ds
 def prepare(name: str, step: float,
             length: float=0, start: float=0, random_start: bool=False,
             episodes: bool=False, ep_start: int=0, ep_end: int=0,
-            sample_id: int=0) -> None:
+            sample_id: int=0, denoise: bool=False) -> None:
     save_dir = ds.SAVE_DIR + 'data/' + name
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
@@ -50,7 +50,7 @@ def prepare(name: str, step: float,
             total = cap.get(cv2.CAP_PROP_FRAME_COUNT) - start_frame
         if not bar_init:
             bar_last_step = total * (ep_end + 1 - ep_start)
-            iter_bar = pyprind.ProgBar(bar_last_step, title='Prepare data', stream=sys.stdout)
+            iter_bar = pyprind.ProgBar(bar_last_step, title='Prepare', stream=sys.stdout)
             bar_init = True
 
         with torch.no_grad():
@@ -59,9 +59,9 @@ def prepare(name: str, step: float,
                 if not ret or (length != 0 and i >= total):
                     break
                 if i % step_frame == 0:
-                    output = cv2.fastNlMeansDenoisingColored(frame, None, 1, 1, 5, 15)
-                    cv2.imwrite(save_dir + '/%05d.png' % sample_id, output)
-                    # cv2.imwrite(save_dir + '/%05d_raw.png' % (i // step), frame)
+                    if denoise:
+                        frame = cv2.fastNlMeansDenoisingColored(frame, None, 1, 1, 5, 15)
+                    cv2.imwrite(save_dir + '/%05d.png' % sample_id, frame)
                     sample_id += 1
                 i += 1
                 iter_bar.update()

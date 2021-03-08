@@ -1,11 +1,10 @@
 import os
-import cv2
 import sys
 import pyprind
 import torch
-import numpy as np
 import torchvision.transforms as transforms
 import dl_modules.dataset as ds
+from cm_modules.utils import imwrite
 
 
 def crop(folder: str, width: int, height: int) -> None:
@@ -16,16 +15,15 @@ def crop(folder: str, width: int, height: int) -> None:
     if width == 0 or height == 0:
         print('Please, specify valid crop resolution!')
         return
+
+    transform = transforms.CenterCrop((height, width))
+    dataset = ds.Dataset(folder, scale=ds.scale, transform=transform, downscaling='none')
+    loader = torch.utils.data.DataLoader(dataset, batch_size=ds.valid_batch_size,
+                                         shuffle=False, num_workers=0)
+
     if not os.path.isdir(folder + '/crop'):
         os.makedirs(folder + '/crop')
 
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.CenterCrop((height, width))
-    ])
-    dataset = ds.Dataset(folder, scale=ds.scale, normalization=transform)
-    loader = torch.utils.data.DataLoader(dataset, batch_size=ds.valid_batch_size,
-                                         shuffle=False, num_workers=0)
     total = len(loader)
     iter_bar = pyprind.ProgBar(total, title="Crop", stream=sys.stdout)
     i = 0
@@ -33,8 +31,7 @@ def crop(folder: str, width: int, height: int) -> None:
     with torch.no_grad():
         for data in loader:
             downscaled, source = data
-            output = np.transpose(source.squeeze(0).cpu().numpy(), (1, 2, 0)) * 255
-            cv2.imwrite(folder + '/crop/' + dataset.ids[i], cv2.cvtColor(output, cv2.COLOR_RGB2BGR))
+            imwrite(folder + '/crop/' + dataset.ids[i], source)
             iter_bar.update()
             i += 1
     iter_bar.update()

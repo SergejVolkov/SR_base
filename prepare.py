@@ -1,10 +1,9 @@
 import sys
-import torch
-import os.path
-import resources.manual as man
-import dl_modules.dataset as ds
+import resources.cm_manual as man
 from cm_modules.prepare import prepare
 from cm_modules.crop import crop
+from cm_modules.extract import extract
+from cm_modules.generate_lr import generate
 
 
 def start_prepare():
@@ -13,7 +12,7 @@ def start_prepare():
         return
 
     name = sys.argv[1]
-    episodes = random = False
+    denoise = episodes = random = False
     ep_start = ep_end = 0
     length = start = 0.0
     sample_id = 0
@@ -24,6 +23,8 @@ def start_prepare():
             start = int(arg[arg.index('=r') + 2:])
         elif arg.startswith('--start='):
             start = float(arg[arg.index('=') + 1:])
+        elif arg == '-d' or arg == '--denoise=':
+            denoise = True
         elif arg.startswith('-s=') or arg.startswith('--step='):
             step = float(arg[arg.index('=') + 1:])
         elif arg.startswith('-l=') or arg.startswith('--length='):
@@ -40,7 +41,7 @@ def start_prepare():
             return
 
     # Process video in 'video' folder
-    prepare(name, step, length, start, random, episodes, ep_start, ep_end, sample_id)
+    prepare(name, step, length, start, random, episodes, ep_start, ep_end, sample_id, denoise)
 
 
 def start_crop():
@@ -65,10 +66,54 @@ def start_crop():
     crop(folder, width, height)
 
 
+def start_extract():
+    if len(sys.argv) < 2:
+        print('Wrong number of params!\nTry "python prepare.py --help" for usage info')
+        return
+
+    folder = sys.argv[1]
+    strength = 2
+    window_size = 7
+    for arg in sys.argv[2:]:
+        if arg == '--extract':
+            pass
+        elif arg.startswith('-s=') or arg.startswith('--strength='):
+            strength = int(arg[arg.index('=') + 1:])
+        elif arg.startswith('-w=') or arg.startswith('--window='):
+            window_size = int(arg[arg.index('=') + 1:])
+        else:
+            print('Unexpected argument "' + arg + '"!')
+            return
+
+    # Process images in folder
+    extract(folder, strength, window_size)
+
+
+def start_generate():
+    if len(sys.argv) < 2:
+        print('Wrong number of params!\nTry "python prepare.py --help" for usage info')
+        return
+
+    folder = sys.argv[1]
+    for arg in sys.argv[2:]:
+        if arg == '-g' or arg == '--generate':
+            pass
+        else:
+            print('Unexpected argument "' + arg + '"!')
+            return
+
+    # Process images in folder
+    generate(folder)
+
+
 if __name__ == "__main__":
     if sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
         print(man.prepare)
     elif sys.argv.__contains__('--crop') or sys.argv.__contains__('-c'):
         start_crop()
+    elif sys.argv.__contains__('--extract'):
+        start_extract()
+    elif sys.argv.__contains__('--generate') or sys.argv.__contains__('-g'):
+        start_generate()
     else:
         start_prepare()

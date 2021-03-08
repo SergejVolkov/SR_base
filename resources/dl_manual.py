@@ -26,16 +26,3 @@ main = 'USAGE\n\npython main.py EPOCH_COUNT EXP_NAME [OPTIONS]\n\n' \
        '       -l=SECONDS, --length=SECONDS\n              processing time (default len(input_video))\n' \
        % (algorithm.init_gen_lr, scheduler.min_gen_lr, algorithm.dis_lr,
           ds.train_batch_size, ds.crop_size, ds.valid_batch_size)
-
-prepare = 'USAGE\n\npython prepare.py VIDEO_NAME [OPTIONS]\n\n' \
-          '       --start={SECONDS, rSECONDS}\n' \
-          '              video start time, applied to every episode (default 0.0),\n' \
-          '              r prefix gives random frame from 0 to SECONDS\n\n' \
-          '       -l=SECONDS, --length=SECONDS\n              processing time (default len(input_video))\n\n' \
-          '       -s=SECONDS, --step=SECONDS\n              step between samples (default 1.0)\n\n' \
-          '       -e=FIRST-LAST, --episodes=FIRST-LAST\n' \
-          '              handle multiple episodes (format "VIDEO_NAME_00")\n\n' \
-          '       -r=START_ID, --resume=START_ID\n              continue sample numeration from given number\n\n' \
-          '       -h, --help\n              show manual\n\n' \
-          'python prepare.py DATA_FOLDER {-c, --crop} [OPTIONS]\n\n' \
-          '       -r=WIDTH:HEIGHT, --resolution=WIDTH:HEIGHT\n              crop size in pixels (default image size)\n'

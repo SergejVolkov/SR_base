@@ -2,14 +2,16 @@ import cv2
 import sys
 import pyprind
 import torch
-import dl_modules.dataset as ds
 import numpy as np
+import dl_modules.dataset as ds
+from cm_modules.utils import imwrite
 
 
 def predict(net: torch.nn.Module, device: torch.device) -> None:
     net.eval()
 
-    dataset = ds.Dataset(ds.SAVE_DIR + 'data/predict', scale=ds.scale)
+    dataset = ds.Dataset(ds.SAVE_DIR + 'data/predict', scale=ds.scale,
+                         downscaling='none')
     loader = torch.utils.data.DataLoader(dataset, batch_size=ds.valid_batch_size,
                                          shuffle=False, num_workers=0)
     total = len(loader)
@@ -20,9 +22,9 @@ def predict(net: torch.nn.Module, device: torch.device) -> None:
         for data in loader:
             downscaled, source = data
             source = source.to(device)
-
-            output = torch.clamp(net(source).squeeze(0) / 2 + 0.5, min=0, max=1)
-            output = np.transpose(output.cpu().numpy(), (1, 2, 0)) * 255
-            cv2.imwrite(ds.SAVE_DIR + 'data/output/' + dataset.ids[i][:-4] + '_x2.png', cv2.cvtColor(output, cv2.COLOR_RGB2BGR))
+            imwrite(
+                ds.SAVE_DIR + 'data/output/' + dataset.ids[i][:-4] + '_x2.png',
+                net(source)
+            )
             iter_bar.update()
             i += 1

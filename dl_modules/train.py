@@ -10,6 +10,7 @@ import dl_modules.scheduler.exp as scheduler
 import dl_modules.warmup as warmup
 import dl_modules.valid as validation
 import dl_modules.checkpoint as checkpoint
+import dl_modules.realsr as realsr
 import log_utils.log_tb as log
 
 from datetime import timedelta
@@ -61,6 +62,9 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             inputs, gt = data
             inputs = inputs.to(device)
             gt = gt.to(device)
+
+            # Perform RealSR
+            inputs = realsr.inject_noise(inputs, ds.noise_loader)
 
             gen_opt.zero_grad()
             dis_opt.zero_grad()
