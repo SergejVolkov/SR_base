@@ -51,6 +51,11 @@ class Kernels:
 
 def inject_noise(image: Tensor, noise_loader: torch.utils.data.DataLoader) -> Tensor:
     noise, gt = next(iter(noise_loader))
+    if noise.shape[0] < image.shape[0]:
+        noise2, gt = next(iter(noise_loader))
+        noise = torch.cat((noise, noise2), dim=0)[:image.shape[0], :, :, :]
+    elif noise.shape[0] > image.shape[0]:
+        noise = noise[:image.shape[0], :, :, :]
     noise = noise.to(image.device)
     if noise_amount is not None:
         clamp = noise_amount * 2 / 255
