@@ -137,7 +137,7 @@ def init_data():
     global train_set, train_loader, valid_set, valid_loader, noise_set, noise_loader, kernel_storage
     train_set = Dataset(train_dir, scale=scale,
                         transform=trf.get_training_transform(crop_size),
-                        augmentation=trf.get_input_image_augmentation(),
+                        # augmentation=trf.get_input_image_augmentation(),
                         downscaling='kernel')
     if train_set_size != 0:
         train_set = Subset(train_set, list(range(train_set_size)))
@@ -187,8 +187,8 @@ def init_data():
     #     )
 
 
-DATA_DIR = '../drive/MyDrive/data/'  # ../drive/MyDrive/
-SAVE_DIR = '../drive/MyDrive/'
+DATA_DIR = '/cache/Shipilov_HSE/data/'  # ../drive/MyDrive/
+SAVE_DIR = '/cache/Shipilov_HSE/'
 
 train_dir = os.path.join(DATA_DIR, 'Bakemonogatari/Bakemonogatari_train_HR')
 valid_hr_dir = os.path.join(DATA_DIR, 'Bakemonogatari/Bakemonogatari_valid_HR')
@@ -197,7 +197,7 @@ kernel_dir = os.path.join(DATA_DIR, 'SoulTaker/SoulTaker_train_kernel')
 noise_dir  = os.path.join(DATA_DIR, 'SoulTaker/SoulTaker_train_noise')
 
 # Load datasets
-train_batch_size = 32
+train_batch_size = 128
 valid_batch_size = 1  # Better leave it 1, otherwise many things won't work)
 
 crop_size = 64
