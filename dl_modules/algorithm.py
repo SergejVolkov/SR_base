@@ -14,9 +14,30 @@ gan_loss_coeff = 0.1
 init_gen_lr = 0.001
 dis_lr = 0.0001
 
-psnr = PSNR()
-ssim = SSIM()
-lpips = LPIPS()
+lpips = None
+ssim = None
+psnr = None
+
+
+def get_lpips() -> nn.Module:
+    global lpips
+    if lpips is None:
+        lpips = LPIPS(verbose=True)
+    return lpips
+
+
+def get_ssim() -> nn.Module:
+    global ssim
+    if ssim is None:
+        ssim = SSIM()
+    return ssim
+
+
+def get_psnr() -> nn.Module:
+    global psnr
+    if psnr is None:
+        psnr = PSNR()
+    return psnr
 
 
 def get_super_loss() -> nn.Module:

@@ -22,6 +22,12 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
           use_warmup: bool=False, best_accuracy: float=float('inf'), bars: bool=False) -> None:
     start_time = time.time()
     explosion_count = 0
+
+    lpips = algorithm.get_lpips()
+    lpips.to(device)
+    ssim = algorithm.get_ssim()
+    psnr = algorithm.get_psnr()
+
     super_criterion = algorithm.get_super_loss()
     gen_criterion = algorithm.get_gen_loss()
     dis_fake_criterion = algorithm.get_dis_fake_loss()
@@ -107,9 +113,9 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             train_real_loss += dis_real_loss.item()
             norm_out = torch.clamp(outputs.data / 2 + 0.5, min=0, max=1)
             norm_gt = torch.clamp(gt.data / 2 + 0.5, min=0, max=1)
-            train_psnr += algorithm.psnr(norm_out, norm_gt).item()
-            train_ssim += algorithm.ssim(norm_out, norm_gt).item()
-            train_lpips += torch.mean(algorithm.lpips(
+            train_psnr += psnr(norm_out, norm_gt).item()
+            train_ssim += ssim(norm_out, norm_gt).item()
+            train_lpips += torch.mean(lpips(
                 torch.clamp(outputs.data, -1, 1), gt
             )).item()
 
