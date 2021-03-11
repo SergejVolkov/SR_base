@@ -187,8 +187,8 @@ def init_data():
     #     )
 
 
-DATA_DIR = '/cache/Shipilov_HSE/data/'  # ../drive/MyDrive/
-SAVE_DIR = '/cache/Shipilov_HSE/'
+DATA_DIR = '/cache/shipilov_hse/data/'  # ../drive/MyDrive/
+SAVE_DIR = '/cache/shipilov_hse/'
 
 train_dir = os.path.join(DATA_DIR, 'Bakemonogatari/Bakemonogatari_train_HR')
 valid_hr_dir = os.path.join(DATA_DIR, 'Bakemonogatari/Bakemonogatari_valid_HR')
