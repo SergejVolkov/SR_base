@@ -18,7 +18,7 @@ def get_validation_augmentation(crop_size: int):
 
 
 def get_input_image_augmentation():
-    return albu.Downscale(scale_min=0.4, scale_max=0.6, interpolation=cv2.INTER_AREA, p=0.5)
+    return albu.Downscale(scale_min=0.2, scale_max=0.3, interpolation=cv2.INTER_AREA, p=0.5)
 
 
 def get_generate_noise_transform(width: int, height: int):

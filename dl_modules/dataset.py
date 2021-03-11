@@ -65,6 +65,9 @@ class Dataset(BaseDataset):
 
         in_image = gt
 
+        if self.augmentation is not None:
+            in_image = self.augmentation(image=in_image)["image"]
+
         if self.downscaling == 'bicubic':
             h, w, _ = gt.shape
             in_image = cv2.resize(in_image, (w // self.scale, h // self.scale), interpolation=cv2.INTER_CUBIC)
@@ -74,9 +77,6 @@ class Dataset(BaseDataset):
             in_image = realsr.apply_kernel(in_image, kernel_storage)
         else:
             in_image = self.normalization(in_image)
-
-        if self.augmentation is not None:
-            in_image = self.augmentation(image=in_image)["image"]
 
         gt = self.normalization(gt)
         return in_image, gt
