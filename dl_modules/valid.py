@@ -69,6 +69,11 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
 
 def simple_eval(gen_model: torch.nn.Module, device: torch.device,
           bars: bool=False, title="Valid") -> tuple:
+    lpips = algorithm.get_lpips()
+    lpips.to(device)
+    ssim = algorithm.get_ssim()
+    psnr = algorithm.get_psnr()
+
     valid_psnr = valid_ssim = valid_lpips = 0.0
     total = len(ds.valid_loader)
 
@@ -85,9 +90,9 @@ def simple_eval(gen_model: torch.nn.Module, device: torch.device,
 
             norm_out = torch.clamp(outputs.data / 2 + 0.5, min=0, max=1)
             norm_gt = torch.clamp(gt.data / 2 + 0.5, min=0, max=1)
-            valid_psnr += algorithm.psnr(norm_out, norm_gt).item()
-            valid_ssim += algorithm.ssim(norm_out, norm_gt).item()
-            valid_lpips += torch.mean(algorithm.lpips(
+            valid_psnr += psnr(norm_out, norm_gt).item()
+            valid_ssim += ssim(norm_out, norm_gt).item()
+            valid_lpips += torch.mean(lpips(
                 torch.clamp(outputs.data, -1, 1), gt
             )).item()
 
