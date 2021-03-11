@@ -88,7 +88,6 @@ def start_train():
 
     # Init datasets, metrics and logger
     ds.init_data()
-    algorithm.lpips.to(device)
     log.init(exp_name)
     if not resume:
         train_start_log(device)
