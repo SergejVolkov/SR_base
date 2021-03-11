@@ -22,7 +22,7 @@ psnr = None
 def get_lpips() -> nn.Module:
     global lpips
     if lpips is None:
-        lpips = LPIPS(verbose=True)
+        lpips = LPIPS(verbose=False)
     return lpips
 
 

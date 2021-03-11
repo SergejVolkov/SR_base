@@ -93,5 +93,5 @@ def get_noise_normalization() -> torch.nn.Module:
 
 
 kernel_count = 26
-noise_amount = 10
+noise_amount = 25
 noise_mean = 128
