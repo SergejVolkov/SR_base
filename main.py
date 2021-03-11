@@ -214,7 +214,6 @@ def start_inference():
 
 
 if __name__ == "__main__":
-    ds.init_data()
     if sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
         print(man.main)
     elif sys.argv.__contains__('--predict'):
