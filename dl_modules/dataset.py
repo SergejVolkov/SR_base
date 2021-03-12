@@ -97,6 +97,7 @@ class ValidDataset(BaseDataset):
         hr_dir (str): path to HR images folder
         lr_dir (str): path to LR images folder
         normalization (torchvision.transforms.transform): image normalization
+        transform (torchvision.transforms.transform): ground truth transform
 
     """
 
@@ -104,12 +105,14 @@ class ValidDataset(BaseDataset):
             self,
             hr_dir,
             lr_dir,
-            normalization=None
+            normalization=None,
+            transform=None
     ):
         self.ids = os.listdir(hr_dir)
         self.hr_fps = [os.path.join(hr_dir, image_id) for image_id in self.ids]
         self.lr_fps = [os.path.join(lr_dir, image_id) for image_id in self.ids]
 
+        self.transform = transform
         if normalization is None:
             self.normalization = get_normalization()
         else:
@@ -123,8 +126,9 @@ class ValidDataset(BaseDataset):
         in_image = cv2.imread(self.lr_fps[i])
         in_image = cv2.cvtColor(in_image, cv2.COLOR_BGR2RGB)
 
-        in_image = self.normalization(in_image)
+        gt = self.transform(gt)
         gt = self.normalization(gt)
+        in_image = self.normalization(in_image)
         return in_image, gt
 
     def __len__(self):
@@ -153,6 +157,7 @@ def init_data():
     if valid_set_size != 0:
         valid_set = Subset(valid_set, list(range(valid_set_size)))
     valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=valid_batch_size,
+                                               transform=trf.get_validation_transform()
                                                shuffle=False, num_workers=0)
 
     noise_set = Dataset(noise_dir, scale=scale,
