@@ -141,8 +141,8 @@ def get_normalization() -> torch.nn.Module:
 def init_data():
     global train_set, train_loader, valid_set, valid_loader, noise_set, noise_loader, kernel_storage
     train_set = Dataset(train_dir, scale=scale,
-                        transform=trf.get_training_transform(crop_size),
-                        # augmentation=trf.get_input_image_augmentation(),
+                        transform=trf.get_training_transform(crop_size, hr_scale),
+                        augmentation=trf.get_input_image_augmentation(),
                         downscaling='kernel')
     if train_set_size != 0:
         train_set = Subset(train_set, list(range(train_set_size)))
@@ -157,7 +157,7 @@ def init_data():
 
     noise_set = Dataset(noise_dir, scale=scale,
                         normalization=realsr.get_noise_normalization(),
-                        transform=trf.get_training_transform(crop_size // scale),
+                        transform=trf.get_training_transform(crop_size // scale, 1),
                         downscaling='none')
     noise_loader = torch.utils.data.DataLoader(noise_set, batch_size=train_batch_size,
                                                shuffle=True, num_workers=0)
@@ -207,6 +207,7 @@ valid_batch_size = 1  # Better leave it 1, otherwise many things won't work)
 
 crop_size = 64
 scale = 2
+hr_scale = 2 / 3
 
 train_set_size = 0
 valid_set_size = 0

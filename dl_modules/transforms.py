@@ -3,18 +3,18 @@ import albumentations as albu
 # from albumentations.augmentations.transforms import ImageCompression
 
 
-def get_training_transform(crop_size: int):
+def get_training_transform(crop_size: int, scale: float):
     return albu.Compose([
+        albu.RandomScale(scale_limit=(scale - 1.0, scale - 1.0), interpolation=cv2.INTER_AREA, always_apply=True),
         albu.RandomCrop(height=crop_size, width=crop_size, always_apply=True),
         albu.HorizontalFlip(p=0.5)
     ])
 
 
-def get_validation_augmentation(crop_size: int):
-    return albu.Compose([
-        albu.PadIfNeeded(min_height=crop_size, min_width=crop_size, always_apply=True),
-        albu.CenterCrop(height=crop_size, width=crop_size, always_apply=True)
-    ])
+def get_validation_transform(scale: float):
+    return albu.RandomScale(
+        scale_limit=(scale - 1.0, scale - 1.0), interpolation=cv2.INTER_AREA, always_apply=True
+    )
 
 
 def get_input_image_augmentation():
