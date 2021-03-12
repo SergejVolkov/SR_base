@@ -126,7 +126,8 @@ class ValidDataset(BaseDataset):
         in_image = cv2.imread(self.lr_fps[i])
         in_image = cv2.cvtColor(in_image, cv2.COLOR_BGR2RGB)
 
-        gt = self.transform(gt)
+        if self.transform is not None:
+            gt = self.transform(image=gt)["image"]
         gt = self.normalization(gt)
         in_image = self.normalization(in_image)
         return in_image, gt
@@ -153,11 +154,11 @@ def init_data():
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=train_batch_size,
                                                shuffle=True, num_workers=6)
 
-    valid_set = ValidDataset(hr_dir=valid_hr_dir, lr_dir=valid_lr_dir)
+    valid_set = ValidDataset(hr_dir=valid_hr_dir, lr_dir=valid_lr_dir,
+                             transform=trf.get_validation_transform(hr_scale))
     if valid_set_size != 0:
         valid_set = Subset(valid_set, list(range(valid_set_size)))
     valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=valid_batch_size,
-                                               transform=trf.get_validation_transform()
                                                shuffle=False, num_workers=0)
 
     noise_set = Dataset(noise_dir, scale=scale,
