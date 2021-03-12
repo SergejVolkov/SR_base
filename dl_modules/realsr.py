@@ -65,22 +65,12 @@ def inject_noise(image: Tensor, noise_loader: torch.utils.data.DataLoader) -> Te
 
 
 def apply_kernel(image: Tensor, kernel_storage: Kernels):
-    unsquuezed_cnt = 0
-    while len(image.shape) < 4:
-        image = image.unsqueeze(0)
-        unsquuezed_cnt += 1
+    image = image.unsqueeze(1)
     kernel = kernel_storage.random_kernel()
     padding = (kernel.shape[-1] - 1) // 2
     image = F.pad(image, [padding for _ in range(4)], mode='reflect')
-    downscaled = torch.cat(
-        [F.conv2d(image[:, i:i+1, :, :], kernel, stride=kernel_storage.scale)
-         for i in range(image.shape[1])],
-        dim=1
-    )
-    while unsquuezed_cnt > 0:
-        downscaled = downscaled.squeeze(0)
-        unsquuezed_cnt -= 1
-    return downscaled
+    downscaled = F.conv2d(image, kernel, stride=kernel_storage.scale)
+    return downscaled.squeeze()
 
 
 def get_noise_normalization() -> torch.nn.Module:

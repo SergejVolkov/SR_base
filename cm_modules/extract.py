@@ -36,7 +36,7 @@ def extract(folder: str, denoise_strength: int, window_size: int) -> None:
                 noisy, None, denoise_strength, denoise_strength, window_size, window_size * 3
             )
             extracted_noise = noisy.astype(np.float32) - denoised.astype(np.float32)
-            kernel = np.ones((3, 3), np.float32) / 9.0
+            kernel = np.ones((5, 5), np.float32) / 25.0
             extracted_noise -= cv2.filter2D(extracted_noise, -1, kernel)
             extracted_noise -= np.mean(extracted_noise)
             cv2.imwrite(folder + '/patches/' + dataset.ids[i][:-4] + '_noise.png',
