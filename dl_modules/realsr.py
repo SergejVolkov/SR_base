@@ -57,6 +57,7 @@ def inject_noise(image: Tensor, noise_loader: torch.utils.data.DataLoader) -> Te
     elif noise.shape[0] > image.shape[0]:
         noise = noise[:image.shape[0], :, :, :]
     noise = noise.to(image.device)
+    noise *= noise_amp
     if noise_amount is not None:
         clamp = noise_amount * 2 / 255
         noise = torch.clamp(noise, -clamp, clamp)
@@ -92,6 +93,7 @@ def get_noise_normalization() -> torch.nn.Module:
     ])
 
 
-kernel_count = 26
-noise_amount = 25
+kernel_count = 61
+noise_amount = 30
+noise_amp = 1.2     # Amplify noise by noise_amp times
 noise_mean = 128

@@ -35,9 +35,13 @@ def extract(folder: str, denoise_strength: int, window_size: int) -> None:
             denoised = cv2.fastNlMeansDenoisingColored(
                 noisy, None, denoise_strength, denoise_strength, window_size, window_size * 3
             )
-            extracted_noise = noisy - denoised
+            extracted_noise = noisy.astype(np.float32) - denoised.astype(np.float32)
+            kernel = np.ones((3, 3), np.float32) / 9.0
+            extracted_noise -= cv2.filter2D(extracted_noise, -1, kernel)
+            extracted_noise -= np.mean(extracted_noise)
+            print(np.max(extracted_noise), np.min(extracted_noise))
             cv2.imwrite(folder + '/patches/' + dataset.ids[i][:-4] + '_noise.png',
-                        cv2.cvtColor(extracted_noise + realsr.noise_mean, cv2.COLOR_RGB2BGR))
+                        cv2.cvtColor(np.round(extracted_noise + realsr.noise_mean).astype(np.uint8), cv2.COLOR_RGB2BGR))
             # cv2.imwrite(folder + '/patches/' + dataset.ids[i][:-4] + '_denoised.png',
             #             cv2.cvtColor(denoised, cv2.COLOR_RGB2BGR))
             # np.save(folder + '/patches/' + dataset.ids[i][:-4] + '_noise.npy', extracted_noise, False)

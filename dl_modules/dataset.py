@@ -43,7 +43,12 @@ class Dataset(BaseDataset):
             augmentation=None,
             downscaling='bicubic'
     ):
-        self.ids = os.listdir(images_dir)
+        self.ids = [name for name in os.listdir(images_dir) if
+                    name.lower().endswith('.png') or
+                    name.lower().endswith('.jpg') or
+                    name.lower().endswith('.jpeg') or
+                    name.lower().endswith('.gif') or
+                    name.lower().endswith('.bmp')]
         self.images_fps = [os.path.join(images_dir, image_id) for image_id in self.ids]
 
         self.transform = transform
