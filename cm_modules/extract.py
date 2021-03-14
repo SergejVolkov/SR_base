@@ -24,7 +24,6 @@ def extract(folder: str, denoise_strength: int,
     loader = torch.utils.data.DataLoader(dataset, batch_size=ds.valid_batch_size,
                                          shuffle=False, num_workers=0)
     total = len(loader)
-    print(select[0])
     if select is not None:
         if not os.path.isdir(folder + '/select'):
             os.makedirs(folder + '/select')
