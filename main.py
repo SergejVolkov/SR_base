@@ -38,7 +38,7 @@ def start_train():
 
     epoch_count = int(sys.argv[1])
     exp_name = sys.argv[2]
-    pretrained = None
+    pretrained = dis_weights = None
     start_epoch = 0
     best_result = float('inf')
     use_scheduler = use_warmup = False
@@ -67,6 +67,8 @@ def start_train():
             algorithm.dis_lr = float(arg[arg.index('=') + 1:])
         elif arg.startswith('-p=') or arg.startswith('--pretrained='):
             pretrained = arg[arg.index('=') + 1:]
+        elif arg.startswith('-d=') or arg.startswith('--dis_weights='):
+            dis_weights = arg[arg.index('=') + 1:]
         elif arg.startswith('-b=') or arg.startswith('--batch='):
             ds.train_batch_size = int(arg[arg.index('=') + 1:])
         elif arg.startswith('-c=') or arg.startswith('--crop='):
@@ -110,9 +112,13 @@ def start_train():
         algorithm.gen_opt_state_dict = checkpoint['gen_optimizer']
         algorithm.dis_opt_state_dict = checkpoint['dis_optimizer']
         use_warmup = False
-    elif pretrained is not None:
-        PATH = ds.SAVE_DIR + 'weights/' + pretrained + '.pth'
-        generator.load_state_dict(torch.load(PATH))
+    else:
+        if pretrained is not None:
+            PATH = ds.SAVE_DIR + 'weights/' + pretrained + '.pth'
+            generator.load_state_dict(torch.load(PATH))
+        if dis_weights is not None:
+            PATH = ds.SAVE_DIR + 'weights/' + dis_weights + '.pth'
+            discriminator.load_state_dict(torch.load(PATH))
 
     if start_epoch == epoch_count:
         print('Cannot resume training, already reached last epoch!')

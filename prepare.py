@@ -1,5 +1,7 @@
+import io
 import sys
 import resources.cm_manual as man
+import dl_modules.dataset as ds
 from cm_modules.prepare import prepare
 from cm_modules.crop import crop
 from cm_modules.extract import extract
@@ -74,19 +76,30 @@ def start_extract():
     folder = sys.argv[1]
     strength = 2
     window_size = 7
+    kernel = 5
+    select_file = None
     for arg in sys.argv[2:]:
         if arg == '--extract':
             pass
+        elif arg.startswith('--select='):
+            select_file = arg[arg.index('=') + 1:]
         elif arg.startswith('-s=') or arg.startswith('--strength='):
             strength = int(arg[arg.index('=') + 1:])
         elif arg.startswith('-w=') or arg.startswith('--window='):
             window_size = int(arg[arg.index('=') + 1:])
+        elif arg.startswith('-k=') or arg.startswith('--kernel='):
+            kernel = int(arg[arg.index('=') + 1:])
         else:
             print('Unexpected argument "' + arg + '"!')
             return
 
+    select = None
+    if select_file is not None:
+        f = io.open(ds.SAVE_DIR + 'data/' + select_file)
+        select = [line[:-1] for line in f.readlines()]
+
     # Process images in folder
-    extract(folder, strength, window_size)
+    extract(folder, strength, window_size, kernel, select)
 
 
 def start_generate():

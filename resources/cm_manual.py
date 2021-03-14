@@ -14,5 +14,7 @@ prepare = 'USAGE\n\npython prepare.py VIDEO_NAME [OPTIONS]\n\n' \
           'python prepare.py DATA_FOLDER --extract [OPTIONS]\n\n' \
           '       -s=INT, --strength=INT\n              denoising strength (default 2)\n\n' \
           '       -w=SIZE, --window=SIZE\n              averaging area size (default 7)\n\n' \
+          '       -k=SIZE, --kernel=SIZE\n              blur kernel size (default 5)\n\n' \
+          '       --select=PATH_TO_LIST\n              separate patches with specific names\n\n' \
           'python prepare.py DATA_FOLDER {-g, --generate}\n\n' \
           '       generate lr images to create paired dataset\n'

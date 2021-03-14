@@ -198,14 +198,13 @@ def init_data():
     #     )
 
 
-DATA_DIR = '/cache/shipilov_hse/data/'  # ../drive/MyDrive/
-SAVE_DIR = '/cache/shipilov_hse/'
+SAVE_DIR = ''#'/cache/shipilov_hse/'  # ../drive/MyDrive/
 
-train_dir = os.path.join(DATA_DIR, 'Bakemonogatari/Bakemonogatari_train_HR')
-valid_hr_dir = os.path.join(DATA_DIR, 'Bakemonogatari/Bakemonogatari_valid_HR')
-valid_lr_dir = os.path.join(DATA_DIR, 'Bakemonogatari/Bakemonogatari_valid_LR')
-kernel_dir = os.path.join(DATA_DIR, 'SoulTaker/SoulTaker_train_kernel')
-noise_dir  = os.path.join(DATA_DIR, 'SoulTaker/SoulTaker_train_noise')
+train_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari/Bakemonogatari_train_HR')
+valid_hr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari/Bakemonogatari_valid_HR')
+valid_lr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari/Bakemonogatari_valid_LR')
+kernel_dir = os.path.join(SAVE_DIR, 'data/SoulTaker/SoulTaker_train_kernel')
+noise_dir  = os.path.join(SAVE_DIR, 'data/SoulTaker/SoulTaker_train_noise')
 
 # Load datasets
 train_batch_size = 128

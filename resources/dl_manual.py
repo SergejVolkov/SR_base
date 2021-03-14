@@ -11,6 +11,7 @@ main = 'USAGE\n\npython main.py EPOCH_COUNT EXP_NAME [OPTIONS]\n\n' \
        '       --dis_lr=LR\n              discriminator learning rate (default %g)\n\n' \
        '       -w=EPOCH_COUNT, --warmup=EPOCH_COUNT\n              use warmup during specified period\n\n' \
        '       -p=MODEL_NAME, --pretrained=MODEL_NAME\n              load pretrained generator weights\n\n' \
+       '       -d=MODEL_NAME, --dis_weights=MODEL_NAME\n              load pretrained discriminator weights\n\n' \
        '       -b=COUNT, --batch=COUNT\n              train batch size (default %d)\n\n' \
        '       -c=SIZE, --crop=SIZE\n              train crop size (default %d)\n\n' \
        '       -t=SIZE, --train=SIZE\n              train subset (default len(TRAIN_SET))\n\n' \
