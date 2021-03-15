@@ -3,7 +3,7 @@
  
  **Current state**
 
- RealSR (CVPRW 2020) implementation (wthout ESRGAN)
+ RealSR (CVPRW 2020) implementation (without ESRGAN)
 
  ### Warning
  
