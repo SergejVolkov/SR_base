@@ -224,7 +224,7 @@ scale = 2             # General SR upscaling parameter
 extra_scale = 0.885   # Extra downscaling in training
 aspect_ratio = 0.838  # Aspect ratio change (anamorphic encoding)
 
-predict_res = (1920, 1080)  # Prediction resolution
+predict_res = (1920 // 2, 1080 // 2)  # Prediction resolution
 
 train_set_size = 0
 valid_set_size = 0
