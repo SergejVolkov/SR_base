@@ -161,7 +161,7 @@ def init_data():
     if train_set_size != 0:
         train_set = Subset(train_set, list(range(train_set_size)))
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=train_batch_size,
-                                               shuffle=True, num_workers=6)
+                                               shuffle=True, num_workers=2)
 
     valid_set = ValidDataset(hr_dir=valid_hr_dir, lr_dir=valid_lr_dir)
     if valid_set_size != 0:

@@ -74,7 +74,9 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             inputs = realsr.inject_noise(inputs, ds.noise_loader)
 
             # Restore initial lr size and aspect ratio
-            inputs = utils.scale(inputs, 1.0 / ds.aspect_ratio, 1.0 / ds.extra_scale)
+            inputs = F.interpolate(
+                inputs, size=(ds.crop_size // ds.scale, ds.crop_size // ds.scale), mode='bicubic', align_corners=True
+            )
 
             gen_opt.zero_grad()
             dis_opt.zero_grad()

@@ -9,4 +9,4 @@ class Bicubic(nn.Module):
         self.eval()
 
     def forward(self, x):
-        return F.interpolate(x, scale_factor=(ds.scale, ds.scale), mode='bicubic')
+        return F.interpolate(x, scale_factor=(ds.scale, ds.scale), mode='bicubic', align_corners=True)

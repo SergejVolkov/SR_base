@@ -22,7 +22,8 @@ def scale(image: Tensor, aspect_ratio: float=1.0, extra_scale: float=1.0):
             image = image.unsqueeze(0)
             unsq_dim += 1
         image = torch.clamp(F.interpolate(
-            image, scale_factor=(extra_scale, aspect_ratio * extra_scale), mode='bicubic', align_corners=True
+            image, scale_factor=(extra_scale, aspect_ratio * extra_scale),
+            mode='bicubic', align_corners=True, recompute_scale_factor=False
         ), min=-1, max=1)
         while unsq_dim > 0:
             image = image.squeeze(0)
