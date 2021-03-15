@@ -207,7 +207,7 @@ def init_data():
     #     )
 
 
-SAVE_DIR = ''  # ../drive/MyDrive/
+SAVE_DIR = '../drive/MyDrive/'
 
 train_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari/Bakemonogatari_train_HR')
 valid_hr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari/Bakemonogatari_valid_HR')
