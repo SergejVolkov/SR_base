@@ -1,9 +1,8 @@
-import cv2
 import sys
 import pyprind
 import torch
-import numpy as np
 import dl_modules.dataset as ds
+import dl_modules.transforms as trf
 from cm_modules.utils import imwrite
 
 
@@ -11,6 +10,7 @@ def predict(net: torch.nn.Module, device: torch.device) -> None:
     net.eval()
 
     dataset = ds.Dataset(ds.SAVE_DIR + 'data/predict', scale=ds.scale,
+                         transform=trf.get_predict_transform(*ds.predict_res),
                          downscaling='none')
     loader = torch.utils.data.DataLoader(dataset, batch_size=ds.valid_batch_size,
                                          shuffle=False, num_workers=0)
@@ -23,7 +23,7 @@ def predict(net: torch.nn.Module, device: torch.device) -> None:
             downscaled, source = data
             source = source.to(device)
             imwrite(
-                ds.SAVE_DIR + 'data/output/' + dataset.ids[i][:-4] + '_x2.png',
+                ds.SAVE_DIR + 'data/output/' + dataset.ids[i][:-4] + '_sr.png',
                 net(source)
             )
             iter_bar.update()

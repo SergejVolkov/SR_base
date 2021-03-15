@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import torch.tensor as Tensor
 import dl_modules.transforms as trf
 import dl_modules.realsr as realsr
+import cm_modules.utils as utils
 from torch.utils.data import Dataset as BaseDataset
 from torch.utils.data import Subset
 
@@ -31,6 +32,8 @@ class Dataset(BaseDataset):
         transform (torchvision.transforms.transform): image transform (typically crop)
         augmentation (albumentations.Compose): data transfromation
         downscaling (str): downscaling method (possible 'bicubic', 'kernel', 'none')
+        aspect_ratio (float): change pixel aspect ratio of lr image to width / heigth
+        extra_scale (float): additional lr scaling for non-integer SR upscaling
 
     """
 
@@ -41,7 +44,9 @@ class Dataset(BaseDataset):
             normalization=None,
             transform=None,
             augmentation=None,
-            downscaling='bicubic'
+            downscaling='bicubic',
+            aspect_ratio=1.0,
+            extra_scale=1.0
     ):
         self.ids = [name for name in os.listdir(images_dir) if
                     name.lower().endswith('.png') or
@@ -59,6 +64,8 @@ class Dataset(BaseDataset):
             self.normalization = normalization
         self.scale = scale
         self.downscaling = downscaling
+        self.ar = aspect_ratio
+        self.es = extra_scale
 
     def __getitem__(self, i):
         # read data
@@ -73,17 +80,17 @@ class Dataset(BaseDataset):
         if self.augmentation is not None:
             in_image = self.augmentation(image=in_image)["image"]
 
-        if self.downscaling == 'bicubic':
-            h, w, _ = gt.shape
-            in_image = cv2.resize(in_image, (w // self.scale, h // self.scale), interpolation=cv2.INTER_CUBIC)
-            in_image = self.normalization(in_image)
-        elif self.downscaling == 'kernel':
-            in_image = self.normalization(in_image)
-            in_image = realsr.apply_kernel(in_image, kernel_storage)
-        else:
-            in_image = self.normalization(in_image)
-
+        in_image = self.normalization(in_image)
         gt = self.normalization(gt)
+
+        if self.downscaling == 'bicubic':
+            in_image = utils.scale(in_image, aspect_ratio=self.ar,
+                                   extra_scale=self.es / self.scale)
+        elif self.downscaling == 'kernel':
+            in_image = utils.scale(in_image, aspect_ratio=self.ar,
+                                   extra_scale=self.es)
+            in_image = realsr.apply_kernel(in_image, kernel_storage)
+
         return in_image, gt
 
     def __len__(self):
@@ -146,16 +153,17 @@ def get_normalization() -> torch.nn.Module:
 def init_data():
     global train_set, train_loader, valid_set, valid_loader, noise_set, noise_loader, kernel_storage
     train_set = Dataset(train_dir, scale=scale,
-                        transform=trf.get_training_transform(crop_size, hr_scale),
+                        transform=trf.get_training_transform(crop_size),
                         augmentation=trf.get_input_image_augmentation(),
-                        downscaling='kernel')
+                        downscaling='kernel',
+                        aspect_ratio=aspect_ratio,
+                        extra_scale=extra_scale)
     if train_set_size != 0:
         train_set = Subset(train_set, list(range(train_set_size)))
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=train_batch_size,
                                                shuffle=True, num_workers=6)
 
-    valid_set = ValidDataset(hr_dir=valid_hr_dir, lr_dir=valid_lr_dir,
-                             transform=trf.get_validation_transform(hr_scale))
+    valid_set = ValidDataset(hr_dir=valid_hr_dir, lr_dir=valid_lr_dir)
     if valid_set_size != 0:
         valid_set = Subset(valid_set, list(range(valid_set_size)))
     valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=valid_batch_size,
@@ -163,7 +171,8 @@ def init_data():
 
     noise_set = Dataset(noise_dir, scale=scale,
                         normalization=realsr.get_noise_normalization(),
-                        transform=trf.get_training_transform(crop_size // scale, 1),
+                        transform=trf.get_training_transform(int(round(crop_size / scale * extra_scale * aspect_ratio)),
+                                                             int(round(crop_size / scale * extra_scale))),
                         downscaling='none')
     noise_loader = torch.utils.data.DataLoader(noise_set, batch_size=train_batch_size,
                                                shuffle=True, num_workers=0)
@@ -198,7 +207,7 @@ def init_data():
     #     )
 
 
-SAVE_DIR = '/cache/shipilov_hse/'  # ../drive/MyDrive/
+SAVE_DIR = ''  # ../drive/MyDrive/
 
 train_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari/Bakemonogatari_train_HR')
 valid_hr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari/Bakemonogatari_valid_HR')
@@ -210,9 +219,12 @@ noise_dir  = os.path.join(SAVE_DIR, 'data/SoulTaker/SoulTaker_train_noise')
 train_batch_size = 128
 valid_batch_size = 1  # Better leave it 1, otherwise many things won't work)
 
-crop_size = 64
-scale = 2
-hr_scale = 2 / 3
+crop_size = 64        # Training crop HR size
+scale = 2             # General SR upscaling parameter
+extra_scale = 0.885   # Extra downscaling in training
+aspect_ratio = 0.838  # Aspect ratio change (anamorphic encoding)
+
+predict_res = (1920, 1080)  # Prediction resolution
 
 train_set_size = 0
 valid_set_size = 0

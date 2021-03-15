@@ -5,6 +5,7 @@ import torch
 import dl_modules.dataset as ds
 import dl_modules.realsr as realsr
 import dl_modules.transforms as trf
+import cm_modules.utils as utils
 from cm_modules.utils import imwrite
 
 
@@ -21,9 +22,11 @@ def generate(folder: str) -> None:
     ds.init_data()
     print('%d kernels\n%d noise patches' % (len(ds.kernel_storage), len(ds.noise_set)))
 
-    dataset = ds.Dataset(folder, scale=ds.scale, downscaling='kernel',
-                         transform=trf.get_validation_transform(ds.hr_scale),
-                         augmentation=trf.get_input_image_augmentation())
+    dataset = ds.Dataset(folder, scale=ds.scale,
+                         augmentation=trf.get_input_image_augmentation(),
+                         downscaling='kernel',
+                         aspect_ratio=ds.aspect_ratio,
+                         extra_scale=ds.extra_scale)
     loader = torch.utils.data.DataLoader(dataset, batch_size=ds.valid_batch_size,
                                          shuffle=False, num_workers=0)
 
@@ -41,6 +44,7 @@ def generate(folder: str) -> None:
                 downscaled.shape[3], downscaled.shape[2]
             )
             downscaled = realsr.inject_noise(downscaled, ds.noise_loader)
+            downscaled = utils.scale(downscaled, 1 / ds.aspect_ratio, 1 / ds.extra_scale)
             imwrite(folder + '/lr/' + dataset.ids[i], downscaled)
             iter_bar.update()
             i += 1

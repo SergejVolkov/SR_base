@@ -11,6 +11,7 @@ import dl_modules.warmup as warmup
 import dl_modules.valid as validation
 import dl_modules.checkpoint as checkpoint
 import dl_modules.realsr as realsr
+import cm_modules.utils as utils
 import log_utils.log_tb as log
 
 from datetime import timedelta
@@ -71,6 +72,9 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
 
             # Perform RealSR
             inputs = realsr.inject_noise(inputs, ds.noise_loader)
+
+            # Restore initial lr size and aspect ratio
+            inputs = utils.scale(inputs, 1.0 / ds.aspect_ratio, 1.0 / ds.extra_scale)
 
             gen_opt.zero_grad()
             dis_opt.zero_grad()

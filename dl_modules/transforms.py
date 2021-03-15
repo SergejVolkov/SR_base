@@ -3,22 +3,25 @@ import albumentations as albu
 # from albumentations.augmentations.transforms import ImageCompression
 
 
-def get_training_transform(crop_size: int, scale: float):
+def get_training_transform(crop_width: int, crop_height: int=None):
+    if crop_height is None:
+        crop_height = crop_width
     return albu.Compose([
-        albu.RandomScale(scale_limit=(scale - 1.0, scale - 1.0), interpolation=cv2.INTER_AREA, always_apply=True),
-        albu.RandomCrop(height=crop_size, width=crop_size, always_apply=True),
+        albu.RandomCrop(height=crop_height, width=crop_width, always_apply=True),
         albu.HorizontalFlip(p=0.5)
     ])
 
 
-def get_validation_transform(scale: float):
-    return albu.RandomScale(
-        scale_limit=(scale - 1.0, scale - 1.0), interpolation=cv2.INTER_AREA, always_apply=True
-    )
+def get_predict_transform(width: int, height: int):
+    return albu.Compose([
+        albu.Resize(height=height, width=width, interpolation=cv2.INTER_CUBIC, always_apply=True)
+    ])
 
 
 def get_input_image_augmentation():
-    return albu.Downscale(scale_min=0.2, scale_max=0.3, interpolation=cv2.INTER_AREA, p=0.5)
+    return albu.Compose([
+        albu.Downscale(scale_min=0.2, scale_max=0.3, interpolation=cv2.INTER_AREA, p=0.5)
+    ])
 
 
 def get_generate_noise_transform(width: int, height: int):

@@ -3,6 +3,7 @@ import sys
 import pyprind
 import torch
 import dl_modules.dataset as ds
+import dl_modules.transforms as trf
 import numpy as np
 
 
@@ -14,10 +15,10 @@ def inference(name: str, net: torch.nn.Module, device: torch.device,
     fps = cap.get(cv2.CAP_PROP_FPS)
     cap.set(cv2.CAP_PROP_POS_FRAMES, start * fps)
     norm = ds.get_normalization()
+    trn = trf.get_predict_transform(*ds.predict_res)
 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) * ds.scale
-    h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) * ds.scale
+    w, h = ds.predict_res
     out = cv2.VideoWriter(ds.SAVE_DIR + 'data/output/' + name + '_x2.mp4', fourcc, fps, (w, h))
     i = 0
 
@@ -33,7 +34,7 @@ def inference(name: str, net: torch.nn.Module, device: torch.device,
             if not ret or (length != 0 and i >= length * fps):
                 break
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            frame = norm(frame).to(device).unsqueeze(0)
+            frame = norm(trn(image=frame)["image"]).to(device).unsqueeze(0)
             # pieces = ds.cut_image(frame)
             # out_pieces = []
             # for piece in pieces:

@@ -22,7 +22,7 @@ def start_prepare():
     for arg in sys.argv[2:]:
         if arg.startswith('--start=r'):
             random = True
-            start = int(arg[arg.index('=r') + 2:])
+            start = float(arg[arg.index('=r') + 2:])
         elif arg.startswith('--start='):
             start = float(arg[arg.index('=') + 1:])
         elif arg == '-d' or arg == '--denoise=':
