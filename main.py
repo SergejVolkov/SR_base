@@ -28,7 +28,7 @@ def train_start_log(device: torch.device):
     # log.add(epoch_idx=0, constants=(valid_psnr, valid_ssim, valid_lpips))
 
     # Add static images to log
-    log.add(epoch_idx=0, images=tuple(get_static_images()), im_start=6)
+    # log.add(epoch_idx=0, images=tuple(get_static_images()), im_start=6)
 
 
 def start_train():
@@ -168,11 +168,14 @@ def start_predict():
     print(device, 'hardware:%d' % cuda_id)
 
     # Create an instance of the model
-    generator = RDN(ds.scale, 3, 64, 64, 16, 8)
-    generator.to(device)
-
-    PATH = ds.SAVE_DIR + 'weights/' + pretrained + '.pth'
-    generator.load_state_dict(torch.load(PATH))
+    if pretrained == 'algo':
+        generator = Bicubic()
+        generator.to(device)
+    else:
+        generator = RDN(ds.scale, 3, 64, 64, 16, 8)
+        generator.to(device)
+        PATH = ds.SAVE_DIR + 'weights/' + pretrained + '.pth'
+        generator.load_state_dict(torch.load(PATH))
 
     # Inference model on images in 'predict' folder
     predict(generator, device)

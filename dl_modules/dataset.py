@@ -151,10 +151,11 @@ def get_normalization() -> torch.nn.Module:
 
 
 def init_data():
-    global train_set, train_loader, valid_set, valid_loader, noise_set, noise_loader, kernel_storage
+    global train_set, train_loader, valid_set, valid_loader, \
+        noise_set, noise_loader, kernel_storage, predict_set, predict_loader
     train_set = Dataset(train_dir, scale=scale,
                         transform=trf.get_training_transform(crop_size),
-                        augmentation=trf.get_input_image_augmentation(),
+                        # augmentation=trf.get_input_image_augmentation(),
                         downscaling='kernel',
                         aspect_ratio=aspect_ratio,
                         extra_scale=extra_scale)
@@ -177,6 +178,12 @@ def init_data():
     noise_loader = torch.utils.data.DataLoader(noise_set, batch_size=train_batch_size,
                                                shuffle=True, num_workers=0)
     kernel_storage = realsr.Kernels(kernel_dir, scale=scale, count=realsr.kernel_count)
+
+    predict_set = Dataset(predict_dir, scale=scale,
+                          transform=trf.get_predict_transform(*predict_res),
+                          downscaling='none')
+    predict_loader = torch.utils.data.DataLoader(predict_set, batch_size=valid_batch_size,
+                                                 shuffle=False, num_workers=0)
 
     # Look at images we have
 
@@ -209,11 +216,12 @@ def init_data():
 
 SAVE_DIR = '../drive/MyDrive/'
 
-train_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari/Bakemonogatari_train_HR')
-valid_hr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari/Bakemonogatari_valid_HR')
-valid_lr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari/Bakemonogatari_valid_LR')
+train_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_4000/Bakemonogatari_train_HR')
+valid_hr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_4000/Bakemonogatari_valid_HR')
+valid_lr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_4000/Bakemonogatari_valid_LR')
 kernel_dir = os.path.join(SAVE_DIR, 'data/SoulTaker/SoulTaker_train_kernel')
 noise_dir  = os.path.join(SAVE_DIR, 'data/SoulTaker/SoulTaker_train_noise')
+predict_dir  = os.path.join(SAVE_DIR, 'data/predict')
 
 # Load datasets
 train_batch_size = 128
@@ -221,8 +229,8 @@ valid_batch_size = 1  # Better leave it 1, otherwise many things won't work)
 
 crop_size = 64        # Training crop HR size
 scale = 2             # General SR upscaling parameter
-extra_scale = 0.885   # Extra downscaling in training
-aspect_ratio = 0.838  # Aspect ratio change (anamorphic encoding)
+extra_scale = 0.889   # Extra downscaling in training
+aspect_ratio = 0.834  # Aspect ratio change (anamorphic encoding)
 
 predict_res = (1920 // scale, 1080 // scale)  # Prediction resolution
 
@@ -236,3 +244,5 @@ valid_loader = None
 noise_set = None
 noise_loader = None
 kernel_storage = None
+predict_set = None
+predict_loader = None

@@ -8,12 +8,11 @@ import dl_modules.dataset as ds
 import dl_modules.algorithm as algorithm
 import dl_modules.scheduler.exp as scheduler
 import dl_modules.warmup as warmup
-import dl_modules.valid as validation
+import dl_modules.valid as valid
 import dl_modules.checkpoint as checkpoint
 import dl_modules.realsr as realsr
-import cm_modules.utils as utils
 import log_utils.log_tb as log
-
+from cm_modules.predict import predict_tb
 from datetime import timedelta
 
 
@@ -155,7 +154,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         gen_model.eval()
         dis_model.eval()
         valid_psnr, valid_ssim, valid_lpips, valid_gen_loss, valid_dis_loss, images = \
-            validation.valid(gen_model, dis_model, device, save_images=True, bars=bars)
+            valid.valid(gen_model, dis_model, device, save_images=False, bars=bars)
 
         # Get lr
         dis_lr = algorithm.dis_lr
@@ -199,6 +198,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         inputs = torch.clamp(scaled_inputs[0, :, :, :] / 2 + 0.5, min=0, max=1)
         outputs = torch.clamp(outputs[0, :, :, :] / 2 + 0.5, min=0, max=1)
         gt = torch.clamp(gt[0, :, :, :] / 2 + 0.5, min=0, max=1)
+        images = predict_tb(gen_model, device, valid.images_to_save)
 
         # Save log
         log.add(epoch_idx=epoch_idx,

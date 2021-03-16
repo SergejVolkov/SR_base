@@ -20,7 +20,7 @@ def get_predict_transform(width: int, height: int):
 
 def get_input_image_augmentation():
     return albu.Compose([
-        albu.Downscale(scale_min=0.2, scale_max=0.3, interpolation=cv2.INTER_AREA, p=0.5)
+        albu.Downscale(scale_min=0.2, scale_max=0.25, interpolation=cv2.INTER_AREA, p=0.5)
     ])
 
 
