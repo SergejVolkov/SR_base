@@ -19,6 +19,8 @@ def inference(name: str, net: torch.nn.Module, device: torch.device,
 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     w, h = ds.predict_res
+    w *= ds.scale
+    h *= ds.scale
     out = cv2.VideoWriter(ds.SAVE_DIR + 'data/output/' + name + '_x2.mp4', fourcc, fps, (w, h))
     i = 0
 
