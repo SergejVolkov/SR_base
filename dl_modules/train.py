@@ -195,9 +195,9 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         checkpoint.save(epoch_idx, best_accuracy, gen_model, dis_model, gen_opt, dis_opt)
 
         # Prepare train samples for export
-        inputs = torch.clamp(scaled_inputs[0, :, :, :] / 2 + 0.5, min=0, max=1)
-        outputs = torch.clamp(outputs[0, :, :, :] / 2 + 0.5, min=0, max=1)
-        gt = torch.clamp(gt[0, :, :, :] / 2 + 0.5, min=0, max=1)
+        inputs = torch.clamp(scaled_inputs.data[0, :, :, :] / 2 + 0.5, min=0, max=1)
+        outputs = torch.clamp(outputs.data[0, :, :, :] / 2 + 0.5, min=0, max=1)
+        gt = torch.clamp(gt.data[0, :, :, :] / 2 + 0.5, min=0, max=1)
         images = predict_tb(gen_model, device, valid.images_to_save)
 
         # Save log

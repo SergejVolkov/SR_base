@@ -34,6 +34,8 @@ def predict_tb(net: torch.nn.Module, device: torch.device, count: int) -> list:
                 break
             downscaled, source = data
             source = source.to(device)
-            results.append(net(source))
+            results.append(torch.clamp(
+                net(source).data[0, :, :, :] / 2 + 0.5, min=0, max=1)
+            )
             i += 1
     return results
