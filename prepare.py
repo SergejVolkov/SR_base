@@ -2,24 +2,24 @@ import io
 import sys
 import resources.cm_manual as man
 import dl_modules.dataset as ds
-from cm_modules.prepare import prepare
+from cm_modules.slice import slice_data
 from cm_modules.crop import crop
 from cm_modules.extract import extract
 from cm_modules.generate_lr import generate
 
 
-def start_prepare():
-    if len(sys.argv) < 2:
+def start_slice():
+    if len(sys.argv) < 3:
         print('Wrong number of params!\nTry "python prepare.py --help" for usage info')
         return
 
-    name = sys.argv[1]
+    name = sys.argv[2]
     denoise = episodes = random = False
     ep_start = ep_end = 0
     length = start = 0.0
     sample_id = 0
     step = 1.0
-    for arg in sys.argv[2:]:
+    for arg in sys.argv[3:]:
         if arg.startswith('--start=r'):
             random = True
             start = float(arg[arg.index('=r') + 2:])
@@ -43,20 +43,18 @@ def start_prepare():
             return
 
     # Process video in 'video' folder
-    prepare(name, step, length, start, random, episodes, ep_start, ep_end, sample_id, denoise)
+    slice_data(name, step, length, start, random, episodes, ep_start, ep_end, sample_id, denoise)
 
 
 def start_crop():
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         print('Wrong number of params!\nTry "python prepare.py --help" for usage info')
         return
 
-    folder = sys.argv[1]
+    folder = sys.argv[2]
     width = height = 0
-    for arg in sys.argv[2:]:
-        if arg == '-c' or arg == '--crop':
-            pass
-        elif arg.startswith('-r=') or arg.startswith('--resolution='):
+    for arg in sys.argv[3:]:
+        if arg.startswith('-r=') or arg.startswith('--resolution='):
             dash_ind = arg.index(':')
             width = int(arg[arg.index('=') + 1: dash_ind])
             height = int(arg[dash_ind + 1:])
@@ -69,19 +67,17 @@ def start_crop():
 
 
 def start_extract():
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         print('Wrong number of params!\nTry "python prepare.py --help" for usage info')
         return
 
-    folder = sys.argv[1]
+    folder = sys.argv[2]
     strength = 2
     window_size = 7
     kernel = 5
     select_file = None
-    for arg in sys.argv[2:]:
-        if arg == '--extract':
-            pass
-        elif arg.startswith('--select='):
+    for arg in sys.argv[3:]:
+        if arg.startswith('--select='):
             select_file = arg[arg.index('=') + 1:]
         elif arg.startswith('-s=') or arg.startswith('--strength='):
             strength = int(arg[arg.index('=') + 1:])
@@ -103,30 +99,41 @@ def start_extract():
 
 
 def start_generate():
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         print('Wrong number of params!\nTry "python prepare.py --help" for usage info')
         return
 
-    folder = sys.argv[1]
-    for arg in sys.argv[2:]:
-        if arg == '-g' or arg == '--generate':
-            pass
-        else:
-            print('Unexpected argument "' + arg + '"!')
-            return
+    folder = sys.argv[2]
+    if len(sys.argv) > 3:
+        print('Unexpected argument "' + sys.argv[3] + '"!')
+        return
 
     # Process images in folder
     generate(folder)
 
 
 if __name__ == "__main__":
-    if sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
-        print(man.prepare)
-    elif sys.argv.__contains__('--crop') or sys.argv.__contains__('-c'):
-        start_crop()
-    elif sys.argv.__contains__('--extract'):
-        start_extract()
-    elif sys.argv.__contains__('--generate') or sys.argv.__contains__('-g'):
-        start_generate()
+    if sys.argv[1] == 'slice':
+        if sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
+            print(man.slice)
+        else:
+            start_slice()
+    elif sys.argv[1] == 'crop':
+        if sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
+            print(man.crop)
+        else:
+            start_crop()
+    elif sys.argv[1] == 'extract':
+        if sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
+            print(man.extract)
+        else:
+            start_extract()
+    elif sys.argv[1] == 'generate':
+        if sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
+            print(man.generate)
+        else:
+            start_generate()
+    elif sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
+        print(man.common)
     else:
-        start_prepare()
+        print('No jobs to do.\nTry "python main.py --help" for usage info')

@@ -3,6 +3,7 @@ import sys
 import pyprind
 import torch
 import torchvision.transforms as transforms
+import torch.nn.functional as F
 import dl_modules.dataset as ds
 from cm_modules.utils import imwrite
 
@@ -17,7 +18,7 @@ def crop(folder: str, width: int, height: int) -> None:
         return
 
     transform = transforms.CenterCrop((height, width))
-    dataset = ds.Dataset(folder, scale=ds.scale, transform=transform, downscaling='none')
+    dataset = ds.Dataset(folder, scale=ds.scale, downscaling='none')
     loader = torch.utils.data.DataLoader(dataset, batch_size=ds.valid_batch_size,
                                          shuffle=False, num_workers=0)
 
@@ -31,7 +32,14 @@ def crop(folder: str, width: int, height: int) -> None:
     with torch.no_grad():
         for data in loader:
             downscaled, source = data
-            imwrite(folder + '/crop/' + dataset.ids[i], source)
+            cropped = transform(source)
+            hor_pad = (source.shape[3] - width) // 2
+            ver_pad = (source.shape[2] - height) // 2
+            letterbox = source - F.pad(cropped,
+                                       [hor_pad, hor_pad, ver_pad, ver_pad],
+                                       mode='constant', value=-1)
+            if torch.mean(letterbox) < 0.012:
+                imwrite(folder + '/crop/' + dataset.ids[i], cropped)
             iter_bar.update()
             i += 1
     iter_bar.update()

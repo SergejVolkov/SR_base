@@ -17,8 +17,8 @@ def generate(folder: str) -> None:
 
     # Load kernels and noise
     ds.train_batch_size = 1
-    ds.kernel_dir = os.path.join(ds.SAVE_DIR, 'data/SoulTaker/SoulTaker_valid_kernel')
-    ds.noise_dir  = os.path.join(ds.SAVE_DIR, 'data/SoulTaker/SoulTaker_valid_noise')
+    ds.kernel_train_dir = ds.kernel_valid_dir
+    ds.noise_train_dir = ds.noise_valid_dir
     ds.init_data()
     print('%d kernels\n%d noise patches' % (len(ds.kernel_storage), len(ds.noise_set)))
 

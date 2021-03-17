@@ -9,7 +9,7 @@ import dl_modules.scheduler.exp as scheduler
 import dl_modules.warmup as warmup
 from dl_modules.train import train
 from dl_modules.valid import valid, simple_eval
-from dl_modules.valid import get_static_images
+# from dl_modules.valid import get_static_images
 from cm_modules.predict import predict
 from cm_modules.inference import inference
 from models.RDN import RDN
@@ -32,12 +32,12 @@ def train_start_log(device: torch.device):
 
 
 def start_train():
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 4:
         print('Wrong number of params!\nTry "python main.py --help" for usage info')
         return
 
-    epoch_count = int(sys.argv[1])
-    exp_name = sys.argv[2]
+    epoch_count = int(sys.argv[2])
+    exp_name = sys.argv[3]
     pretrained = dis_weights = None
     start_epoch = 0
     best_result = float('inf')
@@ -45,7 +45,7 @@ def start_train():
     use_bars = False
     resume = False
     cuda_id = 0
-    for arg in sys.argv[3:]:
+    for arg in sys.argv[4:]:
         if arg == '-r' or arg == '--resume':
             PATH = ds.SAVE_DIR + 'weights/checkpoint'
             if not os.path.isfile(PATH):
@@ -144,17 +144,15 @@ def start_train():
 
 
 def start_predict():
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         print('Wrong number of params!\nTry "python main.py --help" for usage info')
         return
 
-    pretrained = sys.argv[1]
+    pretrained = sys.argv[2]
 
     cuda_id = 0
-    for arg in sys.argv[2:]:
-        if arg == '--predict':
-            pass
-        elif arg.startswith('-g=') or arg.startswith('--gpu='):
+    for arg in sys.argv[3:]:
+        if arg.startswith('-g=') or arg.startswith('--gpu='):
             cuda_id = int(arg[arg.index('=') + 1:])
         elif arg.startswith('-b=') or arg.startswith('--batch='):
             ds.valid_batch_size = int(arg[arg.index('=') + 1:])
@@ -182,18 +180,16 @@ def start_predict():
 
 
 def start_inference():
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 4:
         print('Wrong number of params!\nTry "python main.py --help" for usage info')
         return
 
-    pretrained = sys.argv[1]
-    name = sys.argv[2]
+    pretrained = sys.argv[2]
+    name = sys.argv[3]
     length = start = 0
     cuda_id = 0
-    for arg in sys.argv[3:]:
-        if arg == '-i' or arg == '--inference':
-            pass
-        elif arg.startswith('-g=') or arg.startswith('--gpu='):
+    for arg in sys.argv[4:]:
+        if arg.startswith('-g=') or arg.startswith('--gpu='):
             cuda_id = int(arg[arg.index('=') + 1:])
         elif arg.startswith('-s=') or arg.startswith('--start='):
             start = int(arg[arg.index('=') + 1:])
@@ -223,11 +219,22 @@ def start_inference():
 
 
 if __name__ == "__main__":
-    if sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
-        print(man.main)
-    elif sys.argv.__contains__('--predict'):
-        start_predict()
-    elif sys.argv.__contains__('--inference') or sys.argv.__contains__('-i'):
-        start_inference()
+    if sys.argv[1] == 'train':
+        if sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
+            print(man.train)
+        else:
+            start_train()
+    elif sys.argv[1] == 'predict':
+        if sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
+            print(man.predict)
+        else:
+            start_predict()
+    elif sys.argv[1] == 'inference':
+        if sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
+            print(man.inference)
+        else:
+            start_inference()
+    elif sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
+        print(man.common)
     else:
-        start_train()
+        print('No jobs to do.\nTry "python main.py --help" for usage info')

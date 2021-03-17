@@ -8,10 +8,10 @@ import dl_modules.dataset as ds
 # import numpy as np
 
 
-def prepare(name: str, step: float,
-            length: float=0, start: float=0, random_start: bool=False,
-            episodes: bool=False, ep_start: int=0, ep_end: int=0,
-            sample_id: int=0, denoise: bool=False) -> None:
+def slice_data(name: str, step: float,
+               length: float=0, start: float=0, random_start: bool=False,
+               episodes: bool=False, ep_start: int=0, ep_end: int=0,
+               sample_id: int=0, denoise: bool=False) -> None:
     save_dir = ds.SAVE_DIR + 'data/' + name
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)

@@ -16,6 +16,8 @@ from torch.utils.data import Subset
 
 
 def imshow(img: Tensor) -> None:
+    if len(img.shape) > 3:
+        img = img.squeeze()
     img = torch.clamp(img / 2 + 0.5, 0, 1)
     npimg = img.cpu().numpy()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
@@ -170,14 +172,14 @@ def init_data():
     valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=valid_batch_size,
                                                shuffle=False, num_workers=0)
 
-    noise_set = Dataset(noise_dir, scale=scale,
+    noise_set = Dataset(noise_train_dir, scale=scale,
                         normalization=realsr.get_noise_normalization(),
                         transform=trf.get_training_transform(int(round(crop_size / scale * extra_scale * aspect_ratio)),
                                                              int(round(crop_size / scale * extra_scale))),
                         downscaling='none')
     noise_loader = torch.utils.data.DataLoader(noise_set, batch_size=train_batch_size,
                                                shuffle=True, num_workers=0)
-    kernel_storage = realsr.Kernels(kernel_dir, scale=scale, count=realsr.kernel_count)
+    kernel_storage = realsr.Kernels(kernel_train_dir, scale=scale, count=realsr.kernel_count)
 
     predict_set = Dataset(predict_dir, scale=scale,
                           transform=trf.get_predict_transform(*predict_res),
@@ -219,9 +221,11 @@ SAVE_DIR = '../drive/MyDrive/'
 train_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_4000/Bakemonogatari_train_HR')
 valid_hr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_4000/Bakemonogatari_valid_HR')
 valid_lr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_4000/Bakemonogatari_valid_LR')
-kernel_dir = os.path.join(SAVE_DIR, 'data/SoulTaker/SoulTaker_train_kernel')
-noise_dir  = os.path.join(SAVE_DIR, 'data/SoulTaker/SoulTaker_train_noise')
-predict_dir  = os.path.join(SAVE_DIR, 'data/predict')
+kernel_train_dir = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_train_kernel')
+kernel_valid_dir = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_valid_kernel')
+noise_train_dir  = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_train_noise')
+noise_valid_dir  = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_valid_noise')
+predict_dir = os.path.join(SAVE_DIR, 'data/predict')
 
 # Load datasets
 train_batch_size = 128
