@@ -162,7 +162,7 @@ def init_data():
     train_set = Dataset(train_dir, scale=scale,
                         transform=trf.get_training_transform(crop_size),
                         # augmentation=trf.get_input_image_augmentation(),
-                        downscaling='kernel',
+                        downscaling='kernel_even',
                         aspect_ratio=aspect_ratio,
                         extra_scale=extra_scale)
     if train_set_size != 0:
@@ -176,10 +176,13 @@ def init_data():
     valid_loader = torch.utils.data.DataLoader(valid_set, batch_size=valid_batch_size,
                                                shuffle=False, num_workers=0)
 
+    noise_patch_size = utils.even_round(crop_size * extra_scale * aspect_ratio,
+                                        crop_size * extra_scale)
+    noise_patch_size[0] /= scale
+    noise_patch_size[1] /= scale
     noise_set = Dataset(noise_train_dir, scale=scale,
                         normalization=realsr.get_noise_normalization(),
-                        transform=trf.get_training_transform(int(round(crop_size / scale * extra_scale * aspect_ratio)),
-                                                             int(round(crop_size / scale * extra_scale))),
+                        transform=trf.get_training_transform(noise_patch_size),
                         downscaling='none')
     noise_loader = torch.utils.data.DataLoader(noise_set, batch_size=train_batch_size,
                                                shuffle=True, num_workers=0)

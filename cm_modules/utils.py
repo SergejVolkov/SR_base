@@ -23,13 +23,8 @@ def scale(image: Tensor, aspect_ratio: float=1.0,
             image = image.unsqueeze(0)
             unsq_dim += 1
         if even_rounding:
-            height = int(image.shape[2] * extra_scale)
-            if height % 2 != 0:
-                height += 1
-            width = int(image.shape[3] * aspect_ratio * extra_scale)
-            if width % 2 != 0:
-                width += 1
-            size = (height, width)
+            size = even_round(image.shape[2] * extra_scale,
+                              image.shape[3] * aspect_ratio * extra_scale)
         else:
             size = (int(round(image.shape[2] * extra_scale)),
                     int(round(image.shape[3] * aspect_ratio * extra_scale)))
@@ -40,6 +35,16 @@ def scale(image: Tensor, aspect_ratio: float=1.0,
             image = image.squeeze(0)
             unsq_dim -= 1
     return image
+
+
+def even_round(*args):
+    rounded = []
+    for arg in args:
+        rnd = int(arg)
+        if rnd % 2 != 0:
+            rnd += 1
+        rounded.append(rnd)
+    return rounded
 
 
 def cut_image(image: Tensor) -> list:
