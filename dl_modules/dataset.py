@@ -33,7 +33,7 @@ class Dataset(BaseDataset):
         normalization (torchvision.transforms.transform): image normalization
         transform (torchvision.transforms.transform): image transform (typically crop)
         augmentation (albumentations.Compose): data transfromation
-        downscaling (str): downscaling method (possible 'bicubic', 'kernel', 'none')
+        downscaling (str): downscaling method (possible 'bicubic', 'kernel', 'kernel_even', 'none')
         aspect_ratio (float): change pixel aspect ratio of lr image to width / heigth
         extra_scale (float): additional lr scaling for non-integer SR upscaling
 
@@ -91,6 +91,10 @@ class Dataset(BaseDataset):
         elif self.downscaling == 'kernel':
             in_image = utils.scale(in_image, aspect_ratio=self.ar,
                                    extra_scale=self.es)
+            in_image = realsr.apply_kernel(in_image, kernel_storage)
+        elif self.downscaling == 'kernel_even':
+            in_image = utils.scale(in_image, aspect_ratio=self.ar,
+                                   extra_scale=self.es, even_rounding=True)
             in_image = realsr.apply_kernel(in_image, kernel_storage)
 
         return in_image, gt
@@ -216,6 +220,7 @@ def init_data():
     #     )
 
 
+# SAVE_DIR = ''
 SAVE_DIR = '../drive/MyDrive/'
 
 train_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_4000/Bakemonogatari_train_HR')

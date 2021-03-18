@@ -15,15 +15,26 @@ def imwrite(filename: str, image: Tensor):
     cv2.imwrite(filename, cv2.cvtColor(output, cv2.COLOR_RGB2BGR))
 
 
-def scale(image: Tensor, aspect_ratio: float=1.0, extra_scale: float=1.0):
+def scale(image: Tensor, aspect_ratio: float=1.0,
+          extra_scale: float=1.0, even_rounding: bool=False):
     if aspect_ratio != 1.0 or extra_scale != 1.0:
         unsq_dim = 0
         while len(image.shape) < 4:
             image = image.unsqueeze(0)
             unsq_dim += 1
+        if even_rounding:
+            height = int(image.shape[2] * extra_scale)
+            if height % 2 != 0:
+                height += 1
+            width = int(image.shape[3] * aspect_ratio * extra_scale)
+            if width % 2 != 0:
+                width += 1
+            size = (height, width)
+        else:
+            size = (int(round(image.shape[2] * extra_scale)),
+                    int(round(image.shape[3] * aspect_ratio * extra_scale)))
         image = torch.clamp(F.interpolate(
-            image, scale_factor=(extra_scale, aspect_ratio * extra_scale),
-            mode='bicubic', align_corners=True, recompute_scale_factor=False
+            image, size=size, mode='bicubic', align_corners=True
         ), min=-1, max=1)
         while unsq_dim > 0:
             image = image.squeeze(0)

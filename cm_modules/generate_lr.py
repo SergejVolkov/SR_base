@@ -23,8 +23,8 @@ def generate(folder: str) -> None:
     print('%d kernels\n%d noise patches' % (len(ds.kernel_storage), len(ds.noise_set)))
 
     dataset = ds.Dataset(folder, scale=ds.scale,
-                         augmentation=trf.get_input_image_augmentation(),
-                         downscaling='kernel',
+                         # augmentation=trf.get_input_image_augmentation(),
+                         downscaling='kernel_even',
                          aspect_ratio=ds.aspect_ratio,
                          extra_scale=ds.extra_scale)
     loader = torch.utils.data.DataLoader(dataset, batch_size=ds.valid_batch_size,

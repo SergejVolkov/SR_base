@@ -6,7 +6,7 @@ import cm_modules.utils as utils
 from cm_modules.utils import imwrite
 
 
-def predict(net: torch.nn.Module, device: torch.device, cut : bool=False) -> None:
+def predict(net: torch.nn.Module, device: torch.device, cut: bool=False) -> None:
     net.eval()
     total = len(ds.predict_loader)
     iter_bar = pyprind.ProgBar(total, title="Predict", stream=sys.stdout)
