@@ -182,7 +182,7 @@ def init_data():
     noise_patch_size[1] /= scale
     noise_set = Dataset(noise_train_dir, scale=scale,
                         normalization=realsr.get_noise_normalization(),
-                        transform=trf.get_training_transform(noise_patch_size),
+                        transform=trf.get_training_transform(*noise_patch_size),
                         downscaling='none')
     noise_loader = torch.utils.data.DataLoader(noise_set, batch_size=train_batch_size,
                                                shuffle=True, num_workers=0)
