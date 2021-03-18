@@ -178,8 +178,8 @@ def init_data():
 
     noise_patch_size = utils.even_round(crop_size * extra_scale * aspect_ratio,
                                         crop_size * extra_scale)
-    noise_patch_size[0] /= scale
-    noise_patch_size[1] /= scale
+    noise_patch_size[0] //= scale
+    noise_patch_size[1] //= scale
     noise_set = Dataset(noise_train_dir, scale=scale,
                         normalization=realsr.get_noise_normalization(),
                         transform=trf.get_training_transform(*noise_patch_size),
