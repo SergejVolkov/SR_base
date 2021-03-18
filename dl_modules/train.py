@@ -22,6 +22,8 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
           use_warmup: bool=False, best_accuracy: float=float('inf'), bars: bool=False) -> None:
     start_time = time.time()
     explosion_count = 0
+    dis_loss = 0.4  # just an initial value to get things working, nothing special
+    stepper_active = False
 
     lpips = algorithm.get_lpips()
     lpips.to(device)
@@ -95,21 +97,35 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             gen_loss = super_criterion(outputs, gt) + algorithm.gan_loss_coeff * \
                        gen_criterion(dis_model(concat_outputs), dis_model(concat_gt))
 
+            # Compute gradients
+            gen_loss.backward()
+
+            # Perform weights update
+            gen_opt.step()
+
+            # Temporarily switch discriminator off if it learns too quickly
+            #       (consider turning Eurobeat off)
+            if not stepper_active and dis_loss < 0.3:
+                stepper_active = True
+            elif stepper_active and dis_loss > 0.4:
+                stepper_active = False
+
             # Discriminator step
-            dis_model.requires_grad(True)
+            if not stepper_active:
+                dis_model.requires_grad(True)
+
             concat_outputs = concat_outputs.detach()
 
             dis_fake_loss = dis_fake_criterion(dis_model(concat_outputs))
             dis_real_loss = dis_real_criterion(dis_model(concat_gt))
             dis_loss = dis_fake_loss + dis_real_loss
 
-            # Compute gradients
-            gen_loss.backward()
-            dis_loss.backward()
+            if not stepper_active:
+                # Compute gradients
+                dis_loss.backward()
 
-            # Perform weights update
-            gen_opt.step()
-            dis_opt.step()
+                # Perform weights update
+                dis_opt.step()
 
             # Gather stats
             train_gen_loss += gen_loss.item()
@@ -153,7 +169,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         # Eval model
         gen_model.eval()
         dis_model.eval()
-        valid_psnr, valid_ssim, valid_lpips, valid_gen_loss, valid_dis_loss, images = \
+        valid_psnr, valid_ssim, valid_lpips, valid_gen_loss, valid_super_loss, images = \
             valid.valid(gen_model, dis_model, device, save_images=False, bars=bars)
 
         # Get lr
@@ -171,13 +187,13 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
               'GEN lr: %g, DIS lr: %g\n'
               'DIS: Fake loss: %.3f, Real loss: %.3f\n\n'
               'Train: GEN loss: %.3f, DIS loss: %.3f\n'
-              'Valid: GEN loss: %.3f, DIS loss: %.3f\n\n'
+              'Valid: GEN loss: %.3f, SUP loss: %.3f\n\n'
               'Train: PSNR: %.2f, SSIM: %.4f, LPIPS: %.4f\n'
               'Valid: PSNR: %.2f, SSIM: %.4f, LPIPS: %.4f' %
               (epoch_idx, gen_lr, dis_lr,
                train_fake_loss, train_real_loss,
                train_gen_loss, train_dis_loss,
-               valid_gen_loss, valid_dis_loss,
+               valid_gen_loss, valid_super_loss,
                train_psnr, train_ssim, train_lpips,
                valid_psnr, valid_ssim, valid_lpips))
 
@@ -206,7 +222,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
                          valid_psnr, valid_ssim, valid_lpips,
                          train_gen_loss, train_dis_loss,
                          train_fake_loss, train_real_loss,
-                         valid_gen_loss, valid_dis_loss,
+                         valid_gen_loss, valid_super_loss,
                          gen_lr, dis_lr),
                 images=tuple(images + [inputs, outputs, gt]))
         log.save()

@@ -17,9 +17,8 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
 
     super_criterion = algorithm.get_super_loss()
     gen_criterion = algorithm.get_gen_loss()
-    dis_criterion = algorithm.get_dis_loss()
     average_gen_loss = 0.0
-    average_dis_loss = 0.0
+    average_super_loss = 0.0
     valid_psnr = valid_ssim = valid_lpips = 0.0
     total = len(ds.valid_loader)
 
@@ -41,12 +40,12 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
             concat_outputs = torch.cat((outputs, scaled_inputs), 1)
             concat_gt = torch.cat((gt, scaled_inputs), 1)
 
-            gen_loss = super_criterion(outputs, gt) + algorithm.gan_loss_coeff * \
-                       gen_criterion(dis_model(concat_outputs), dis_model(concat_gt))
-            dis_loss = dis_criterion(dis_model(concat_outputs), dis_model(concat_gt))
+            super_loss = super_criterion(outputs, gt)
+            gen_loss = super_loss + algorithm.gan_loss_coeff * \
+                gen_criterion(dis_model(concat_outputs), dis_model(concat_gt))
 
+            average_super_loss += super_loss.item()
             average_gen_loss += gen_loss.item()
-            average_dis_loss += dis_loss.item()
             norm_out = torch.clamp(outputs.data / 2 + 0.5, min=0, max=1)
             norm_gt = torch.clamp(gt.data / 2 + 0.5, min=0, max=1)
             valid_psnr += psnr(norm_out, norm_gt).item()
@@ -64,7 +63,7 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
                 iter_bar.update()
 
     return (valid_psnr / total, valid_ssim / total, valid_lpips / total,
-            average_gen_loss / total, average_dis_loss / total, images)
+            average_gen_loss / total, average_super_loss / total, images)
 
 
 def simple_eval(gen_model: torch.nn.Module, device: torch.device,
