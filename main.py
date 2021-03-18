@@ -151,11 +151,14 @@ def start_predict():
     pretrained = sys.argv[2]
 
     cuda_id = 0
+    cut = False
     for arg in sys.argv[3:]:
         if arg.startswith('-g=') or arg.startswith('--gpu='):
             cuda_id = int(arg[arg.index('=') + 1:])
         elif arg.startswith('-b=') or arg.startswith('--batch='):
             ds.valid_batch_size = int(arg[arg.index('=') + 1:])
+        elif arg == '-c' or arg == '--cut':
+            cut = True
         else:
             print('Unexpected argument "' + arg + '"!')
             return
@@ -164,6 +167,9 @@ def start_predict():
     os.environ['CUDA_VISIBLE_DEVICES'] = str(cuda_id)
     device = torch.device('cuda:0' if torch.cuda.is_available() else "cpu")
     print(device, 'hardware:%d' % cuda_id)
+
+    # Init datasets
+    ds.init_data()
 
     # Create an instance of the model
     if pretrained == 'algo':
@@ -176,7 +182,7 @@ def start_predict():
         generator.load_state_dict(torch.load(PATH))
 
     # Inference model on images in 'predict' folder
-    predict(generator, device)
+    predict(generator, device, cut)
 
 
 def start_inference():

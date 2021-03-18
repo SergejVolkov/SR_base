@@ -26,7 +26,7 @@ extract = \
     '\npython prepare.py extract DATA_FOLDER [OPTIONS]\n\n' \
     '       -s=INT, --strength=INT\n              denoising strength (default 2)\n\n' \
     '       -w=SIZE, --window=SIZE\n              averaging area size (default 7)\n\n' \
-    '       -k=SIZE, --kernel=SIZE\n              blur kernel size (default 5)\n\n' \
+    '       -k=SIZE, --kernel=SIZE\n              blur kernel size (default 0)\n\n' \
     '       --select=PATH_TO_LIST\n              separate patches with specific names\n'
 
 generate = \

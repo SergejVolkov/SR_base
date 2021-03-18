@@ -74,7 +74,7 @@ def start_extract():
     folder = sys.argv[2]
     strength = 2
     window_size = 7
-    kernel = 5
+    kernel = 0
     select_file = None
     for arg in sys.argv[3:]:
         if arg.startswith('--select='):

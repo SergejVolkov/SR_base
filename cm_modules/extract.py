@@ -40,8 +40,9 @@ def extract(folder: str, denoise_strength: int,
                 noisy, None, denoise_strength, denoise_strength, window_size, window_size * 3
             )
             extracted_noise = noisy.astype(np.float32) - denoised.astype(np.float32)
-            kernel = np.ones((kernel_size, kernel_size), np.float32) / (kernel_size ** 2)
-            extracted_noise -= cv2.filter2D(extracted_noise, -1, kernel)
+            if kernel_size > 0:
+                kernel = np.ones((kernel_size, kernel_size), np.float32) / (kernel_size ** 2)
+                extracted_noise -= cv2.filter2D(extracted_noise, -1, kernel)
             extracted_noise -= np.mean(extracted_noise)
             save_name = dataset.ids[i][:-4] + '_noise.png'
             if select is not None and (dataset.ids[i] in select or

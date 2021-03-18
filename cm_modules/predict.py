@@ -2,10 +2,11 @@ import sys
 import pyprind
 import torch
 import dl_modules.dataset as ds
+import cm_modules.utils as utils
 from cm_modules.utils import imwrite
 
 
-def predict(net: torch.nn.Module, device: torch.device) -> None:
+def predict(net: torch.nn.Module, device: torch.device, cut : bool=False) -> None:
     net.eval()
     total = len(ds.predict_loader)
     iter_bar = pyprind.ProgBar(total, title="Predict", stream=sys.stdout)
@@ -15,9 +16,17 @@ def predict(net: torch.nn.Module, device: torch.device) -> None:
         for data in ds.predict_loader:
             downscaled, source = data
             source = source.to(device)
+            if cut:
+                pieces = utils.cut_image(source)
+                out_pieces = []
+                for piece in pieces:
+                    out_pieces.append(net(piece))
+                output = utils.glue_image(out_pieces)
+            else:
+                output = net(source)
             imwrite(
                 ds.SAVE_DIR + 'data/output/' + ds.predict_set.ids[i][:-4] + '_sr.png',
-                net(source)
+                output
             )
             iter_bar.update()
             i += 1

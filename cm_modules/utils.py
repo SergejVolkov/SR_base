@@ -4,7 +4,7 @@ import torch
 import torch.tensor as Tensor
 import torch.nn.functional as F
 
-piece_count = 2
+piece_count = 4
 
 
 def imwrite(filename: str, image: Tensor):
@@ -44,9 +44,8 @@ def cut_image(image: Tensor) -> list:
 
 
 def glue_image(pieces: list) -> Tensor:
-    # Temporary code
-    horiz_1 = torch.cat((pieces[0], pieces[1]), 3)
-    horiz_2 = torch.cat((pieces[2], pieces[3]), 3)
-    image = torch.cat((horiz_1, horiz_2), 2)
-
+    horiz = []
+    for i in range(piece_count):
+        horiz.append(torch.cat(pieces[i * piece_count:(i + 1) * piece_count], 3))
+    image = torch.cat(horiz, 2)
     return image

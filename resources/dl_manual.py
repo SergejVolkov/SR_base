@@ -31,7 +31,8 @@ train = \
 predict = \
     '\npython main.py predict MODEL_NAME [OPTIONS]\n\n' \
     '       -g=CUDA_DEVICE_NUMBER, --gpu=CUDA_DEVICE_NUMBER\n              CUDA device to use (default 0)\n\n' \
-    '       -b=COUNT, --batch=COUNT\n              predict batch size (default %d)\n' \
+    '       -b=COUNT, --batch=COUNT\n              predict batch size (default %d)\n\n' \
+    '       -c, --cut\n              cut image and use model separately on each piece to reduce cuda memory\n' \
     % ds.valid_batch_size
 
 inference = \
