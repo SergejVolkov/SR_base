@@ -167,7 +167,7 @@ def get_normalization() -> torch.nn.Module:
 
 def init_data():
     global train_set, train_loader, valid_set, valid_loader, \
-        noise_set, noise_loader, kernel_storage, predict_set, predict_loader
+        noise_set, kernel_storage, predict_set, predict_loader
     train_set = Dataset(train_dir, scale=scale,
                         transform=trf.get_training_transform(crop_size),
                         # augmentation=trf.get_input_image_augmentation(),
@@ -213,7 +213,7 @@ def init_data():
     # Visualize augmented images
 
     # for i in range(3):
-    #     image_in, image_out = train_set[i]
+    #     image_in, image_out = train_set[random.randrange(len(train_set))]
     #     # image_in = realsr.inject_noise(image_in.unsqueeze(0), noise_set)
     #     image_in = image_in.unsqueeze(0)
     #     print(image_in.shape)
@@ -233,8 +233,8 @@ def init_data():
     #     )
 
 
-SAVE_DIR = ''
-# SAVE_DIR = '../drive/MyDrive/'
+# SAVE_DIR = ''
+SAVE_DIR = '../drive/MyDrive/'
 
 train_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_1000/Bakemonogatari_train_HR')
 valid_hr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_1000/Bakemonogatari_valid_HR')
