@@ -1,6 +1,7 @@
 import os
 import cv2
 import numpy as np
+import random
 import torch
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
@@ -67,6 +68,15 @@ class Dataset(BaseDataset):
         self.downscaling = downscaling
         self.ar = aspect_ratio
         self.es = extra_scale
+
+    def random_n_samples(self, count: int):
+        inputs = []
+        gts = []
+        for i in range(count):
+            inp, gt = self.__getitem__(random.randrange(0, self.__len__()))
+            inputs.append(inp)
+            gts.append(gt)
+        return torch.stack(inputs), torch.stack(gts)
 
     def __getitem__(self, i):
         # read data
@@ -183,8 +193,6 @@ def init_data():
                         normalization=realsr.get_noise_normalization(),
                         transform=trf.get_training_noise_transform(*noise_patch_size),
                         downscaling='none')
-    noise_loader = torch.utils.data.DataLoader(noise_set, batch_size=train_batch_size,
-                                               shuffle=True, num_workers=0)
     kernel_storage = realsr.Kernels(kernel_train_dir, scale=scale, count=realsr.kernel_count)
 
     predict_set = Dataset(predict_dir, scale=scale,
@@ -206,8 +214,8 @@ def init_data():
 
     # for i in range(3):
     #     image_in, image_out = train_set[i]
-    #     image_in = realsr.inject_noise(image_in.unsqueeze(0), noise_loader)
-    #     # image_in = image_in.unsqueeze(0)
+    #     # image_in = realsr.inject_noise(image_in.unsqueeze(0), noise_set)
+    #     image_in = image_in.unsqueeze(0)
     #     print(image_in.shape)
     #     utils.imwrite(
     #         SAVE_DIR + 'data/output/%d_lr_scaled.png' % i,
@@ -256,7 +264,6 @@ train_loader = None
 valid_set = None
 valid_loader = None
 noise_set = None
-noise_loader = None
 kernel_storage = None
 predict_set = None
 predict_loader = None

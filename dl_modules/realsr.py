@@ -5,7 +5,6 @@ import torch
 import torch.tensor as Tensor
 import torch.nn.functional as F
 import torchvision.transforms as transforms
-from torch.utils.data import Dataset as BaseDataset
 # from scipy.ndimage import measurements, interpolation
 
 
@@ -49,13 +48,8 @@ class Kernels:
         return self.count
 
 
-def inject_noise(image: Tensor, noise_loader: torch.utils.data.DataLoader) -> Tensor:
-    noise, gt = next(iter(noise_loader))
-    if noise.shape[0] < image.shape[0]:
-        noise2, gt = next(iter(noise_loader))
-        noise = torch.cat((noise, noise2), dim=0)[:image.shape[0], :, :, :]
-    elif noise.shape[0] > image.shape[0]:
-        noise = noise[:image.shape[0], :, :, :]
+def inject_noise(image: Tensor, noise_set) -> Tensor:
+    noise, gt = noise_set.random_n_samples(image.shape[0])
     noise = noise.to(image.device)
     noise *= noise_amp
     if noise_amount is not None:

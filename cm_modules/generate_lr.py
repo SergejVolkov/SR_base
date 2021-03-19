@@ -43,7 +43,7 @@ def generate(folder: str) -> None:
             ds.noise_set.transform = trf.get_generate_noise_transform(
                 downscaled.shape[3], downscaled.shape[2]
             )
-            downscaled = realsr.inject_noise(downscaled, ds.noise_loader)
+            downscaled = realsr.inject_noise(downscaled, ds.noise_set)
             downscaled = utils.scale(downscaled, 1 / ds.aspect_ratio, 1 / ds.extra_scale)
             imwrite(folder + '/lr/' + dataset.ids[i], downscaled)
             iter_bar.update()

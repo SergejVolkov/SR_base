@@ -72,7 +72,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             gt = gt.to(device)
 
             # Perform RealSR
-            inputs = realsr.inject_noise(inputs, ds.noise_loader)
+            inputs = realsr.inject_noise(inputs, ds.noise_set)
 
             # Restore initial lr size and aspect ratio
             inputs = F.interpolate(
