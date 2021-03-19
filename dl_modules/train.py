@@ -58,6 +58,8 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         train_psnr = train_ssim = train_lpips = 0.0
         total = len(ds.train_loader)
         scaled_inputs = outputs = gt = None
+        total_throttling = 0
+        start_throttling = 0
 
         if bars:
             iter_bar = pyprind.ProgBar(total, title="Train", stream=sys.stdout)
@@ -107,8 +109,10 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             #       (consider turning Eurobeat off)
             if not stepper_active and dis_loss < 0.3:
                 stepper_active = True
+                start_throttling = sample_id
             elif stepper_active and dis_loss > 0.35:
                 stepper_active = False
+                total_throttling += sample_id - start_throttling
 
             # Discriminator step
             if not stepper_active:
@@ -150,6 +154,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         train_psnr /= total
         train_ssim /= total
         train_lpips /= total
+        total_throttling /= total / 100
 
         # Check whether the model has exploded
         if train_gen_loss > 50:
@@ -185,12 +190,13 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         # Print useful numbers
         print('Epoch %3d:\n'
               'GEN lr: %g, DIS lr: %g\n'
+              'DIS throttling: %.0f %%\n'
               'DIS: Fake loss: %.3f, Real loss: %.3f\n\n'
               'Train: GEN loss: %.3f, DIS loss: %.3f\n'
               'Valid: GEN loss: %.3f, SUP loss: %.3f\n\n'
               'Train: PSNR: %.2f, SSIM: %.4f, LPIPS: %.4f\n'
               'Valid: PSNR: %.2f, SSIM: %.4f, LPIPS: %.4f' %
-              (epoch_idx, gen_lr, dis_lr,
+              (epoch_idx, gen_lr, dis_lr, total_throttling,
                train_fake_loss, train_real_loss,
                train_gen_loss, train_dis_loss,
                valid_gen_loss, valid_super_loss,
