@@ -107,7 +107,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
             #       (consider turning Eurobeat off)
             if not stepper_active and dis_loss < 0.3:
                 stepper_active = True
-            elif stepper_active and dis_loss > 0.4:
+            elif stepper_active and dis_loss > 0.35:
                 stepper_active = False
 
             # Discriminator step
