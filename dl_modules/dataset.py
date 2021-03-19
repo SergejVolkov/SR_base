@@ -170,7 +170,7 @@ def init_data():
         noise_set, noise_loader, kernel_storage, predict_set, predict_loader
     train_set = Dataset(train_dir, scale=scale,
                         transform=trf.get_training_transform(crop_size),
-                        augmentation=trf.get_input_image_augmentation(),
+                        # augmentation=trf.get_input_image_augmentation(),
                         downscaling='kernel_even',
                         aspect_ratio=aspect_ratio,
                         extra_scale=extra_scale)
@@ -233,12 +233,12 @@ def init_data():
     #     )
 
 
-# SAVE_DIR = ''
-SAVE_DIR = '../drive/MyDrive/'
+SAVE_DIR = ''
+# SAVE_DIR = '../drive/MyDrive/'
 
-train_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_4000/Bakemonogatari_train_HR')
-valid_hr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_4000/Bakemonogatari_valid_HR')
-valid_lr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_4000/Bakemonogatari_valid_LR')
+train_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_1000/Bakemonogatari_train_HR')
+valid_hr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_1000/Bakemonogatari_valid_HR')
+valid_lr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_1000/Bakemonogatari_valid_LR')
 kernel_train_dir = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_train_kernel')
 kernel_valid_dir = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_valid_kernel')
 noise_train_dir  = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_train_noise')

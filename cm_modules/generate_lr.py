@@ -10,7 +10,10 @@ from cm_modules.utils import imwrite
 
 
 def generate(folder: str) -> None:
-    folder = ds.SAVE_DIR + 'data/' + folder
+    if folder is None:
+        folder = ds.valid_hr_dir
+    else:
+        folder = ds.SAVE_DIR + 'data/' + folder
     if not os.path.isdir(folder):
         print('Folder "' + folder + '" does not exist!')
         return
@@ -23,7 +26,7 @@ def generate(folder: str) -> None:
     print('%d kernels\n%d noise patches' % (len(ds.kernel_storage), len(ds.noise_set)))
 
     dataset = ds.Dataset(folder, scale=ds.scale,
-                         augmentation=trf.get_input_image_augmentation(),
+                         # augmentation=trf.get_input_image_augmentation(),
                          downscaling='kernel_even',
                          aspect_ratio=ds.aspect_ratio,
                          extra_scale=ds.extra_scale)

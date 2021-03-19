@@ -99,12 +99,14 @@ def start_extract():
 
 
 def start_generate():
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 2:
         print('Wrong number of params!\nTry "python prepare.py --help" for usage info')
         return
 
-    folder = sys.argv[2]
-    if len(sys.argv) > 3:
+    folder = None
+    if len(sys.argv) == 3:
+        folder = sys.argv[2]
+    elif len(sys.argv) > 3:
         print('Unexpected argument "' + sys.argv[3] + '"!')
         return
 
