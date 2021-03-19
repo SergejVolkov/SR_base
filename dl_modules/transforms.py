@@ -7,7 +7,7 @@ def get_training_transform(crop_size: int):
     return albu.Compose([
         albu.RandomCrop(height=crop_size, width=crop_size, always_apply=True),
         albu.RandomBrightnessContrast(brightness_limit=(-0.5, -0.35),
-                                      contrast_limit=(0.35, 0.5), p=0.66),
+                                      contrast_limit=(0.35, 0.5), p=0.8),
         albu.HorizontalFlip(p=0.5)
     ])
 
