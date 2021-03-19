@@ -234,7 +234,7 @@ def init_data():
 
 
 # SAVE_DIR = ''
-SAVE_DIR = '../drive/MyDrive/'
+SAVE_DIR = '/cache/shipilov_hse/'
 
 train_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_1000/Bakemonogatari_train_HR')
 valid_hr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_1000/Bakemonogatari_valid_HR')
