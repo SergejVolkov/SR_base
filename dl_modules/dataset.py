@@ -12,7 +12,6 @@ from torch.utils.data import Dataset as BaseDataset
 from torch.utils.data import Subset
 
 # import torch.nn.functional as F
-# from cm_modules.utils import imwrite
 
 
 def imshow(img: Tensor) -> None:
@@ -182,7 +181,7 @@ def init_data():
     noise_patch_size[1] //= scale
     noise_set = Dataset(noise_train_dir, scale=scale,
                         normalization=realsr.get_noise_normalization(),
-                        transform=trf.get_training_transform(*noise_patch_size),
+                        transform=trf.get_training_noise_transform(*noise_patch_size),
                         downscaling='none')
     noise_loader = torch.utils.data.DataLoader(noise_set, batch_size=train_batch_size,
                                                shuffle=True, num_workers=0)
@@ -208,16 +207,19 @@ def init_data():
     # for i in range(3):
     #     image_in, image_out = train_set[i]
     #     image_in = realsr.inject_noise(image_in.unsqueeze(0), noise_loader)
+    #     # image_in = image_in.unsqueeze(0)
     #     print(image_in.shape)
-    #     imwrite(
+    #     utils.imwrite(
     #         SAVE_DIR + 'data/output/%d_lr_scaled.png' % i,
-    #         F.interpolate(image_in, scale_factor=scale, mode='bicubic')
+    #         F.interpolate(
+    #             image_in, size=(crop_size // scale, crop_size // scale), mode='bicubic', align_corners=True
+    #         )
     #     )
-    #     imwrite(
+    #     utils.imwrite(
     #         SAVE_DIR + 'data/output/%d_lr.png' % i,
     #         image_in
     #     )
-    #     imwrite(
+    #     utils.imwrite(
     #         SAVE_DIR + 'data/output/%d_hr.png' % i,
     #         image_out
     #     )
