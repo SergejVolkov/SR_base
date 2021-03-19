@@ -5,6 +5,7 @@ import torch.tensor as Tensor
 import torch.nn.functional as F
 
 piece_count = 4
+padding = 10
 
 
 def imwrite(filename: str, image: Tensor):
@@ -54,14 +55,25 @@ def cut_image(image: Tensor) -> list:
     pieces = []
     for i in range(piece_count):
         for j in range(piece_count):
-            pieces.append(image[:, :, i * h:(i + 1) * h,
-                          j * w:(j + 1) * w])
+            pieces.append(image[:, :, i * h - teta(i) * padding:(i + 1) * h + teta(piece_count - 1 - i) * padding,
+                          j * w - teta(j) * padding:(j + 1) * w + teta(piece_count - 1 - j) * padding])
     return pieces
 
 
 def glue_image(pieces: list) -> Tensor:
     horiz = []
+    for i in range(len(pieces)):
+        pieces[i] = pieces[i][:, :, padding * 2 * teta(i // piece_count):
+                                    pieces[i].shape[2] - padding * 2 * teta(piece_count - 1 - i // piece_count),
+                              padding * 2 * teta(i % piece_count):
+                              pieces[i].shape[3] - padding * 2 * teta(piece_count - 1 - i % piece_count)]
     for i in range(piece_count):
         horiz.append(torch.cat(pieces[i * piece_count:(i + 1) * piece_count], 3))
     image = torch.cat(horiz, 2)
     return image
+
+
+def teta(x: int) -> int:
+    if x != 0:
+        return 1
+    return 0
