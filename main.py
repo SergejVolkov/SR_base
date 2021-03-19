@@ -225,7 +225,9 @@ def start_inference():
 
 
 if __name__ == "__main__":
-    if sys.argv[1] == 'train':
+    if len(sys.argv) < 2:
+        print('No jobs to do.\nTry "python main.py --help" for usage info')
+    elif sys.argv[1] == 'train':
         if sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
             print(man.train)
         else:
@@ -243,4 +245,4 @@ if __name__ == "__main__":
     elif sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
         print(man.common)
     else:
-        print('No jobs to do.\nTry "python main.py --help" for usage info')
+        print('Wrong job!\nTry "python main.py --help" for usage info')
