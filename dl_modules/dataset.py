@@ -161,7 +161,7 @@ def init_data():
         noise_set, noise_loader, kernel_storage, predict_set, predict_loader
     train_set = Dataset(train_dir, scale=scale,
                         transform=trf.get_training_transform(crop_size),
-                        # augmentation=trf.get_input_image_augmentation(),
+                        augmentation=trf.get_input_image_augmentation(),
                         downscaling='kernel_even',
                         aspect_ratio=aspect_ratio,
                         extra_scale=extra_scale)
