@@ -107,10 +107,10 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
 
             # Temporarily switch discriminator off if it learns too quickly
             #       (consider turning Eurobeat off)
-            if not stepper_active and dis_loss < 0.3:
+            if not stepper_active and dis_loss < 0.2:
                 stepper_active = True
                 start_throttling = sample_id
-            elif stepper_active and dis_loss > 0.35:
+            elif stepper_active and dis_loss > 0.3:
                 stepper_active = False
                 total_throttling += sample_id - start_throttling
 
