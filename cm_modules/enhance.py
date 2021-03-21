@@ -41,12 +41,19 @@ def enhance_images(folder: str, denoise_strength: int,
     iter_bar.update()
 
 
-def enhance(image, denoise_strength: int=4, window_size: int=5,
-            contrast: int=5):
+def enhance(image, denoise_strength: int=4, window_size: int=5, contrast: int=5):
     denoised = cv2.fastNlMeansDenoisingColored(
         image, None, denoise_strength, denoise_strength, window_size, window_size * 3
     )
-    return auto_contrast(denoised, strength=contrast)
+    equalized = auto_contrast(denoised, strength=contrast)
+    # dithered = dither(equalized)
+    return equalized
+
+
+def dither(image, dither_strength: int=1):
+    return np.clip(np.round(
+        image.astype(np.float) + 2 * (np.random.rand(*image.shape) - 0.5) * dither_strength
+    ), a_min=0, a_max=255).astype(np.uint8)
 
 
 def auto_contrast(image, clip_hist_percent: int=5,
