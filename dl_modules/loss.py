@@ -54,7 +54,7 @@ class EdgeLoss(nn.Module):
                                    kernel_size=3, groups=channels, bias=False)
         sobel_x_filter.weight.data = sobel_x_kernel
         sobel_x_filter.weight.requires_grad = False
-        self.sobel_x_filter = sobel_x_filter
+        self.sobel_x = sobel_x_filter
 
         sobel_y = torch.transpose(sobel_x, 0, 1)
         sobel_y_kernel = sobel_y.repeat(channels, 1, 1, 1)
@@ -62,7 +62,7 @@ class EdgeLoss(nn.Module):
                                    kernel_size=3, groups=channels, bias=False)
         sobel_y_filter.weight.data = sobel_y_kernel
         sobel_y_filter.weight.requires_grad = False
-        self.sobel_y_filter = sobel_y_filter
+        self.sobel_y = sobel_y_filter
 
         kernel_size = 3
         sigma = 3
@@ -97,16 +97,16 @@ class EdgeLoss(nn.Module):
     def forward(self, input: Tensor, target: Tensor) -> Tensor:
         denoised_input = self.gaussian(input)
         denoised_target = self.gaussian(target)
-        edges_map_input = (self.sobel_x_filter(denoised_input) ** 2 +
-                           self.sobel_y_filter(denoised_input) ** 2) ** (1 / 2)
-        edges_map_target = (self.sobel_x_filter(denoised_target) ** 2 +
-                            self.sobel_y_filter(denoised_target) ** 2) ** (1 / 2)
+        edges_map_input = (self.sobel_x(denoised_input) ** 2 +
+                           self.sobel_y(denoised_input) ** 2) ** (1 / 2)
+        edges_map_target = (self.sobel_x(denoised_target) ** 2 +
+                            self.sobel_y(denoised_target) ** 2) ** (1 / 2)
         return self.loss(edges_map_input, edges_map_target)
 
     def myto(self, device: torch.device):
-        self.gaussian_filter.weight.data.to(device)
-        self.sobel_x_filter.weight.data.to(device)
-        self.sobel_y_filter.weight.data.to(device)
+        self.gaussian.weight.data.to(device)
+        self.sobel_x.weight.data.to(device)
+        self.sobel_y.weight.data.to(device)
 
 
 class LSGANGenLoss(nn.Module):
