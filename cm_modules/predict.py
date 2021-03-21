@@ -4,7 +4,7 @@ import cv2
 import torch
 import dl_modules.dataset as ds
 import cm_modules.utils as utils
-from cm_modules.utils import imwrite, convert_to_cv2
+from cm_modules.utils import imwrite, convert_to_cv_8bit
 from cm_modules.enhance import enhance
 
 
@@ -29,7 +29,7 @@ def predict(net: torch.nn.Module, device: torch.device, cut: bool=False, perform
 
             if perform_enhance:
                 path = ds.SAVE_DIR + 'data/output/' + ds.predict_set.ids[i][:-4] + '_sr_e.png'
-                output = convert_to_cv2(output)
+                output = convert_to_cv_8bit(output)
                 output = enhance(output)
                 cv2.imwrite(path, output)
             else:

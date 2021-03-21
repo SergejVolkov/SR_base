@@ -9,10 +9,10 @@ padding = 10
 
 
 def imwrite(filename: str, image: Tensor):
-    cv2.imwrite(filename, convert_to_cv2(image))
+    cv2.imwrite(filename, convert_to_cv_8bit(image))
 
 
-def convert_to_cv2(image: Tensor):
+def convert_to_cv_8bit(image: Tensor):
     if len(image.shape) == 4:
         image = image.squeeze(0)
     output = torch.clamp(image / 2 + 0.5, min=0, max=1)

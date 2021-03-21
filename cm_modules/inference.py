@@ -48,7 +48,7 @@ def inference(name: str, net: torch.nn.Module, device: torch.device,
             #     out_pieces.append(torch.clamp(net(piece) / 2 + 0.5, min=0, max=1))
             # output = ds.glue_image(out_pieces).squeeze(0)
             output = torch.clamp(net(frame) / 2 + 0.5, min=0, max=1).squeeze(0)
-            output = np.uint8(np.transpose(output.cpu().numpy(), (1, 2, 0)) * 255)
+            output = (np.transpose(output.cpu().numpy(), (1, 2, 0)) * 255).astype(np.uint8)
             output = cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
             if perform_enhance:
                 output = enhance(output)
