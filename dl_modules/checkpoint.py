@@ -35,4 +35,4 @@ def unpack(name: str='checkpoint'):
     valid_metric = checkpoint['best_acc']
     PATH = ds.SAVE_DIR + 'weights/'
     torch.save(checkpoint['generator'], PATH + 'gen_epoch_%04d_lpips_%.4f.pth' % (epoch_idx, valid_metric))
-    torch.save(checkpoint['generator'], PATH + 'dis_epoch_%04d_lpips_%.4f.pth' % (epoch_idx, valid_metric))
+    torch.save(checkpoint['discriminator'], PATH + 'dis_epoch_%04d_lpips_%.4f.pth' % (epoch_idx, valid_metric))
