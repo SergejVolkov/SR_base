@@ -33,6 +33,9 @@ class VGGPerceptual(nn.Module):
         edge = self.edge_loss(input, target)
         return self.a * l1 + self.b * l1_features + self.c * edge
 
+    def myto(self, device: torch.device):
+        self.edge_loss.myto(device)
+
 
 class EdgeLoss(nn.Module):
     def __init__(self):
@@ -73,10 +76,9 @@ class EdgeLoss(nn.Module):
         mean = (kernel_size - 1) / 2.0
         variance = sigma ** 2.0
         gaussian_kernel = (1.0 / (2.0 * math.pi * variance)) * \
-                                          torch.exp(
-                                              -torch.sum((xy_grid - mean)**2., dim=-1) / \
-                                              (2*variance)
-                                          )
+            torch.exp(
+                -torch.sum((xy_grid - mean)**2., dim=-1) / (2 * variance)
+            )
         gaussian_kernel = gaussian_kernel / torch.sum(gaussian_kernel)
 
         # Reshape to 2d depthwise convolutional weight
@@ -100,6 +102,11 @@ class EdgeLoss(nn.Module):
         edges_map_target = (self.sobel_x_filter(denoised_target) ** 2 +
                             self.sobel_y_filter(denoised_target) ** 2) ** (1 / 2)
         return self.loss(edges_map_input, edges_map_target)
+
+    def myto(self, device: torch.device):
+        self.gaussian_filter.weight.data.to(device)
+        self.sobel_x_filter.weight.data.to(device)
+        self.sobel_y_filter.weight.data.to(device)
 
 
 class LSGANGenLoss(nn.Module):

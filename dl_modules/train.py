@@ -31,6 +31,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
     psnr = algorithm.get_psnr()
 
     super_criterion = algorithm.get_super_loss()
+    super_criterion.myto(device)
     gen_criterion = algorithm.get_gen_loss()
     dis_fake_criterion = algorithm.get_dis_fake_loss()
     dis_real_criterion = algorithm.get_dis_real_loss()
