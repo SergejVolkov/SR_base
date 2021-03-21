@@ -22,7 +22,11 @@ def inference(name: str, net: torch.nn.Module, device: torch.device,
     w, h = ds.predict_res
     w *= ds.scale
     h *= ds.scale
-    out = cv2.VideoWriter(ds.SAVE_DIR + 'data/output/' + name + '_x2.mp4', fourcc, fps, (w, h))
+    if perform_enhance:
+        path = ds.SAVE_DIR + 'data/output/' + name + '_sr_e.mp4'
+    else:
+        path = ds.SAVE_DIR + 'data/output/' + name + '_sr.mp4'
+    out = cv2.VideoWriter(path, fourcc, fps, (w, h))
     i = 0
 
     if length != 0:
