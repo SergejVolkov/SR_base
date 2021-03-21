@@ -13,6 +13,7 @@ from torch.utils.data import Dataset as BaseDataset
 from torch.utils.data import Subset
 
 # import torch.nn.functional as F
+# import dl_modules.loss as loss
 
 
 def imshow(img: Tensor) -> None:
@@ -232,6 +233,22 @@ def init_data():
     #         image_out
     #     )
 
+    # edge_loss = loss.EdgeLoss()
+    # for i in range(19, 20):
+    #     image_in, image_out = train_set[random.randrange(len(train_set))]
+    #     lr = F.interpolate(
+    #         image_in.unsqueeze(0), size=(crop_size, crop_size), mode='bicubic', align_corners=True
+    #     )
+    #     utils.imwrite(
+    #         SAVE_DIR + 'data/output/%d_lr.png' % i,
+    #         lr
+    #     )
+    #     utils.imwrite(
+    #         SAVE_DIR + 'data/output/%d_hr.png' % i,
+    #         image_out
+    #     )
+    #     print(edge_loss(lr, image_out.unsqueeze(0)))
+
 
 # SAVE_DIR = ''
 SAVE_DIR = '/cache/shipilov_hse/'
@@ -249,7 +266,7 @@ predict_dir = os.path.join(SAVE_DIR, 'data/predict')
 train_batch_size = 128
 valid_batch_size = 1  # Better leave it 1, otherwise many things won't work)
 
-crop_size = 64        # Training crop HR size
+crop_size = 512        # Training crop HR size
 scale = 2             # General SR upscaling parameter
 extra_scale = 0.889   # Extra downscaling in training
 aspect_ratio = 0.834  # Aspect ratio change (anamorphic encoding)
