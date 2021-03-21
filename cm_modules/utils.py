@@ -9,11 +9,15 @@ padding = 10
 
 
 def imwrite(filename: str, image: Tensor):
+    cv2.imwrite(filename, convert_to_cv2(image))
+
+
+def convert_to_cv2(image: Tensor):
     if len(image.shape) == 4:
         image = image.squeeze(0)
     output = torch.clamp(image / 2 + 0.5, min=0, max=1)
     output = np.transpose(output.cpu().numpy(), (1, 2, 0)) * 255
-    cv2.imwrite(filename, cv2.cvtColor(output, cv2.COLOR_RGB2BGR))
+    return cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
 
 
 def scale(image: Tensor, aspect_ratio: float=1.0,

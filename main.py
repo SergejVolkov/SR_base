@@ -12,6 +12,7 @@ from dl_modules.valid import valid, simple_eval
 # from dl_modules.valid import get_static_images
 from cm_modules.predict import predict
 from cm_modules.inference import inference
+from dl_modules.checkpoint import unpack
 from models.RDN import RDN
 from models.RevDiscr import RevDiscr
 from models.Algo import Bicubic
@@ -152,6 +153,7 @@ def start_predict():
 
     cuda_id = 0
     cut = False
+    enhance = False
     for arg in sys.argv[3:]:
         if arg.startswith('-g=') or arg.startswith('--gpu='):
             cuda_id = int(arg[arg.index('=') + 1:])
@@ -159,6 +161,8 @@ def start_predict():
             ds.valid_batch_size = int(arg[arg.index('=') + 1:])
         elif arg == '-c' or arg == '--cut':
             cut = True
+        elif arg == '-e' or arg == '--enhance':
+            enhance = True
         else:
             print('Unexpected argument "' + arg + '"!')
             return
@@ -182,7 +186,7 @@ def start_predict():
         generator.load_state_dict(torch.load(PATH))
 
     # Inference model on images in 'predict' folder
-    predict(generator, device, cut)
+    predict(generator, device, cut, enhance)
 
 
 def start_inference():
@@ -194,6 +198,7 @@ def start_inference():
     name = sys.argv[3]
     length = start = 0
     cuda_id = 0
+    enhance = False
     for arg in sys.argv[4:]:
         if arg.startswith('-g=') or arg.startswith('--gpu='):
             cuda_id = int(arg[arg.index('=') + 1:])
@@ -201,6 +206,8 @@ def start_inference():
             start = int(arg[arg.index('=') + 1:])
         elif arg.startswith('-l=') or arg.startswith('--length='):
             length = int(arg[arg.index('=') + 1:])
+        elif arg == '-e' or arg == '--enhance':
+            enhance = True
         else:
             print('Unexpected argument "' + arg + '"!')
             return
@@ -221,7 +228,18 @@ def start_inference():
         generator.load_state_dict(torch.load(PATH))
 
     # Process video in 'video' folder
-    inference(name, generator, device, length, start)
+    inference(name, generator, device, length, start, enhance)
+
+
+def start_unpack():
+    name = 'checkpoint'
+    if len(sys.argv) > 2:
+        name = sys.argv[2]
+    if len(sys.argv) > 3:
+        print('Unexpected argument "' + sys.argv[3] + '"!')
+        return
+
+    unpack(name)
 
 
 if __name__ == "__main__":
@@ -242,6 +260,11 @@ if __name__ == "__main__":
             print(man.inference)
         else:
             start_inference()
+    elif sys.argv[1] == 'unpack':
+        if sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
+            print(man.unpack)
+        else:
+            start_unpack()
     elif sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
         print(man.common)
     else:

@@ -27,3 +27,12 @@ def load(gen_model: nn.Module, dis_model: nn.Module,
     dis_model.load_state_dict(checkpoint['discriminator'])
     gen_opt.load_state_dict(checkpoint['gen_optimizer'])
     dis_opt.load_state_dict(checkpoint['dis_optimizer'])
+
+
+def unpack(name: str='checkpoint'):
+    checkpoint = torch.load(ds.SAVE_DIR + 'weights/' + name)
+    epoch_idx = checkpoint['epoch']
+    valid_metric = checkpoint['best_acc']
+    PATH = ds.SAVE_DIR + 'weights/'
+    torch.save(checkpoint['generator'], PATH + 'gen_epoch_%04d_lpips_%.4f.pth' % (epoch_idx, valid_metric))
+    torch.save(checkpoint['generator'], PATH + 'dis_epoch_%04d_lpips_%.4f.pth' % (epoch_idx, valid_metric))

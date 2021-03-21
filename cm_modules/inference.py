@@ -2,13 +2,14 @@ import cv2
 import sys
 import pyprind
 import torch
+import numpy as np
 import dl_modules.dataset as ds
 import dl_modules.transforms as trf
-import numpy as np
+from cm_modules.enhance import enhance
 
 
 def inference(name: str, net: torch.nn.Module, device: torch.device,
-              length: int=0, start: int=0) -> None:
+              length: int=0, start: int=0, perform_enhance: bool=False) -> None:
     net.eval()
 
     cap = cv2.VideoCapture(ds.SAVE_DIR + 'data/video/' + name + '.mp4')
@@ -45,6 +46,8 @@ def inference(name: str, net: torch.nn.Module, device: torch.device,
             output = torch.clamp(net(frame) / 2 + 0.5, min=0, max=1).squeeze(0)
             output = np.uint8(np.transpose(output.cpu().numpy(), (1, 2, 0)) * 255)
             output = cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
+            if perform_enhance:
+                output = enhance(output)
             out.write(output)
             i += 1
             iter_bar.update()

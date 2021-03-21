@@ -1,12 +1,14 @@
 import sys
 import pyprind
+import cv2
 import torch
 import dl_modules.dataset as ds
 import cm_modules.utils as utils
-from cm_modules.utils import imwrite
+from cm_modules.utils import imwrite, convert_to_cv2
+from cm_modules.enhance import enhance
 
 
-def predict(net: torch.nn.Module, device: torch.device, cut: bool=False) -> None:
+def predict(net: torch.nn.Module, device: torch.device, cut: bool=False, perform_enhance: bool=False) -> None:
     net.eval()
     total = len(ds.predict_loader)
     iter_bar = pyprind.ProgBar(total, title="Predict", stream=sys.stdout)
@@ -24,10 +26,16 @@ def predict(net: torch.nn.Module, device: torch.device, cut: bool=False) -> None
                 output = utils.glue_image(out_pieces)
             else:
                 output = net(source)
-            imwrite(
-                ds.SAVE_DIR + 'data/output/' + ds.predict_set.ids[i][:-4] + '_sr.png',
-                output
-            )
+
+            if perform_enhance:
+                path = ds.SAVE_DIR + 'data/output/' + ds.predict_set.ids[i][:-4] + '_sr_e.png'
+                output = convert_to_cv2(output)
+                output = enhance(output)
+                cv2.imwrite(path, output)
+            else:
+                path = ds.SAVE_DIR + 'data/output/' + ds.predict_set.ids[i][:-4] + '_sr.png'
+                imwrite(path, output)
+
             iter_bar.update()
             i += 1
 

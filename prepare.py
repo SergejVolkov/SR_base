@@ -6,6 +6,7 @@ from cm_modules.slice import slice_data
 from cm_modules.crop import crop
 from cm_modules.extract import extract
 from cm_modules.generate_lr import generate
+from cm_modules.enhance import enhance_images
 
 
 def start_slice():
@@ -114,6 +115,30 @@ def start_generate():
     generate(folder)
 
 
+def start_enhance():
+    if len(sys.argv) < 3:
+        print('Wrong number of params!\nTry "python prepare.py --help" for usage info')
+        return
+
+    folder = sys.argv[2]
+    strength = 4
+    window_size = 5
+    contrast = 5
+    for arg in sys.argv[3:]:
+        if arg.startswith('-s=') or arg.startswith('--strength='):
+            strength = int(arg[arg.index('=') + 1:])
+        elif arg.startswith('-w=') or arg.startswith('--window='):
+            window_size = int(arg[arg.index('=') + 1:])
+        elif arg.startswith('-c=') or arg.startswith('--contrast='):
+            contrast = int(arg[arg.index('=') + 1:])
+        else:
+            print('Unexpected argument "' + arg + '"!')
+            return
+
+    # Process images in folder
+    enhance_images(folder, strength, window_size, contrast)
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print('No jobs to do.\nTry "python main.py --help" for usage info')
@@ -137,6 +162,11 @@ if __name__ == "__main__":
             print(man.generate)
         else:
             start_generate()
+    elif sys.argv[1] == 'enhance':
+        if sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
+            print(man.enhance)
+        else:
+            start_enhance()
     elif sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
         print(man.common)
     else:

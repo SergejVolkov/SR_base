@@ -31,3 +31,9 @@ extract = \
 
 generate = \
     '\npython prepare.py generate DATA_FOLDER\n'
+
+enhance = \
+    '\npython prepare.py enhance DATA_FOLDER [OPTIONS]\n\n' \
+    '       -s=INT, --strength=INT\n              denoising strength (default 4)\n\n' \
+    '       -w=SIZE, --window=SIZE\n              averaging area size (default 5)\n\n' \
+    '       -c=INT, --contrast=INT\n              auto contrast level (default 5)\n'
