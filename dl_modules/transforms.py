@@ -6,8 +6,12 @@ import albumentations as albu
 def get_training_transform(crop_size: int):
     return albu.Compose([
         albu.RandomCrop(height=crop_size, width=crop_size, always_apply=True),
-        albu.RandomBrightnessContrast(brightness_limit=(-0.25, -0.25),
-                                      contrast_limit=(0.3, 0.3), p=0.7),
+        albu.OneOf([
+            albu.RandomBrightnessContrast(brightness_limit=(-0.25, -0.25),
+                                          contrast_limit=(0.3, 0.3)),
+            albu.RandomBrightnessContrast(brightness_limit=(0.25, 0.25),
+                                          contrast_limit=(-0.3, -0.3)),
+        ], p=0.7),
         albu.HorizontalFlip(p=0.5)
     ])
 
