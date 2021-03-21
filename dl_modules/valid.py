@@ -16,7 +16,6 @@ def valid(gen_model: torch.nn.Module, dis_model: torch.nn.Module, device: torch.
     psnr = algorithm.get_psnr()
 
     super_criterion = algorithm.get_super_loss()
-    super_criterion.myto(device)
     gen_criterion = algorithm.get_gen_loss()
     average_gen_loss = 0.0
     average_super_loss = 0.0
