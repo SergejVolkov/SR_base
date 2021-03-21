@@ -266,7 +266,7 @@ predict_dir = os.path.join(SAVE_DIR, 'data/predict')
 train_batch_size = 128
 valid_batch_size = 1  # Better leave it 1, otherwise many things won't work)
 
-crop_size = 512        # Training crop HR size
+crop_size = 64        # Training crop HR size
 scale = 2             # General SR upscaling parameter
 extra_scale = 0.889   # Extra downscaling in training
 aspect_ratio = 0.834  # Aspect ratio change (anamorphic encoding)
