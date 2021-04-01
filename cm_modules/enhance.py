@@ -10,7 +10,7 @@ import dl_modules.dataset as ds
 
 
 def enhance_images(folder: str, denoise_strength: int,
-                   window_size: int, contrast: int) -> None:
+                   window_size: int, contrast: int, kernel_size: int) -> None:
     folder = ds.SAVE_DIR + 'data/' + folder
     if not os.path.isdir(folder):
         print('Folder "' + folder + '" does not exist!')
@@ -32,7 +32,7 @@ def enhance_images(folder: str, denoise_strength: int,
     with torch.no_grad():
         for data in loader:
             downscaled, source = data
-            noisy = (np.transpose(source.squeeze(0).cpu().numpy(), (1, 2, 0)) * 255).astype(np.uint8)
+            noisy = np.transpose(source.squeeze(0).cpu().numpy(), (1, 2, 0)) * 255
             noisy = cv2.cvtColor(noisy, cv2.COLOR_RGB2BGR)
             enhanced = enhance(noisy, denoise_strength, window_size, contrast)
             cv2.imwrite(folder + '/enhanced/' + dataset.ids[i][:-4] + '_e.png', enhanced)
@@ -41,19 +41,30 @@ def enhance_images(folder: str, denoise_strength: int,
     iter_bar.update()
 
 
-def enhance(image, denoise_strength: int=4, window_size: int=5, contrast: int=5):
-    denoised = cv2.fastNlMeansDenoisingColored(
-        image, None, denoise_strength, denoise_strength, window_size, window_size * 3
-    )
-    equalized = auto_contrast(denoised, strength=contrast)
-    # dithered = dither(equalized)
-    return equalized
+def enhance(image, denoise_strength: int=5, window_size: int=5, contrast: int=5, kernel_size: int=5):
+    denoised = gentle_denoise(image, denoise_strength, window_size, kernel_size)
+    # equalized = auto_contrast(denoised, strength=contrast)
+    # dithered = dither(denoised)
+    return denoised
 
 
 def dither(image, dither_strength: int=1):
     return np.clip(np.round(
         image.astype(np.float) + 2 * (np.random.rand(*image.shape) - 0.5) * dither_strength
     ), a_min=0, a_max=255).astype(np.uint8)
+
+
+def gentle_denoise(noisy, denoise_strength, window_size, kernel_size):
+    denoised = cv2.fastNlMeansDenoisingColored(
+        noisy.astype(np.uint8), None, denoise_strength, denoise_strength, window_size, window_size * 3
+    )
+    noisy = noisy.astype(np.float32)
+    extracted_noise = noisy - denoised.astype(np.float32)
+    if kernel_size > 0:
+        kernel = np.ones((kernel_size, kernel_size), np.float32) / (kernel_size ** 2)
+        extracted_noise -= cv2.filter2D(extracted_noise, -1, kernel)
+    denoised = noisy - extracted_noise
+    return denoised
 
 
 def auto_contrast(image, clip_hist_percent: int=5,

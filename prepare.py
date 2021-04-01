@@ -124,6 +124,7 @@ def start_enhance():
     strength = 4
     window_size = 5
     contrast = 5
+    kernel = 5
     for arg in sys.argv[3:]:
         if arg.startswith('-s=') or arg.startswith('--strength='):
             strength = int(arg[arg.index('=') + 1:])
@@ -131,12 +132,14 @@ def start_enhance():
             window_size = int(arg[arg.index('=') + 1:])
         elif arg.startswith('-c=') or arg.startswith('--contrast='):
             contrast = int(arg[arg.index('=') + 1:])
+        elif arg.startswith('-k=') or arg.startswith('--kernel='):
+            kernel = int(arg[arg.index('=') + 1:])
         else:
             print('Unexpected argument "' + arg + '"!')
             return
 
     # Process images in folder
-    enhance_images(folder, strength, window_size, contrast)
+    enhance_images(folder, strength, window_size, contrast, kernel)
 
 
 if __name__ == "__main__":
