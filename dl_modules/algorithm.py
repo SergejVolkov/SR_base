@@ -41,7 +41,7 @@ def get_psnr() -> nn.Module:
 
 
 def get_super_loss() -> nn.Module:
-    return VGGPerceptual(l1_coeff=0.01, features_coeff=1, edge_coeff=1)
+    return VGGPerceptual(l1_coeff=0.01, features_coeff=1, edge_coeff=2)
 
 
 def get_gen_loss() -> nn.Module:
