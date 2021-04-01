@@ -50,7 +50,7 @@ class RDN(nn.Module):
 
         # up-sampling
         assert 2 <= scale_factor <= 4
-        blurpool = antialiased_cnns.BlurPool(self.G0, filt_size=4, stride=1)
+        blurpool = antialiased_cnns.BlurPool(self.G0, filt_size=3, stride=1)
         if scale_factor == 2 or scale_factor == 4:
             self.upscale = [ ]
             for _ in range(scale_factor // 2):
