@@ -4,6 +4,7 @@ common = \
     '       crop\n              crop cinematic/TV resolution letterbox if needed\n\n' \
     '       extract\n              extract noise patches from dataset\n\n' \
     '       generate\n              generate lr images to create paired dataset\n\n' \
+    '       enhance\n              process images with some cool algo to make them look better\n\n' \
     '       -h, --help\n              show manual\n'
 
 slice = \
@@ -36,4 +37,5 @@ enhance = \
     '\npython prepare.py enhance DATA_FOLDER [OPTIONS]\n\n' \
     '       -s=INT, --strength=INT\n              denoising strength (default 4)\n\n' \
     '       -w=SIZE, --window=SIZE\n              averaging area size (default 5)\n\n' \
-    '       -c=INT, --contrast=INT\n              auto contrast level (default 5)\n'
+    '       -c=INT, --contrast=INT\n              auto contrast level (default 5)\n\n' \
+    '       -k=SIZE, --kernel=SIZE\n              gentle noise extraction level (default 5)\n'

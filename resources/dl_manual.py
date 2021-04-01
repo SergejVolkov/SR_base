@@ -5,8 +5,9 @@ import dl_modules.scheduler.exp as scheduler
 common = \
     'USAGE\n\npython main.py {train, predict, inference} [OPTIONS]\n\n' \
     '       train\n              train model\n\n' \
-    '       predict\n              enhance images\n\n' \
-    '       inference\n              enhance video\n\n' \
+    '       predict\n              process images\n\n' \
+    '       inference\n              process video\n\n' \
+    '       unpack\n              extract weights from checkpoint\n\n' \
     '       -h, --help\n              show manual\n'
 
 train = \
@@ -41,6 +42,7 @@ inference = \
     '       -g=CUDA_DEVICE_NUMBER, --gpu=CUDA_DEVICE_NUMBER\n              CUDA device to use (default 0)\n\n' \
     '       -s=SECONDS, --start=SECONDS\n              predict video start time (default 0)\n\n' \
     '       -l=SECONDS, --length=SECONDS\n              processing time (default len(input_video))\n\n' \
+    '       -c, --cut\n              cut image and use model separately on each piece to reduce cuda memory\n\n' \
     '       -e, --enhance\n              process super-resolved video with some cool algo to make it look better\n'
 
 unpack = \
