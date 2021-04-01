@@ -157,7 +157,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         total_throttling /= total / 100
 
         # Check whether the model has exploded
-        if train_gen_loss > 50:
+        if train_gen_loss > 50 or train_gen_loss == float('NaN'):
             scheduler.discard()
             checkpoint.load(gen_model, dis_model, gen_opt, dis_opt)
             print('Train: GEN loss: %.3f, DIS loss: %.3f\n' %
