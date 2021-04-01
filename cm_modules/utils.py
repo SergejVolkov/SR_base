@@ -5,7 +5,7 @@ import torch.tensor as Tensor
 import torch.nn.functional as F
 
 piece_count = 4
-padding = 10
+padding = 6
 
 
 def imwrite(filename: str, image: Tensor):

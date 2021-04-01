@@ -13,7 +13,7 @@ from dl_modules.valid import valid, simple_eval
 from cm_modules.predict import predict
 from cm_modules.inference import inference
 from dl_modules.checkpoint import unpack
-from models.RDN import RDN
+from models.RDN_Alias import RDN
 from models.RevDiscr import RevDiscr
 from models.Algo import Bicubic
 
@@ -198,6 +198,7 @@ def start_inference():
     name = sys.argv[3]
     length = start = 0
     cuda_id = 0
+    cut = False
     enhance = False
     for arg in sys.argv[4:]:
         if arg.startswith('-g=') or arg.startswith('--gpu='):
@@ -206,6 +207,8 @@ def start_inference():
             start = int(arg[arg.index('=') + 1:])
         elif arg.startswith('-l=') or arg.startswith('--length='):
             length = int(arg[arg.index('=') + 1:])
+        elif arg == '-c' or arg == '--cut':
+            cut = True
         elif arg == '-e' or arg == '--enhance':
             enhance = True
         else:
@@ -228,7 +231,7 @@ def start_inference():
         generator.load_state_dict(torch.load(PATH))
 
     # Process video in 'video' folder
-    inference(name, generator, device, length, start, enhance)
+    inference(name, generator, device, length, start, cut, enhance)
 
 
 def start_unpack():

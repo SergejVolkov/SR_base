@@ -8,7 +8,8 @@ from cm_modules.utils import imwrite, convert_to_cv_8bit
 from cm_modules.enhance import enhance
 
 
-def predict(net: torch.nn.Module, device: torch.device, cut: bool=False, perform_enhance: bool=False) -> None:
+def predict(net: torch.nn.Module, device: torch.device,
+            cut: bool=False, perform_enhance: bool=False) -> None:
     net.eval()
     total = len(ds.predict_loader)
     iter_bar = pyprind.ProgBar(total, title="Predict", stream=sys.stdout)
