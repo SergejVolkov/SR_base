@@ -7,6 +7,7 @@ import dl_modules.dataset as ds
 import dl_modules.transforms as trf
 import cm_modules.utils as utils
 from cm_modules.enhance import enhance
+from cm_modules.utils import convert_to_cv_float
 
 
 def inference(name: str, net: torch.nn.Module, device: torch.device,
@@ -51,12 +52,10 @@ def inference(name: str, net: torch.nn.Module, device: torch.device,
                 output = utils.glue_image(out_pieces)
             else:
                 output = net(frame)
-            output = torch.clamp(output / 2 + 0.5, min=0, max=1).squeeze(0)
-            output = (np.transpose(output.cpu().numpy(), (1, 2, 0)) * 255).astype(np.uint8)
-            output = cv2.cvtColor(output, cv2.COLOR_RGB2BGR)
+            output = convert_to_cv_float(output)
             if perform_enhance:
                 output = enhance(output)
-            out.write(output)
+            out.write(output.astype(np.uint8))
             i += 1
             iter_bar.update()
     cap.release()

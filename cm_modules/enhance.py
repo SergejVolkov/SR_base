@@ -34,8 +34,8 @@ def enhance_images(folder: str, denoise_strength: int,
             downscaled, source = data
             noisy = np.transpose(source.squeeze(0).cpu().numpy(), (1, 2, 0)) * 255
             noisy = cv2.cvtColor(noisy, cv2.COLOR_RGB2BGR)
-            enhanced = enhance(noisy, denoise_strength, window_size, contrast)
-            cv2.imwrite(folder + '/enhanced/' + dataset.ids[i][:-4] + '_e.png', enhanced)
+            enhanced = enhance(noisy, denoise_strength, window_size, contrast, kernel_size)
+            cv2.imwrite(folder + '/enhanced/' + dataset.ids[i][:-4] + '_e.png', enhanced.astype(np.uint8))
             iter_bar.update()
             i += 1
     iter_bar.update()
@@ -44,8 +44,8 @@ def enhance_images(folder: str, denoise_strength: int,
 def enhance(image, denoise_strength: int=5, window_size: int=5, contrast: int=5, kernel_size: int=5):
     denoised = gentle_denoise(image, denoise_strength, window_size, kernel_size)
     equalized = auto_contrast(denoised, strength=contrast)
-    # dithered = dither(denoised)
-    return equalized
+    dithered = dither(equalized)
+    return dithered
 
 
 def dither(image, dither_strength: int=1):
