@@ -43,14 +43,14 @@ def enhance_images(folder: str, denoise_strength: int,
 
 def enhance(image, denoise_strength: int=5, window_size: int=5, contrast: int=5, kernel_size: int=5):
     denoised = gentle_denoise(image, denoise_strength, window_size, kernel_size)
-    # equalized = auto_contrast(denoised, strength=contrast)
+    equalized = auto_contrast(denoised, strength=contrast)
     # dithered = dither(denoised)
-    return denoised
+    return equalized
 
 
 def dither(image, dither_strength: int=1):
     return np.clip(np.round(
-        image.astype(np.float) + 2 * (np.random.rand(*image.shape) - 0.5) * dither_strength
+        image.astype(np.float) + (np.random.rand(*image.shape) - 0.5) * dither_strength
     ), a_min=0, a_max=255).astype(np.uint8)
 
 
@@ -67,7 +67,7 @@ def gentle_denoise(noisy, denoise_strength, window_size, kernel_size):
     return denoised
 
 
-def auto_contrast(image, clip_hist_percent: int=5,
+def auto_contrast(image, clip_hist_percent: int=1,
                   strength: int=5, saturation: int=64):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
