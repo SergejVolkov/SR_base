@@ -50,21 +50,18 @@ class RDN(nn.Module):
 
         # up-sampling
         assert 2 <= scale_factor <= 4
-        if scale_factor == 2:
-            self.upscale = nn.Sequential(
-                antialiased_cnns.BlurPool(self.G0, filt_size=4, stride=1),
-                nn.ConvTranspose2d(self.G0, self.G0, kernel_size=4, stride=2, padding=3)
-            )
-        elif scale_factor == 4:
-            self.upscale = []
+        blurpool = antialiased_cnns.BlurPool(self.G0, filt_size=4, stride=1)
+        if scale_factor == 2 or scale_factor == 4:
+            self.upscale = [ ]
             for _ in range(scale_factor // 2):
                 self.upscale.extend([nn.Conv2d(self.G0, self.G0 * (2 ** 2), kernel_size=3, padding=3 // 2),
                                      nn.PixelShuffle(2)])
-            self.upscale = nn.Sequential(*self.upscale)
+            self.upscale = nn.Sequential(*self.upscale, blurpool)
         else:
             self.upscale = nn.Sequential(
                 nn.Conv2d(self.G0, self.G0 * (scale_factor ** 2), kernel_size=3, padding=3 // 2),
-                nn.PixelShuffle(scale_factor)
+                nn.PixelShuffle(scale_factor),
+                blurpool
             )
 
         self.output = nn.Conv2d(self.G0, num_channels, kernel_size=3, padding=3 // 2)
