@@ -204,9 +204,9 @@ def start_inference():
         if arg.startswith('-g=') or arg.startswith('--gpu='):
             cuda_id = int(arg[arg.index('=') + 1:])
         elif arg.startswith('-s=') or arg.startswith('--start='):
-            start = int(arg[arg.index('=') + 1:])
+            start = float(arg[arg.index('=') + 1:])
         elif arg.startswith('-l=') or arg.startswith('--length='):
-            length = int(arg[arg.index('=') + 1:])
+            length = float(arg[arg.index('=') + 1:])
         elif arg == '-c' or arg == '--cut':
             cut = True
         elif arg == '-e' or arg == '--enhance':

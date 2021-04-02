@@ -6,21 +6,21 @@ import numpy as np
 import dl_modules.dataset as ds
 import dl_modules.transforms as trf
 import cm_modules.utils as utils
+import skvideo.io as vio
 from cm_modules.enhance import enhance
 from cm_modules.utils import convert_to_cv_float
 
 
 def inference(name: str, net: torch.nn.Module, device: torch.device,
-              length: int=0, start: int=0, cut: bool=False, perform_enhance: bool=False) -> None:
+              length: float=0, start: float=0, cut: bool=False, perform_enhance: bool=False) -> None:
     net.eval()
-
-    cap = cv2.VideoCapture(ds.SAVE_DIR + 'data/video/' + name + '.mp4')
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    cap.set(cv2.CAP_PROP_POS_FRAMES, start * fps)
     norm = ds.get_normalization()
     trn = trf.get_predict_transform(*ds.predict_res)
 
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    cap = cv2.VideoCapture(ds.SAVE_DIR + 'data/video/' + name + '.mp4')
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    cap.set(cv2.CAP_PROP_POS_FRAMES, int(round(start * fps)))
+
     w, h = ds.predict_res
     w *= ds.scale
     h *= ds.scale
@@ -28,11 +28,15 @@ def inference(name: str, net: torch.nn.Module, device: torch.device,
         path = ds.SAVE_DIR + 'data/output/' + name + '_sr_e.mp4'
     else:
         path = ds.SAVE_DIR + 'data/output/' + name + '_sr.mp4'
-    out = cv2.VideoWriter(path, fourcc, fps, (w, h))
-    i = 0
+    out = vio.FFmpegWriter(path, outputdict={
+        '-vcodec': 'libx264',
+        '-crf': '0',
+        '-preset': 'veryslow'
+    })
 
+    i = 0
     if length != 0:
-        total = length * fps
+        total = int(round(length * fps))
     else:
         total = cap.get(cv2.CAP_PROP_FRAME_COUNT)
     iter_bar = pyprind.ProgBar(total, title='Inference', stream=sys.stdout)
@@ -55,8 +59,8 @@ def inference(name: str, net: torch.nn.Module, device: torch.device,
             output = convert_to_cv_float(output)
             if perform_enhance:
                 output = enhance(output)
-            out.write(output.astype(np.uint8))
+            out.writeFrame(cv2.cvtColor(output.astype(np.uint8), cv2.COLOR_BGR2RGB))
             i += 1
             iter_bar.update()
     cap.release()
-    out.release()
+    out.close()
