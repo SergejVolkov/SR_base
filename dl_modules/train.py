@@ -78,7 +78,8 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
 
             # Restore initial lr size and aspect ratio
             inputs = F.interpolate(
-                inputs, size=(ds.crop_size // ds.scale, ds.crop_size // ds.scale), mode='bicubic', align_corners=True
+                inputs, size=(ds.crop_size // ds.scale, ds.crop_size // ds.scale),
+                mode='bicubic', align_corners=True
             )
 
             gen_opt.zero_grad()
