@@ -3,15 +3,15 @@
  
  **Current state**
 
- RealSR (CVPRW 2020) implementation (without ESRGAN)
+ RealSR (CVPRW 2020) implementation (without ESRGAN).
+ Better noise extraction, edge loss, and aspect ratio correction.
 
  ### Warning
  
  This project is under development! The results of
  the research will provide numerous changes to its
- current state, so the code should not yet be used
- to avoid any instability and possible harm to your
- system. By the time the project takes its final shape,
+ current state, please, use the code with caution.
+ By the time the project takes its final shape,
  this repository will get proper description and manuals.
  
  Stay tuned!
