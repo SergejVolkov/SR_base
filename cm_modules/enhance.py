@@ -41,10 +41,10 @@ def enhance_images(folder: str, denoise_strength: int,
     iter_bar.update()
 
 
-def enhance(image, denoise_strength: int=5, window_size: int=5, contrast: int=1, kernel_size: int=5):
+def enhance(image, denoise_strength: int=5, window_size: int=5, contrast: int=0, kernel_size: int=5):
     denoised = gentle_denoise(image, denoise_strength, window_size, kernel_size)
-    equalized = auto_contrast(denoised, strength=contrast)
-    dithered = dither(equalized)
+    # equalized = auto_contrast(denoised, strength=contrast)
+    dithered = dither(denoised)
     return dithered
 
 
