@@ -155,7 +155,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         train_psnr /= total
         train_ssim /= total
         train_lpips /= total
-        total_throttling /= total / 100
+        total_throttling /= total / 100.0
 
         # Check whether the model has exploded
         if train_gen_loss > 50 or train_gen_loss != train_gen_loss:
@@ -230,7 +230,7 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
                          train_gen_loss, train_dis_loss,
                          train_fake_loss, train_real_loss,
                          valid_gen_loss, valid_super_loss,
-                         gen_lr, dis_lr),
+                         gen_lr, dis_lr, total_throttling),
                 images=tuple(images + [inputs, outputs, gt]))
         log.save()
 
