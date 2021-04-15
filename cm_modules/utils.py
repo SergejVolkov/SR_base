@@ -4,7 +4,8 @@ import torch
 import torch.tensor as Tensor
 import torch.nn.functional as F
 
-piece_count = 4
+piece_count = 3
+batch_size = 2
 padding = 6
 
 
@@ -58,6 +59,25 @@ def even_round(*args):
             rnd += 1
         rounded.append(rnd)
     return rounded
+
+
+def make_batch(image: Tensor) -> list:
+    pieces = cut_image(image)
+    batches = []
+    for i in range(len(pieces) // batch_size):
+        batches.append(torch.cat(pieces[i * batch_size:(i + 1) * batch_size], dim=0))
+    if len(pieces) % batch_size != 0:
+        batches.append(torch.cat(pieces[(len(pieces) // batch_size) * batch_size:], dim=0))
+    return batches
+
+
+def unbatch(batches: list) -> Tensor:
+    pieces = []
+    for batch in batches:
+        pieces.extend(torch.unbind(batch, dim=0))
+    for i in range(len(pieces)):
+        pieces[i] = pieces[i].unsqueeze(0)
+    return glue_image(pieces)
 
 
 def cut_image(image: Tensor) -> list:
