@@ -23,7 +23,6 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
     start_time = time.time()
     explosion_count = 0
     dis_loss = 0.4  # just an initial value to get things working, nothing special
-    stepper_active = False
 
     lpips = algorithm.get_lpips()
     lpips.to(device)
@@ -59,7 +58,6 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
         total = len(ds.train_loader)
         scaled_inputs = outputs = gt = None
         total_throttling = 0
-        start_throttling = 0
 
         if bars:
             iter_bar = pyprind.ProgBar(total, title="Train", stream=sys.stdout)
@@ -108,12 +106,11 @@ def train(gen_model: nn.Module, dis_model: nn.Module, device: torch.device,
 
             # Temporarily switch discriminator off if it learns too quickly
             #       (consider turning Eurobeat off)
-            if not stepper_active and dis_loss < 0.2:
+            if dis_loss < 0.2:
                 stepper_active = True
-                start_throttling = sample_id
-            elif stepper_active and dis_loss > 0.3:
+                total_throttling += 1
+            else:
                 stepper_active = False
-                total_throttling += sample_id - start_throttling
 
             # Discriminator step
             if not stepper_active:
