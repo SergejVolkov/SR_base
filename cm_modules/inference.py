@@ -28,10 +28,13 @@ def inference(name: str, net: torch.nn.Module, device: torch.device,
         path = ds.SAVE_DIR + 'data/output/' + name + '_sr_e.mp4'
     else:
         path = ds.SAVE_DIR + 'data/output/' + name + '_sr.mp4'
-    out = vio.FFmpegWriter(path, outputdict={
+    out = vio.FFmpegWriter(path, inputdict={
+        '-r': '%g' % fps,
+    }, outputdict={
         '-vcodec': 'libx264',
         '-crf': '0',
-        '-preset': 'veryslow'
+        '-preset': 'veryslow',
+        '-r' : '%g' % fps
     })
 
     i = 0
