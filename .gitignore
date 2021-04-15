@@ -3,6 +3,9 @@ __pycache__
 data
 log
 weights
+vulcan
+dl_modules/deepdream.py
+models/DeepDream.py
 *.iml
 *.ipynb
 *.pth
