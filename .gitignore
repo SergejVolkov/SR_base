@@ -6,6 +6,7 @@ weights
 vulcan
 dl_modules/deepdream.py
 models/DeepDream.py
+garbage.txt
 *.iml
 *.ipynb
 *.pth
