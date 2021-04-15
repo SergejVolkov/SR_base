@@ -259,8 +259,10 @@ valid_hr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_1000/Bakemonogatari_v
 valid_lr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_1000/Bakemonogatari_valid_LR')
 kernel_train_dir = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_train_kernel')
 kernel_valid_dir = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_valid_kernel')
-noise_train_dir  = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_train_noise')
-noise_valid_dir  = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_valid_noise')
+# noise_train_dir  = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_train_noise')
+# noise_valid_dir  = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_valid_noise')
+noise_train_dir  = os.path.join(SAVE_DIR, 'data/Corrupted_noise/train')
+noise_valid_dir  = os.path.join(SAVE_DIR, 'data/Corrupted_noise/valid')
 predict_dir = os.path.join(SAVE_DIR, 'data/predict')
 
 # Load datasets
