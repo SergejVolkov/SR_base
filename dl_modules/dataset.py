@@ -37,6 +37,7 @@ class Dataset(BaseDataset):
         downscaling (str): downscaling method (possible 'bicubic', 'kernel', 'kernel_even', 'none')
         aspect_ratio (float): change pixel aspect ratio of lr image to width / heigth
         extra_scale (float): additional lr scaling for non-integer SR upscaling
+        min_var (float): minimum sample variance
 
     """
 
@@ -49,7 +50,8 @@ class Dataset(BaseDataset):
             augmentation=None,
             downscaling='bicubic',
             aspect_ratio=1.0,
-            extra_scale=1.0
+            extra_scale=1.0,
+            min_var=None
     ):
         self.ids = [name for name in os.listdir(images_dir) if
                     name.lower().endswith('.png') or
@@ -57,7 +59,17 @@ class Dataset(BaseDataset):
                     name.lower().endswith('.jpeg') or
                     name.lower().endswith('.gif') or
                     name.lower().endswith('.bmp')]
-        self.images_fps = [os.path.join(images_dir, image_id) for image_id in self.ids]
+        if min_var is not None:
+            filtered_ids = []
+            self.images_fps = []
+            for i in range(len(self.ids)):
+                image = cv2.imread(os.path.join(images_dir, self.ids[i]))
+                if np.mean(np.var(image, axis=(0, 1))) >= min_var:
+                    filtered_ids.append(self.ids[i])
+                    self.images_fps.append(os.path.join(images_dir, self.ids[i]))
+            self.ids = filtered_ids
+        else:
+            self.images_fps = [os.path.join(images_dir, image_id) for image_id in self.ids]
 
         self.transform = transform
         self.augmentation = augmentation
@@ -174,7 +186,8 @@ def init_data():
                         # augmentation=trf.get_input_image_augmentation(),
                         downscaling='kernel_even',
                         aspect_ratio=aspect_ratio,
-                        extra_scale=extra_scale)
+                        extra_scale=extra_scale,
+                        min_var=min_sample_var)
     if train_set_size != 0:
         train_set = Subset(train_set, list(range(train_set_size)))
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=train_batch_size,
@@ -256,11 +269,11 @@ SAVE_DIR = '../drive/MyDrive/'
 
 train_dir = os.path.join(SAVE_DIR, 'data/Cossette/Cossette_train_HR')
 valid_hr_dir = os.path.join(SAVE_DIR, 'data/Cossette/Cossette_valid_HR')
-valid_lr_dir = os.path.join(SAVE_DIR, 'data/Cossette/Cossette_valid_LR')
+valid_lr_dir = os.path.join(SAVE_DIR, 'data/Cossette/Cossette_valid_LR_Filtered')
 kernel_train_dir = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_train_kernel')
 kernel_valid_dir = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_valid_kernel')
-noise_train_dir  = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_train_noise')
-noise_valid_dir  = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_valid_noise')
+noise_train_dir  = os.path.join(SAVE_DIR, 'data/AniBoters/Filtered/SoulTaker_train_noise')
+noise_valid_dir  = os.path.join(SAVE_DIR, 'data/AniBoters/Filtered/SoulTaker_valid_noise')
 predict_dir = os.path.join(SAVE_DIR, 'data/predict')
 
 # Load datasets
@@ -273,6 +286,8 @@ extra_scale = 480 / (1080 / 2)         # Extra downscaling in training
 aspect_ratio = (712 / 480) / (16 / 9)  # Aspect ratio change (anamorphic encoding)
 
 predict_res = (1920 // scale, 1080 // scale)  # Prediction resolution
+
+min_sample_var = 1000
 
 train_set_size = 0
 valid_set_size = 0
