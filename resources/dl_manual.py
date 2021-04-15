@@ -34,7 +34,7 @@ predict = \
     '       -g=CUDA_DEVICE_NUMBER, --gpu=CUDA_DEVICE_NUMBER\n              CUDA device to use (default 0)\n\n' \
     '       -b=COUNT, --batch=COUNT\n              predict batch size (default %d)\n\n' \
     '       -c, --cut\n              cut image and use model separately on each piece to reduce cuda memory\n\n' \
-    '       -e, --enhance\n              process super-resolved images with some cool algo to make it look better\n' \
+    '       -e, --enhance\n              process super-resolved images with some cool algo to make them look better\n' \
     % ds.valid_batch_size
 
 inference = \

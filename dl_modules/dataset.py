@@ -251,9 +251,10 @@ def init_data():
 
 
 # SAVE_DIR = ''
-SAVE_DIR = '/cache/shipilov_hse/'
+SAVE_DIR = '../drive/MyDrive/'
+# SAVE_DIR = '/cache/shipilov_hse/'
 
-train_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_4000/Bakemonogatari_train_HR')
+train_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_1000/Bakemonogatari_train_HR')
 valid_hr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_1000/Bakemonogatari_valid_HR')
 valid_lr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_1000/Bakemonogatari_valid_LR')
 kernel_train_dir = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_train_kernel')
