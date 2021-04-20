@@ -60,6 +60,7 @@ class Dataset(BaseDataset):
                     name.lower().endswith('.jpeg') or
                     name.lower().endswith('.gif') or
                     name.lower().endswith('.bmp')]
+        self.ids.sort()
         if min_var is not None:
             var_path = os.path.join(images_dir, 'variance.txt')
             filtered_ids = []
@@ -69,7 +70,7 @@ class Dataset(BaseDataset):
                 for i in range(len(self.ids)):
                     image = cv2.imread(os.path.join(images_dir, self.ids[i]))
                     var = np.mean(np.var(image, axis=(0, 1)))
-                    variance.append(str(var))
+                    variance.append(str(var) + '\n')
                     if var >= min_var:
                         filtered_ids.append(self.ids[i])
                         self.images_fps.append(os.path.join(images_dir, self.ids[i]))
@@ -279,16 +280,16 @@ def init_data():
     #     print(edge_loss(lr, image_out.unsqueeze(0)))
 
 
-SAVE_DIR = ''
-# SAVE_DIR = '../drive/MyDrive/'
+# SAVE_DIR = ''
+SAVE_DIR = '../drive/MyDrive/'
 # SAVE_DIR = '/cache/shipilov_hse/'
 
 # train_dir = os.path.join(SAVE_DIR, 'data/Cossette/Cossette_train_HR')
 # valid_hr_dir = os.path.join(SAVE_DIR, 'data/Cossette/Cossette_valid_HR')
 # valid_lr_dir = os.path.join(SAVE_DIR, 'data/Cossette/Cossette_valid_LR')
-train_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari/Bakemonogatari_train_HR')
-valid_hr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari/Bakemonogatari_valid_HR')
-valid_lr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari/Bakemonogatari_valid_LR')
+train_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_1000/Bakemonogatari_train_HR')
+valid_hr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_1000/Bakemonogatari_valid_HR')
+valid_lr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari_1000/Bakemonogatari_valid_LR')
 kernel_train_dir = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_train_kernel')
 kernel_valid_dir = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_valid_kernel')
 noise_train_dir  = os.path.join(SAVE_DIR, 'data/AniBoters/Filtered/SoulTaker_train_noise')
