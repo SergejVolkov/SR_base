@@ -1,3 +1,4 @@
+import io
 import os
 import cv2
 import numpy as np
@@ -60,13 +61,28 @@ class Dataset(BaseDataset):
                     name.lower().endswith('.gif') or
                     name.lower().endswith('.bmp')]
         if min_var is not None:
+            var_path = os.path.join(images_dir, 'variance.txt')
             filtered_ids = []
             self.images_fps = []
-            for i in range(len(self.ids)):
-                image = cv2.imread(os.path.join(images_dir, self.ids[i]))
-                if np.mean(np.var(image, axis=(0, 1))) >= min_var:
-                    filtered_ids.append(self.ids[i])
-                    self.images_fps.append(os.path.join(images_dir, self.ids[i]))
+            if not os.path.isfile(var_path):
+                variance = []
+                for i in range(len(self.ids)):
+                    image = cv2.imread(os.path.join(images_dir, self.ids[i]))
+                    var = np.mean(np.var(image, axis=(0, 1)))
+                    variance.append(str(var))
+                    if var >= min_var:
+                        filtered_ids.append(self.ids[i])
+                        self.images_fps.append(os.path.join(images_dir, self.ids[i]))
+                fd = io.open(var_path, 'w')
+                fd.writelines(variance)
+            else:
+                fd = io.open(var_path, 'r')
+                variance = fd.readlines()
+                for i in range(len(self.ids)):
+                    if float(variance[i]) >= min_var:
+                        filtered_ids.append(self.ids[i])
+                        self.images_fps.append(os.path.join(images_dir, self.ids[i]))
+            fd.close()
             self.ids = filtered_ids
         else:
             self.images_fps = [os.path.join(images_dir, image_id) for image_id in self.ids]
@@ -263,13 +279,16 @@ def init_data():
     #     print(edge_loss(lr, image_out.unsqueeze(0)))
 
 
-# SAVE_DIR = ''
-SAVE_DIR = '../drive/MyDrive/'
+SAVE_DIR = ''
+# SAVE_DIR = '../drive/MyDrive/'
 # SAVE_DIR = '/cache/shipilov_hse/'
 
-train_dir = os.path.join(SAVE_DIR, 'data/Cossette/Cossette_train_HR')
-valid_hr_dir = os.path.join(SAVE_DIR, 'data/Cossette/Cossette_valid_HR')
-valid_lr_dir = os.path.join(SAVE_DIR, 'data/Cossette/Cossette_valid_LR_Filtered')
+# train_dir = os.path.join(SAVE_DIR, 'data/Cossette/Cossette_train_HR')
+# valid_hr_dir = os.path.join(SAVE_DIR, 'data/Cossette/Cossette_valid_HR')
+# valid_lr_dir = os.path.join(SAVE_DIR, 'data/Cossette/Cossette_valid_LR')
+train_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari/Bakemonogatari_train_HR')
+valid_hr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari/Bakemonogatari_valid_HR')
+valid_lr_dir = os.path.join(SAVE_DIR, 'data/Bakemonogatari/Bakemonogatari_valid_LR')
 kernel_train_dir = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_train_kernel')
 kernel_valid_dir = os.path.join(SAVE_DIR, 'data/AniBoters/SoulTaker_valid_kernel')
 noise_train_dir  = os.path.join(SAVE_DIR, 'data/AniBoters/Filtered/SoulTaker_train_noise')
@@ -286,8 +305,9 @@ extra_scale = 480 / (1080 / 2)         # Extra downscaling in training
 aspect_ratio = (712 / 480) / (16 / 9)  # Aspect ratio change (anamorphic encoding)
 
 predict_res = (1920 // scale, 1080 // scale)  # Prediction resolution
+# predict_res = (712, 480)
 
-min_sample_var = 1000
+min_sample_var = 500
 
 train_set_size = 0
 valid_set_size = 0
