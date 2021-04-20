@@ -7,6 +7,9 @@ from cm_modules.crop import crop
 from cm_modules.extract import extract
 from cm_modules.generate_lr import generate
 from cm_modules.enhance import enhance_images
+from cm_modules.draw import draw_data
+from cm_modules.draw import extract_palette
+from cm_modules.draw import random_palette
 
 
 def start_slice():
@@ -142,6 +145,41 @@ def start_enhance():
     enhance_images(folder, strength, window_size, contrast, kernel)
 
 
+def start_draw():
+    if len(sys.argv) < 6:
+        print('Wrong number of params!\nTry "python prepare.py --help" for usage info')
+        return
+
+    folder = sys.argv[2]
+    width = int(sys.argv[3])
+    height = int(sys.argv[4])
+    count = int(sys.argv[5])
+    sample_id = 0
+    line_count = 100
+    kernel = 11
+    palette_folder = None
+    for arg in sys.argv[6:]:
+        if arg.startswith('-r=') or arg.startswith('--resume='):
+            sample_id = int(arg[arg.index('=') + 1:])
+        elif arg.startswith('-l=') or arg.startswith('--lines='):
+            line_count = int(arg[arg.index('=') + 1:])
+        elif arg.startswith('-p=') or arg.startswith('--palette='):
+            palette_folder = arg[arg.index('=') + 1:]
+        elif arg.startswith('-k=') or arg.startswith('--kernel='):
+            kernel = int(arg[arg.index('=') + 1:])
+        else:
+            print('Unexpected argument "' + arg + '"!')
+            return
+
+    if palette_folder is not None:
+        palette = extract_palette(palette_folder, kernel)
+    else:
+        palette = random_palette(count)
+
+    # Process images in folder
+    draw_data(folder, palette, (width, height), count, line_count, sample_id)
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print('No jobs to do.\nTry "python main.py --help" for usage info')
@@ -170,6 +208,11 @@ if __name__ == "__main__":
             print(man.enhance)
         else:
             start_enhance()
+    elif sys.argv[1] == 'draw':
+        if sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
+            print(man.draw)
+        else:
+            start_draw()
     elif sys.argv.__contains__('--help') or sys.argv.__contains__('-h'):
         print(man.common)
     else:

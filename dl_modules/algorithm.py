@@ -10,7 +10,7 @@ from dl_modules.loss import VGGPerceptual, LSGANGenLoss, \
 gen_opt_state_dict = None
 dis_opt_state_dict = None
 
-gan_loss_coeff = 0.05
+gan_loss_coeff = 0.25
 init_gen_lr = 0.001
 dis_lr = 0.0001
 
@@ -41,7 +41,7 @@ def get_psnr() -> nn.Module:
 
 
 def get_super_loss() -> nn.Module:
-    return VGGPerceptual(l1_coeff=0.01, features_coeff=1, edge_coeff=2)
+    return VGGPerceptual(l1_coeff=0.01, features_coeff=1, edge_coeff=10)
 
 
 def get_gen_loss() -> nn.Module:
