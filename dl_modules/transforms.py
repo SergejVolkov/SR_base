@@ -32,7 +32,8 @@ def get_generate_noise_transform(width: int, height: int):
 
 def get_input_image_augmentation():
     return albu.Compose([
-        albu.Downscale(scale_min=0.35, scale_max=0.45, interpolation=cv2.INTER_AREA, p=0.5)
+        albu.ImageCompression(quality_lower=70, quality_upper=90, p=0.5)
+        # albu.Downscale(scale_min=0.35, scale_max=0.45, interpolation=cv2.INTER_AREA, p=0.5)
     ])
 
 

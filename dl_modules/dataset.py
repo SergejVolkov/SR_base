@@ -118,9 +118,6 @@ class Dataset(BaseDataset):
 
         in_image = gt
 
-        if self.augmentation is not None:
-            in_image = self.augmentation(image=in_image)["image"]
-
         in_image = self.normalization(in_image)
         gt = self.normalization(gt)
 
@@ -135,6 +132,11 @@ class Dataset(BaseDataset):
             in_image = utils.scale(in_image, aspect_ratio=self.ar,
                                    extra_scale=self.es, even_rounding=True)
             in_image = realsr.apply_kernel(in_image, kernel_storage)
+
+        if self.augmentation is not None:
+            in_image = cv2.cvtColor(utils.convert_to_cv_8bit(in_image), cv2.COLOR_BGR2RGB)
+            in_image = self.augmentation(image=in_image)["image"]
+            in_image = self.normalization(in_image)
 
         return in_image, gt
 
@@ -200,7 +202,7 @@ def init_data():
         noise_set, kernel_storage, predict_set, predict_loader
     train_set = Dataset(train_dir, scale=scale,
                         transform=trf.get_training_transform(crop_size),
-                        # augmentation=trf.get_input_image_augmentation(),
+                        augmentation=trf.get_input_image_augmentation(),
                         downscaling='kernel_even',
                         aspect_ratio=aspect_ratio,
                         extra_scale=extra_scale,
