@@ -87,7 +87,7 @@ def fill_colors(image: np.ndarray, palette: list) -> None:
     h, w, _ = image.shape
     colors = []
     col_count = 3
-    threshold = 0.002
+    threshold = 0.0015
     for i in range(col_count):
         colors.append(palette[random.randrange(0, len(palette))])
     period = random.uniform(math.pi, 20 * math.pi)
@@ -134,10 +134,10 @@ def generate_lines(image: Image, line_count: int=100) -> None:
         color = line_colors[color_ind][0]
         if random.randrange(0, 40) == 0:
             width = random.uniform(w_min, w_max)
-        elif random.randrange(0, 5) == 0:
+        elif random.randrange(0, 6) == 0:
             width = random.uniform(w_min, 3.0)
         else:
-            width = w_min
+            width = 2.0
         generate_line(image, color, width)
 
 
