@@ -310,7 +310,7 @@ aspect_ratio = (712 / 480) / (16 / 9)  # Aspect ratio change (anamorphic encodin
 predict_res = (1920 // scale, 1080 // scale)  # Prediction resolution
 # predict_res = (712, 480)
 
-min_sample_var = 500
+min_sample_var = None
 
 train_set_size = 0
 valid_set_size = 0
