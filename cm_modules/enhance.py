@@ -41,10 +41,10 @@ def enhance_images(folder: str, denoise_strength: int,
     iter_bar.update()
 
 
-def enhance(image, denoise_strength: int=3, window_size: int=5, contrast: int=0, kernel_size: int=5):
+def enhance(image, denoise_strength: int=3, window_size: int=5, contrast: int=2, kernel_size: int=5):
     denoised = gentle_denoise(image, denoise_strength, window_size, kernel_size)
-    # equalized = auto_contrast(denoised, strength=contrast)
-    dithered = dither(denoised)
+    equalized = auto_contrast(denoised, strength=contrast)
+    dithered = dither(equalized)
     return dithered
 
 
@@ -102,11 +102,14 @@ def auto_contrast(image, clip_hist_percent: int=1,
     alpha = 255 / (maximum_gray - minimum_gray)
     average_gray = (maximum_gray + minimum_gray) // 2
 
-    correlation = 0.5
-    contrast = int(round(saturate(
-        alpha * strength,
-        saturation
-    )))
+    if alpha > 4:
+        contrast = 4
+    else:
+        contrast = int(round(saturate(
+            alpha * strength,
+            saturation
+        )))
+    correlation = 1.0
     brightness = int(round(saturate(
         correlation * strength * contrast * (127 - average_gray) / 128,
         saturation
