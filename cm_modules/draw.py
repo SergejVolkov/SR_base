@@ -13,14 +13,35 @@ import dl_modules.dataset as ds
 from PIL import Image
 
 w_min = 1.0
-w_max = 10.0
+w_max = 12.0
+
+
 line_colors = [
-    ((255, 255, 255), 0.01),
-    ((140, 140, 140), 0.02),
-    ((153, 137, 76), 0.01),
-    ((80, 80, 80), 0.06),
-    ((40, 40, 40), 0.1),
-    ((0, 0, 0), 0.8),
+    ((184, 100, 63), 1 / 144),
+    ((134, 110, 86), 1 / 144),
+    ((172, 145, 90), 1 / 144),
+    ((145, 132, 123), 1 / 144),
+    ((153, 137, 76), 1 / 144),
+    ((157, 78, 84), 1 / 144),
+    ((120, 79, 83), 1 / 144),
+    ((83, 33, 36), 1 / 144),
+    ((92, 50, 31), 1 / 144),
+    ((67, 55, 43), 1 / 144),
+    ((86, 72, 45), 1 / 144),
+    ((59, 55, 28), 1 / 144),
+    ((86, 66, 61), 1 / 144),
+    ((70, 87, 113), 1 / 144),
+    ((76, 68, 38), 1 / 144),
+    ((78, 39, 42), 1 / 144),
+    ((60, 39, 41), 1 / 144),
+    ((31, 6, 45), 1 / 144),
+    ((255, 255, 255), 1 / 48),
+    ((220, 220, 220), 1 / 48),
+    ((180, 180, 180), 1 / 48),
+    ((140, 140, 140), 1 / 48),
+    ((80, 80, 80), 1 / 48),
+    ((40, 40, 40), 1 / 48),
+    ((0, 0, 0), 3 / 4),
 ]
 
 
@@ -67,16 +88,25 @@ def extract_palette(folder: str, kernel_size: int=11, colors_per_image: int=3) -
 
 
 def draw_data(name: str, palette: list, resolution: tuple, sample_count: int,
-              line_count: int, sample_id: int=0) -> None:
+              line_count: int, sample_id: int=0, source: str=None) -> None:
     save_dir = ds.SAVE_DIR + 'data/' + name
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
+    if source is not None:
+        source = ds.SAVE_DIR + 'data/' + source
+        if not os.path.isdir(save_dir):
+            print("Source folder does not exist!")
+            return
 
     iter_bar = pyprind.ProgBar(sample_count, title='Draw', stream=sys.stdout)
 
     for i in range(sample_id, sample_id + sample_count):
-        image = np.ones((*resolution[::-1], 3), dtype=np.float)
-        fill_colors(image, palette)
+        if source is not None:
+            image = cv2.imread(source + '/%05d.png' % i)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) / 255.0
+        else:
+            image = np.ones((*resolution[::-1], 3), dtype=np.float)
+            fill_colors(image, palette)
         image = Image.fromarray((image * 255).astype(np.uint8))
         generate_lines(image, line_count)
         image.save(save_dir + '/%05d.png' % i, "PNG")
@@ -87,13 +117,66 @@ def fill_colors(image: np.ndarray, palette: list) -> None:
     h, w, _ = image.shape
     colors = []
     col_count = 3
-    threshold = 0.0015
     for i in range(col_count):
         colors.append(palette[random.randrange(0, len(palette))])
+
+    mode = random.randrange(0, 3)
+    if mode == 0:
+        threshold = 0.4
+        border_count = 35
+        borders = []
+        for i in range(border_count):
+            A = random.uniform(-10, 10)
+            B = random.uniform(-10, 10)
+            if abs(A) + abs(B) < 0.05:
+                if random.randrange(0, 2) == 0:
+                    A = random.uniform(-10, -1)
+                else:
+                    A = random.uniform(1, 10)
+            choice = random.randrange(0, (1920 + h) * 2)
+            if 0 <= choice < h:
+                coord = random.uniform(0, h)
+                C = -B * coord
+            elif h <= choice < h + w:
+                coord = random.uniform(0, w)
+                C = -A * coord
+            elif h + w <= choice < h * 2 + w:
+                coord = random.uniform(0, h)
+                C = -B * coord - A * w
+            else:
+                coord = random.uniform(0, w)
+                C = -A * coord - B * h
+            # slope = -A / (B - int(B < 0) * 0.00001 + int(B >= 0) * 0.00001)
+            vect_len = math.sqrt(A ** 2 + B ** 2)
+            borders.append((A, B, C, vect_len))
+        for i in range(h):
+            for j in range(w):
+                color_idx = 0
+                edge = []
+                for A, B, C, vect_len in borders:
+                    value = (A * j + B * i + C) / vect_len
+                    if abs(value) < threshold:
+                        edge.append(value)
+                    if value > 0:
+                        color_idx += 1
+                if len(edge) > 0:
+                    color = np.zeros(3, dtype=np.float)
+                    for value in edge:
+                        color += colors[(color_idx - int(value >= 0) + int(value < 0)) % 3] * \
+                                 (-abs(value) / (2 * threshold) + 0.5) + \
+                                 colors[color_idx % 3] * (abs(value) / (2 * threshold) + 0.5)
+                    image[i, j, :] = color / len(edge)
+                else:
+                    image[i, j, :] = colors[color_idx % 3]
+        return
+
+    avg_dst = (lng.norm(colors[0] - colors[1]) +
+               lng.norm(colors[1] - colors[2]) +
+               lng.norm(colors[2] - colors[0])) / 3
+    threshold = 0.002 * avg_dst
     period = random.uniform(math.pi, 20 * math.pi)
     period2 = random.uniform(math.pi, 20 * math.pi)
     phase = random.uniform(0, math.pi)
-    solid = random.randrange(0, 2)
     for i in range(h):
         for j in range(w):
             ratio1 = (math.sin(j / (w / 10) * math.pi - phase * 2.0) +
@@ -101,7 +184,7 @@ def fill_colors(image: np.ndarray, palette: list) -> None:
             ratio2 = (math.sin(j / w * period + phase + i / h * period2) +
                       math.sin(i / h * period + phase + j / w * period2) + 2.0) / 8.0
             image[i, j, :] = (1.0 - ratio2) * (colors[0] * ratio1 + colors[1] * (1.0 - ratio1)) + ratio2 * colors[2]
-            if solid == 1:
+            if mode == 1:
                 distance = []
                 for k in range(col_count):
                     distance.append(lng.norm(colors[k] - image[i, j, :]))
@@ -124,20 +207,22 @@ def fill_colors(image: np.ndarray, palette: list) -> None:
 
 
 def generate_lines(image: Image, line_count: int=100) -> None:
-    p = 0.0
-    color_ind = 0
     for i in range(line_count):
-        if p > line_colors[color_ind][1]:
+        p = random.uniform(0, 1)
+        color_ind = 0
+        for color_ind in range(len(line_colors)):
             p -= line_colors[color_ind][1]
-            color_ind += 1
-        p += 1 / line_count
-        color = line_colors[color_ind][0]
-        if random.randrange(0, 40) == 0:
+            if p < 0:
+                break
+        if i < line_count // 4:
             width = random.uniform(w_min, w_max)
-        elif random.randrange(0, 6) == 0:
+            color = (*line_colors[color_ind][0], 255 - random.randrange(0, 30))
+        elif i < 3 * line_count // 4:
             width = random.uniform(w_min, 3.0)
+            color = (*line_colors[color_ind][0], 255 - random.randrange(30, 80))
         else:
             width = 2.0
+            color = (*line_colors[color_ind][0], 255 - random.randrange(50, 140))
         generate_line(image, color, width)
 
 
@@ -153,7 +238,7 @@ def generate_line(image: Image, color: tuple, line_width: float) -> None:
                      random.randrange(0, w), random.randrange(0, h),
                      random.randrange(0, w), random.randrange(0, h))
     else:
-        if random.randrange(0, 1920 + 1080) < 1080:
+        if random.randrange(0, w + h) < h:
             x0, y0 = random.randrange(0, 2) * (w - 1), random.randrange(0, h)
             if random.randrange(0, 6) == 0:
                 x1, y1 = w - 1 - x0, random.randrange(0, h)
