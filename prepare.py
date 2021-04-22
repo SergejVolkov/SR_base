@@ -146,20 +146,18 @@ def start_enhance():
 
 
 def start_draw():
-    if len(sys.argv) < 6:
+    if len(sys.argv) < 4:
         print('Wrong number of params!\nTry "python prepare.py --help" for usage info')
         return
 
     folder = sys.argv[2]
-    width = int(sys.argv[3])
-    height = int(sys.argv[4])
-    count = int(sys.argv[5])
-    sample_id = 0
+    count = int(sys.argv[3])
+    width = height = sample_id = 0
     line_count = 100
     kernel = 11
-    palette_folder = None
-    for arg in sys.argv[6:]:
-        if arg.startswith('-r=') or arg.startswith('--resume='):
+    source = palette_folder = None
+    for arg in sys.argv[4:]:
+        if arg.startswith('--resume='):
             sample_id = int(arg[arg.index('=') + 1:])
         elif arg.startswith('-l=') or arg.startswith('--lines='):
             line_count = int(arg[arg.index('=') + 1:])
@@ -167,17 +165,26 @@ def start_draw():
             palette_folder = arg[arg.index('=') + 1:]
         elif arg.startswith('-k=') or arg.startswith('--kernel='):
             kernel = int(arg[arg.index('=') + 1:])
+        elif arg.startswith('-r=') or arg.startswith('--resolution='):
+            dash_ind = arg.index(':')
+            width = int(arg[arg.index('=') + 1: dash_ind])
+            height = int(arg[dash_ind + 1:])
+        elif arg.startswith('-s=') or arg.startswith('--source='):
+            source = arg[arg.index('=') + 1:]
         else:
             print('Unexpected argument "' + arg + '"!')
             return
 
-    if palette_folder is not None:
-        palette = extract_palette(palette_folder, kernel)
+    if source is None:
+        if palette_folder is not None:
+            palette = extract_palette(palette_folder, kernel)
+        else:
+            palette = random_palette(count)
     else:
-        palette = random_palette(count)
+        palette = None
 
     # Process images in folder
-    draw_data(folder, palette, (width, height), count, line_count, sample_id)
+    draw_data(folder, palette, (width, height), count, line_count, sample_id, source)
 
 
 if __name__ == "__main__":
