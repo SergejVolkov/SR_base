@@ -154,6 +154,7 @@ def start_predict():
     cuda_id = 0
     cut = False
     enhance = False
+    ensemble = False
     for arg in sys.argv[3:]:
         if arg.startswith('-g=') or arg.startswith('--gpu='):
             cuda_id = int(arg[arg.index('=') + 1:])
@@ -163,6 +164,8 @@ def start_predict():
             cut = True
         elif arg == '-e' or arg == '--enhance':
             enhance = True
+        elif arg == '--ensemble':
+            ensemble = True
         else:
             print('Unexpected argument "' + arg + '"!')
             return
@@ -186,7 +189,7 @@ def start_predict():
         generator.load_state_dict(torch.load(PATH))
 
     # Inference model on images in 'predict' folder
-    predict(generator, device, cut, enhance)
+    predict(generator, device, cut, enhance, ensemble)
 
 
 def start_inference():
