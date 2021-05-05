@@ -1,12 +1,13 @@
+import os
 import cv2
 import numpy as np
 import albumentations as albu
 # import albumentations.augmentations.functional as F
 
 
-def get_training_transform(crop_size: int):
+def get_training_transform(crop_size: int, kernel_size: int):
     return albu.Compose([
-        RandomEdgeCrop(height=crop_size, width=crop_size, always_apply=True),
+        RandomEdgeCrop(height=crop_size, width=crop_size, kernel_size=kernel_size, always_apply=True),
         # albu.RandomCrop(height=crop_size, width=crop_size, always_apply=True),
         # albu.OneOf([
         #     albu.RandomBrightnessContrast(brightness_limit=(-0.15, -0.15),
@@ -72,7 +73,7 @@ def get_predict_transform(width: int, height: int):
 
 
 class RandomEdgeCrop(albu.DualTransform):
-    def __init__(self, height, width, always_apply=False, p=1.0):
+    def __init__(self, height, width, kernel_size, always_apply=False, p=1.0):
         super(RandomEdgeCrop, self).__init__(always_apply, p)
         self.height = height
         self.width = width
@@ -80,17 +81,38 @@ class RandomEdgeCrop(albu.DualTransform):
                                  [2, 0, -2],
                                  [1, 0, -1]], dtype=float)
         self.sobel_y = np.transpose(self.sobel_x, (1, 0))
-        self.kernel_size = 61
+        self.kernel_size = kernel_size
+        self.tmp_dir = './tmp/'
+        if not os.path.isdir(self.tmp_dir):
+            os.makedirs(self.tmp_dir)
         # self.kernel = np.ones((self.kernel_size, self.kernel_size), np.float32) / (self.kernel_size ** 2)
 
-    def apply(self, img, **params):
-        flt_img = img.astype(np.float32)
-        edges = (cv2.filter2D(flt_img, -1, self.sobel_x) ** 2 +
-                 cv2.filter2D(flt_img, -1, self.sobel_y) ** 2) ** (1 / 2.0)
-        prob_map = cv2.GaussianBlur(edges, (self.kernel_size, self.kernel_size), 0)
-        # cv2.imwrite('./data/output/prob_map.png', cv2.cvtColor(prob_map, cv2.COLOR_RGB2BGR))
-        prob_map = cv2.cvtColor(prob_map, cv2.COLOR_RGB2GRAY).astype(np.float64)
+    def apply(self, img, uid=None, **params):
+        prob_map = None
+        if uid is not None:
+            filename = self.tmp_dir + uid + '.npy'
+            if os.path.isfile(filename):
+                prob_map = np.fromfile(filename, dtype=np.float64).reshape(*img.shape[:2])
+        if prob_map is None:
+            flt_img = img.astype(np.float32)
+            edges = (cv2.filter2D(flt_img, -1, self.sobel_x) ** 2 +
+                     cv2.filter2D(flt_img, -1, self.sobel_y) ** 2) ** (1 / 2.0)
+            prob_map = cv2.GaussianBlur(edges, (self.kernel_size, self.kernel_size), 0)
+            # cv2.imwrite('./data/output/prob_map.png', cv2.cvtColor(prob_map, cv2.COLOR_RGB2BGR))
+            prob_map = cv2.cvtColor(prob_map, cv2.COLOR_RGB2GRAY).astype(np.float64)
+            if uid is not None:
+                prob_map.tofile(self.tmp_dir + uid + '.npy')
         return prob_crop(img, prob_map, self.height, self.width)
+
+    def get_params_dependent_on_targets(self, params):
+        uid = None
+        if 'uid' in params:
+            uid = params['uid']
+        return {"uid": uid}
+
+    @property
+    def targets_as_params(self):
+        return ["image", "uid"]
 
     def get_transform_init_args_names(self):
         return "height", "width"

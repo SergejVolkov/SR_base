@@ -51,8 +51,8 @@ class Dataset(BaseDataset):
             augmentation=None,
             downscaling='bicubic',
             aspect_ratio=1.0,
-            extra_scale=1.0,
-            min_var=None
+            extra_scale=1.0
+            # min_var=None
     ):
         self.ids = [name for name in os.listdir(images_dir) if
                     name.lower().endswith('.png') or
@@ -61,32 +61,32 @@ class Dataset(BaseDataset):
                     name.lower().endswith('.gif') or
                     name.lower().endswith('.bmp')]
         self.ids.sort()
-        if min_var is not None:
-            var_path = os.path.join(images_dir, 'variance.txt')
-            filtered_ids = []
-            self.images_fps = []
-            if not os.path.isfile(var_path):
-                variance = []
-                for i in range(len(self.ids)):
-                    image = cv2.imread(os.path.join(images_dir, self.ids[i]))
-                    var = np.mean(np.var(image, axis=(0, 1)))
-                    variance.append(str(var) + '\n')
-                    if var >= min_var:
-                        filtered_ids.append(self.ids[i])
-                        self.images_fps.append(os.path.join(images_dir, self.ids[i]))
-                fd = io.open(var_path, 'w')
-                fd.writelines(variance)
-            else:
-                fd = io.open(var_path, 'r')
-                variance = fd.readlines()
-                for i in range(len(self.ids)):
-                    if float(variance[i]) >= min_var:
-                        filtered_ids.append(self.ids[i])
-                        self.images_fps.append(os.path.join(images_dir, self.ids[i]))
-            fd.close()
-            self.ids = filtered_ids
-        else:
-            self.images_fps = [os.path.join(images_dir, image_id) for image_id in self.ids]
+        # if min_var is not None:
+        #     var_path = os.path.join(images_dir, 'variance.txt')
+        #     filtered_ids = []
+        #     self.images_fps = []
+        #     if not os.path.isfile(var_path):
+        #         variance = []
+        #         for i in range(len(self.ids)):
+        #             image = cv2.imread(os.path.join(images_dir, self.ids[i]))
+        #             var = np.mean(np.var(image, axis=(0, 1)))
+        #             variance.append(str(var) + '\n')
+        #             if var >= min_var:
+        #                 filtered_ids.append(self.ids[i])
+        #                 self.images_fps.append(os.path.join(images_dir, self.ids[i]))
+        #         fd = io.open(var_path, 'w')
+        #         fd.writelines(variance)
+        #     else:
+        #         fd = io.open(var_path, 'r')
+        #         variance = fd.readlines()
+        #         for i in range(len(self.ids)):
+        #             if float(variance[i]) >= min_var:
+        #                 filtered_ids.append(self.ids[i])
+        #                 self.images_fps.append(os.path.join(images_dir, self.ids[i]))
+        #     fd.close()
+        #     self.ids = filtered_ids
+        # else:
+        self.images_fps = [os.path.join(images_dir, image_id) for image_id in self.ids]
 
         self.transform = transform
         self.augmentation = augmentation
@@ -114,7 +114,7 @@ class Dataset(BaseDataset):
         gt = cv2.cvtColor(gt, cv2.COLOR_BGR2RGB)
 
         if self.transform is not None:
-            gt = self.transform(image=gt)["image"]
+            gt = self.transform(image=gt, uid=self.ids[i])["image"]
 
         in_image = gt
 
@@ -201,12 +201,12 @@ def init_data():
     global train_set, train_loader, valid_set, valid_loader, \
         noise_set, kernel_storage, predict_set, predict_loader
     train_set = Dataset(train_dir, scale=scale,
-                        transform=trf.get_training_transform(crop_size),
+                        transform=trf.get_training_transform(crop_size, crop_kernel_size),
                         augmentation=trf.get_input_image_augmentation(),
                         downscaling='kernel_even',
                         aspect_ratio=aspect_ratio,
-                        extra_scale=extra_scale,
-                        min_var=min_sample_var)
+                        extra_scale=extra_scale)
+                        # min_var=min_sample_var)
     if train_set_size != 0:
         train_set = Subset(train_set, list(range(train_set_size)))
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=train_batch_size,
@@ -300,7 +300,7 @@ predict_dir = os.path.join(SAVE_DIR, 'data/predict')
 
 # Load datasets
 train_batch_size = 128
-valid_batch_size = 1  # Better leave it 1, otherwise many things won't work)
+valid_batch_size = 1                   # Better leave it 1, otherwise many things won't work)
 
 crop_size = 64                         # Training crop HR size
 scale = 2                              # General SR upscaling parameter
@@ -310,7 +310,8 @@ aspect_ratio = (712 / 480) / (16 / 9)  # Aspect ratio change (anamorphic encodin
 predict_res = (1920 // scale, 1080 // scale)  # Prediction resolution
 # predict_res = (712, 480)
 
-min_sample_var = None
+# min_sample_var = None                  # Minimum image variance in train dataset
+crop_kernel_size = 61                  # Content-wise crop parameter, larger value - more distributed crop
 
 train_set_size = 0
 valid_set_size = 0
