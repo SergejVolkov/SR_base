@@ -1,11 +1,13 @@
 import cv2
+import numpy as np
 import albumentations as albu
-# from albumentations.augmentations.transforms import ImageCompression
+# import albumentations.augmentations.functional as F
 
 
 def get_training_transform(crop_size: int):
     return albu.Compose([
-        albu.RandomCrop(height=crop_size, width=crop_size, always_apply=True),
+        RandomEdgeCrop(height=crop_size, width=crop_size, always_apply=True),
+        # albu.RandomCrop(height=crop_size, width=crop_size, always_apply=True),
         # albu.OneOf([
         #     albu.RandomBrightnessContrast(brightness_limit=(-0.15, -0.15),
         #                                   contrast_limit=(0.2, 0.2)),
@@ -67,3 +69,49 @@ def get_predict_transform(width: int, height: int):
     #         p=1
     #     )
     # ])
+
+
+class RandomEdgeCrop(albu.DualTransform):
+    def __init__(self, height, width, always_apply=False, p=1.0):
+        super(RandomEdgeCrop, self).__init__(always_apply, p)
+        self.height = height
+        self.width = width
+        self.sobel_x = np.array([[1, 0, -1],
+                                 [2, 0, -2],
+                                 [1, 0, -1]], dtype=float)
+        self.sobel_y = np.transpose(self.sobel_x, (1, 0))
+        self.kernel_size = 61
+        # self.kernel = np.ones((self.kernel_size, self.kernel_size), np.float32) / (self.kernel_size ** 2)
+
+    def apply(self, img, **params):
+        flt_img = img.astype(np.float32)
+        edges = (cv2.filter2D(flt_img, -1, self.sobel_x) ** 2 +
+                 cv2.filter2D(flt_img, -1, self.sobel_y) ** 2) ** (1 / 2.0)
+        prob_map = cv2.GaussianBlur(edges, (self.kernel_size, self.kernel_size), 0)
+        # cv2.imwrite('./data/output/prob_map.png', cv2.cvtColor(prob_map, cv2.COLOR_RGB2BGR))
+        prob_map = cv2.cvtColor(prob_map, cv2.COLOR_RGB2GRAY).astype(np.float64)
+        return prob_crop(img, prob_map, self.height, self.width)
+
+    def get_transform_init_args_names(self):
+        return "height", "width"
+
+
+def prob_crop(img, prob_map, height, width):
+    s_h = height // 2 + 1
+    s_w = width // 2 + 1
+    c_h = (height - 1) // 2
+    c_w = (width - 1) // 2
+
+    prob_map = prob_map[c_h:prob_map.shape[0] - s_h, c_w:prob_map.shape[1] - s_w]
+    prob_map /= np.sum(prob_map)
+
+    p_h = prob_map.shape[0]
+    p_w = prob_map.shape[1]
+
+    coords = np.arange(0, p_w * p_h)
+    prob_map = prob_map.flatten()
+    coord = np.random.choice(coords, p=prob_map)
+    x = coord % p_w
+    y = coord // p_w
+    img = img[y:y + height, x:x + width, :]
+    return img
