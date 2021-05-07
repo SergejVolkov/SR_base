@@ -15,6 +15,7 @@ def get_training_transform(crop_size: int, kernel_size: int):
         #     albu.RandomBrightnessContrast(brightness_limit=(0.12, 0.12),
         #                                   contrast_limit=(-0.17, -0.17)),
         # ], p=0.66),
+        albu.RandomRotate90(p=0.5),
         albu.HorizontalFlip(p=0.5)
     ])
 
