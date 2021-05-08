@@ -4,14 +4,15 @@ import numpy as np
 import cv2
 import torch
 import torch.tensor as Tensor
+import torch.nn.functional as F
 import dl_modules.dataset as ds
 import cm_modules.utils as utils
 from cm_modules.utils import imwrite, convert_to_cv_float
-from cm_modules.enhance import enhance
+from cm_modules.enhance import correct_colors
 
 
 def predict(net: torch.nn.Module, device: torch.device,
-            cut: bool=False, perform_enhance: bool=False, ensemble: bool=False) -> None:
+            cut: bool=False, normalize: bool=False, ensemble: bool=False) -> None:
     net.eval()
     total = len(ds.predict_loader)
     iter_bar = pyprind.ProgBar(total, title="Predict", stream=sys.stdout)
@@ -39,14 +40,12 @@ def predict(net: torch.nn.Module, device: torch.device,
             else:
                 output = process(net, source, cut)
 
-            if perform_enhance:
-                path = ds.SAVE_DIR + 'data/output/' + ds.predict_set.ids[i][:-4] + '_sr_e.png'
-                output = convert_to_cv_float(output)
-                output = enhance(output)
-                cv2.imwrite(path, output.astype(np.uint8))
+            if normalize:
+                path = ds.SAVE_DIR + 'data/output/' + ds.predict_set.ids[i][:-4] + '_sr_n.png'
+                output = correct_colors(output, source)
             else:
                 path = ds.SAVE_DIR + 'data/output/' + ds.predict_set.ids[i][:-4] + '_sr.png'
-                imwrite(path, output)
+            imwrite(path, output)
 
             iter_bar.update()
             i += 1
