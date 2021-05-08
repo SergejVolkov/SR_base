@@ -153,7 +153,7 @@ def start_predict():
 
     cuda_id = 0
     cut = False
-    enhance = False
+    normalize = False
     ensemble = False
     for arg in sys.argv[3:]:
         if arg.startswith('-g=') or arg.startswith('--gpu='):
@@ -162,9 +162,9 @@ def start_predict():
             ds.valid_batch_size = int(arg[arg.index('=') + 1:])
         elif arg == '-c' or arg == '--cut':
             cut = True
-        elif arg == '-e' or arg == '--enhance':
-            enhance = True
-        elif arg == '--ensemble':
+        elif arg == '-n' or arg == '--normalize':
+            normalize = True
+        elif arg == '-e' or arg == '--ensemble':
             ensemble = True
         else:
             print('Unexpected argument "' + arg + '"!')
@@ -189,7 +189,7 @@ def start_predict():
         generator.load_state_dict(torch.load(PATH))
 
     # Inference model on images in 'predict' folder
-    predict(generator, device, cut, enhance, ensemble)
+    predict(generator, device, cut, normalize, ensemble)
 
 
 def start_inference():
@@ -199,21 +199,33 @@ def start_inference():
 
     pretrained = sys.argv[2]
     name = sys.argv[3]
-    length = start = 0
+    episodes = False
+    length = start = ep_start = ep_end = 0
     cuda_id = 0
     cut = False
-    enhance = False
+    normalize = False
+    crf = 17
+    batch = 4
     for arg in sys.argv[4:]:
         if arg.startswith('-g=') or arg.startswith('--gpu='):
             cuda_id = int(arg[arg.index('=') + 1:])
+        elif arg.startswith('-b=') or arg.startswith('--batch='):
+            batch = int(arg[arg.index('=') + 1:])
         elif arg.startswith('-s=') or arg.startswith('--start='):
             start = float(arg[arg.index('=') + 1:])
         elif arg.startswith('-l=') or arg.startswith('--length='):
             length = float(arg[arg.index('=') + 1:])
+        elif arg.startswith('-e=') or arg.startswith('--episodes='):
+            episodes = True
+            dash_ind = len(arg) - arg[::-1].index('-') - 1
+            ep_start = int(arg[arg.index('=') + 1: dash_ind])
+            ep_end = int(arg[dash_ind + 1:])
         elif arg == '-c' or arg == '--cut':
             cut = True
-        elif arg == '-e' or arg == '--enhance':
-            enhance = True
+        elif arg == '-n' or arg == '--normalize':
+            normalize = True
+        elif arg.startswith('--crf='):
+            crf = int(arg[arg.index('=') + 1:])
         else:
             print('Unexpected argument "' + arg + '"!')
             return
@@ -234,7 +246,11 @@ def start_inference():
         generator.load_state_dict(torch.load(PATH))
 
     # Process video in 'video' folder
-    inference(name, generator, device, length, start, cut, enhance)
+    if episodes:
+        for ep in range(ep_start, ep_end + 1):
+            inference(name + '_%02d' % ep, generator, device, length, start, batch, cut, normalize, crf)
+    else:
+        inference(name, generator, device, length, start, batch, cut, normalize, crf)
 
 
 def start_unpack():
