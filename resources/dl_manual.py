@@ -34,7 +34,8 @@ predict = \
     '       -g=CUDA_DEVICE_NUMBER, --gpu=CUDA_DEVICE_NUMBER\n              CUDA device to use (default 0)\n\n' \
     '       -b=COUNT, --batch=COUNT\n              predict batch size (default %d)\n\n' \
     '       -c, --cut\n              cut image and use model separately on each piece to reduce cuda memory\n\n' \
-    '       -e, --enhance\n              process super-resolved images with some cool algo to make them look better\n' \
+    '       -n, --normalize\n              normalize colors, useful for models that produce inconsistent results\n' \
+    '       -e, --ensemble\n              use model ensemble, produces slightly better results\n' \
     % ds.valid_batch_size
 
 inference = \
@@ -42,8 +43,10 @@ inference = \
     '       -g=CUDA_DEVICE_NUMBER, --gpu=CUDA_DEVICE_NUMBER\n              CUDA device to use (default 0)\n\n' \
     '       -s=SECONDS, --start=SECONDS\n              predict video start time (default 0)\n\n' \
     '       -l=SECONDS, --length=SECONDS\n              processing time (default len(input_video))\n\n' \
+    '       -e=FIRST-LAST, --episodes=FIRST-LAST\n' \
+    '              handle multiple episodes (format "VIDEO_NAME_00")\n\n' \
     '       -c, --cut\n              cut image and use model separately on each piece to reduce cuda memory\n\n' \
-    '       -e, --enhance\n              process super-resolved video with some cool algo to make it look better\n'
+    '       -n, --normalize\n              normalize colors, useful for models that produce inconsistent results\n'
 
 unpack = \
     '\npython main.py unpack [CHECKPOINT_NAME]\n\n' \
