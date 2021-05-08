@@ -5,8 +5,13 @@ import math
 import pyprind
 import torch
 import numpy as np
+import torch.tensor as Tensor
+# import torch.nn.functional as F
 import torchvision.transforms as transforms
 import dl_modules.dataset as ds
+
+
+epsilon = 0.0001
 
 
 def enhance_images(folder: str, denoise_strength: int,
@@ -41,6 +46,29 @@ def enhance_images(folder: str, denoise_strength: int,
     iter_bar.update()
 
 
+def correct_colors(image: Tensor, source: Tensor) -> Tensor:
+    if len(image.shape) == 4:
+        image = image.squeeze(0)
+    if len(source.shape) == 4:
+        source = source.squeeze(0)
+    channels = []
+    for i in range(image.shape[0]):
+        my_std = image[i, :, :].std()
+        if torch.abs(my_std) < epsilon:
+            alpha = 1.0
+        else:
+            alpha = source[i, :, :].std() / my_std
+        beta = source[i, :, :].mean() - alpha * image[i, :, :].mean()
+
+        channels.append(alpha * image[i, :, :] + beta)
+
+    return torch.clamp(
+        torch.stack(channels, dim=0),
+        min=-1.0,
+        max=1.0
+    )
+
+
 def enhance(image, denoise_strength: int=2, window_size: int=5, contrast: int=0, kernel_size: int=5):
     denoised = gentle_denoise(image, denoise_strength, window_size, kernel_size)
     equalized = auto_contrast(denoised, strength=contrast)
@@ -51,7 +79,7 @@ def enhance(image, denoise_strength: int=2, window_size: int=5, contrast: int=0,
 def dither(image, dither_strength: int=1):
     return np.clip(np.round(
         image.astype(np.float) + (np.random.rand(*image.shape) - 0.5) * dither_strength
-    ), a_min=0, a_max=255).astype(np.uint8)
+    ), a_min=0, a_max=255)
 
 
 def gentle_denoise(noisy, denoise_strength, window_size, kernel_size):
