@@ -283,8 +283,8 @@ def init_data():
 
 
 # SAVE_DIR = ''
-SAVE_DIR = '../drive/MyDrive/'
-# SAVE_DIR = '/cache/shipilov_hse/'
+# SAVE_DIR = '../drive/MyDrive/'
+SAVE_DIR = '/cache/shipilov/'
 
 # train_dir = os.path.join(SAVE_DIR, 'data/Cossette/Cossette_train_HR')
 # valid_hr_dir = os.path.join(SAVE_DIR, 'data/Cossette/Cossette_valid_HR')
