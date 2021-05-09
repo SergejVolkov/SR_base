@@ -206,6 +206,7 @@ def start_inference():
     normalize = False
     crf = 17
     batch = 4
+    tune = None
     for arg in sys.argv[4:]:
         if arg.startswith('-g=') or arg.startswith('--gpu='):
             cuda_id = int(arg[arg.index('=') + 1:])
@@ -226,6 +227,8 @@ def start_inference():
             normalize = True
         elif arg.startswith('--crf='):
             crf = int(arg[arg.index('=') + 1:])
+        elif arg.startswith('-t=') or arg.startswith('--tune='):
+            tune = arg[arg.index('=') + 1:]
         else:
             print('Unexpected argument "' + arg + '"!')
             return
@@ -248,9 +251,9 @@ def start_inference():
     # Process video in 'video' folder
     if episodes:
         for ep in range(ep_start, ep_end + 1):
-            inference(name + '_%02d' % ep, generator, device, length, start, batch, cut, normalize, crf)
+            inference(name + '_%02d' % ep, generator, device, length, start, batch, cut, normalize, crf, tune)
     else:
-        inference(name, generator, device, length, start, batch, cut, normalize, crf)
+        inference(name, generator, device, length, start, batch, cut, normalize, crf, tune)
 
 
 def start_unpack():

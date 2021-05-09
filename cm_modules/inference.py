@@ -13,7 +13,7 @@ from cm_modules.utils import convert_to_cv_8bit
 
 def inference(name: str, net: torch.nn.Module, device: torch.device,
               length: float=0, start: float=0, batch: int=1,
-              cut: bool=False, normalize: bool=False, crf: int=17) -> None:
+              cut: bool=False, normalize: bool=False, crf: int=17, tune: str=None) -> None:
     net.eval()
     norm = ds.get_normalization()
     trn = trf.get_predict_transform(*ds.predict_res)
@@ -29,15 +29,21 @@ def inference(name: str, net: torch.nn.Module, device: torch.device,
         path = ds.SAVE_DIR + 'data/output/' + name + '_sr_n.mp4'
     else:
         path = ds.SAVE_DIR + 'data/output/' + name + '_sr.mp4'
-    out = vio.FFmpegWriter(path, inputdict={
-        '-r': '%g' % fps,
-    }, outputdict={
+
+    outputdict = {
         '-vcodec': 'libx264',
         '-crf': '%d' % crf,
-        '-tune': 'animation',
         '-preset': 'veryslow',
         '-r' : '%g' % fps
-    })
+    }
+    if tune is not None:
+        outputdict['-tune'] = tune
+    out = vio.FFmpegWriter(
+        path, inputdict={
+            '-r': '%g' % fps,
+        },
+        outputdict=outputdict
+    )
 
     i = 0
     if length != 0:
@@ -47,16 +53,21 @@ def inference(name: str, net: torch.nn.Module, device: torch.device,
     iter_bar = pyprind.ProgBar(total, title='Inference ' + name, stream=sys.stdout)
 
     frame_list = []
+    end = False
 
     with torch.no_grad():
         while True:
             ret, frame = cap.read()
             if not ret or (length != 0 and i >= length * fps):
-                break
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            frame = norm(trn(image=frame)["image"]).to(device)
-            frame_list.append(frame)
-            if len(frame_list) == batch or i >= length * fps - 1:
+                if not end:
+                    end = True
+                else:
+                    break
+            else:
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                frame = norm(trn(image=frame)["image"]).to(device)
+                frame_list.append(frame)
+            if len(frame_list) == batch or (end and len(frame_list) > 0):
                 frames = torch.stack(frame_list)
                 if cut:
                     pieces = utils.cut_image(frames)

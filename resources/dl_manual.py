@@ -3,7 +3,7 @@ import dl_modules.algorithm as algorithm
 import dl_modules.scheduler.exp as scheduler
 
 common = \
-    'USAGE\n\npython main.py {train, predict, inference} [OPTIONS]\n\n' \
+    'USAGE\n\npython main.py {train, predict, inference, unpack} [OPTIONS]\n\n' \
     '       train\n              train model\n\n' \
     '       predict\n              process images\n\n' \
     '       inference\n              process video\n\n' \
@@ -46,7 +46,9 @@ inference = \
     '       -e=FIRST-LAST, --episodes=FIRST-LAST\n' \
     '              handle multiple episodes (format "VIDEO_NAME_00")\n\n' \
     '       -c, --cut\n              cut image and use model separately on each piece to reduce cuda memory\n\n' \
-    '       -n, --normalize\n              normalize colors, useful for models that produce inconsistent results\n'
+    '       -n, --normalize\n              normalize colors, useful for models that produce inconsistent results\n\n' \
+    '       --crf=INT\n              constant rate factor of H.264 video (default 17)\n\n' \
+    '       -t=MODE, --tune=MODE\n              tuning of H.264, e. g. "film", "animation", etc.\n'
 
 unpack = \
     '\npython main.py unpack [CHECKPOINT_NAME]\n\n' \
