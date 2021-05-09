@@ -11,7 +11,7 @@ import torchvision.transforms as transforms
 import dl_modules.dataset as ds
 
 
-epsilon = 0.0001
+epsilon = 0.008
 
 
 def enhance_images(folder: str, denoise_strength: int,
