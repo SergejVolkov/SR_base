@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import albumentations as albu
 # import albumentations.augmentations.functional as F
+from PIL import Image
 
 
 def get_training_transform(crop_size: int, kernel_size: int):
@@ -83,6 +84,7 @@ class RandomEdgeCrop(albu.DualTransform):
                                  [1, 0, -1]], dtype=float)
         self.sobel_y = np.transpose(self.sobel_x, (1, 0))
         self.kernel_size = kernel_size
+        self.default_prob = 0.01
         self.tmp_dir = './tmp/'
         if not os.path.isdir(self.tmp_dir):
             os.makedirs(self.tmp_dir)
@@ -91,18 +93,22 @@ class RandomEdgeCrop(albu.DualTransform):
     def apply(self, img, uid=None, **params):
         prob_map = None
         if uid is not None:
-            filename = self.tmp_dir + uid + '.npy'
+            filename = self.tmp_dir + uid[:-4] + '.png'
             if os.path.isfile(filename):
-                prob_map = np.fromfile(filename, dtype=np.float64).reshape(*img.shape[:2])
+                prob_map = cv2.imread(filename, cv2.IMREAD_UNCHANGED).astype(np.float32) / 255.0 + self.default_prob
         if prob_map is None:
             flt_img = img.astype(np.float32)
             edges = (cv2.filter2D(flt_img, -1, self.sobel_x) ** 2 +
                      cv2.filter2D(flt_img, -1, self.sobel_y) ** 2) ** (1 / 2.0)
             prob_map = cv2.GaussianBlur(edges, (self.kernel_size, self.kernel_size), 0)
-            # cv2.imwrite('./data/output/prob_map.png', cv2.cvtColor(prob_map, cv2.COLOR_RGB2BGR))
-            prob_map = cv2.cvtColor(prob_map, cv2.COLOR_RGB2GRAY).astype(np.float64)
+            prob_map = cv2.cvtColor(prob_map, cv2.COLOR_RGB2GRAY)
+            s_h, s_w, c_h, c_w = ccrop_params(self.height, self.width)
+            prob_map = prob_map[c_h:prob_map.shape[0] - s_h, c_w:prob_map.shape[1] - s_w]
+            prob_map *= 255.0 / prob_map.max()
             if uid is not None:
-                prob_map.tofile(self.tmp_dir + uid + '.npy')
+                pimage = Image.fromarray(np.round(prob_map).astype(np.uint8), mode='L')
+                pimage.save(self.tmp_dir + uid[:-4] + '.png', 'PNG')
+                # cv2.imwrite(self.tmp_dir + uid[:-4] + '.png', np.round(prob_map).astype(np.uint8))
         return prob_crop(img, prob_map, self.height, self.width)
 
     def get_params_dependent_on_targets(self, params):
@@ -119,13 +125,15 @@ class RandomEdgeCrop(albu.DualTransform):
         return "height", "width"
 
 
-def prob_crop(img, prob_map, height, width):
+def ccrop_params(height: int, width: int) -> tuple:
     s_h = height // 2 + 1
     s_w = width // 2 + 1
     c_h = (height - 1) // 2
     c_w = (width - 1) // 2
+    return s_h, s_w, c_h, c_w
 
-    prob_map = prob_map[c_h:prob_map.shape[0] - s_h, c_w:prob_map.shape[1] - s_w]
+
+def prob_crop(img, prob_map, height, width):
     prob_map /= np.sum(prob_map)
 
     p_h = prob_map.shape[0]
@@ -133,6 +141,8 @@ def prob_crop(img, prob_map, height, width):
 
     coords = np.arange(0, p_w * p_h)
     prob_map = prob_map.flatten()
+    print(prob_map.shape)
+    print(coords.shape)
     coord = np.random.choice(coords, p=prob_map)
     x = coord % p_w
     y = coord // p_w

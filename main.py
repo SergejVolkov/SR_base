@@ -205,7 +205,7 @@ def start_inference():
     cut = False
     normalize = False
     crf = 17
-    batch = 4
+    batch = 1
     tune = None
     for arg in sys.argv[4:]:
         if arg.startswith('-g=') or arg.startswith('--gpu='):

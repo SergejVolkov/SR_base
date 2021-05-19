@@ -1,4 +1,3 @@
-import io
 import os
 import cv2
 import numpy as np
@@ -15,6 +14,7 @@ from torch.utils.data import Subset
 
 # import torch.nn.functional as F
 # import dl_modules.loss as loss
+# import time
 
 
 def imshow(img: Tensor) -> None:
@@ -245,11 +245,14 @@ def init_data():
 
     # Visualize augmented images
 
-    # for i in range(3):
-    #     image_in, image_out = train_set[random.randrange(len(train_set))]
+    # n_img = 3
+    # # idxs = [51, 484, 488]
+    # idxs = [random.randrange(len(train_set)) for _ in range(n_img)]
+    # start = time.perf_counter()
+    # for i in range(n_img * 2):
+    #     image_in, image_out = train_set[idxs[i % n_img]]
     #     # image_in = realsr.inject_noise(image_in.unsqueeze(0), noise_set)
     #     image_in = image_in.unsqueeze(0)
-    #     print(image_in.shape)
     #     utils.imwrite(
     #         SAVE_DIR + 'data/output/%d_lr_scaled.png' % i,
     #         F.interpolate(
@@ -264,6 +267,9 @@ def init_data():
     #         SAVE_DIR + 'data/output/%d_hr.png' % i,
     #         image_out
     #     )
+    #     if i % n_img == n_img - 1:
+    #         print(time.perf_counter() - start)
+    #         start = time.perf_counter()
 
     # edge_loss = loss.EdgeLoss()
     # for i in range(19, 20):
@@ -299,7 +305,7 @@ noise_valid_dir  = os.path.join(SAVE_DIR, 'data/AniBoters/Filtered/SoulTaker_val
 predict_dir = os.path.join(SAVE_DIR, 'data/predict')
 
 # Load datasets
-train_batch_size = 128
+train_batch_size = 32
 valid_batch_size = 1                   # Better leave it 1, otherwise many things won't work)
 
 crop_size = 64                         # Training crop HR size
