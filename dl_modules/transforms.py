@@ -6,9 +6,9 @@ import albumentations as albu
 from PIL import Image
 
 
-def get_training_transform(crop_size: int, kernel_size: int):
+def get_training_transform(crop_size: int, kernel_size: int, bg_prob: float):
     return albu.Compose([
-        RandomEdgeCrop(height=crop_size, width=crop_size, kernel_size=kernel_size, always_apply=True),
+        RandomEdgeCrop(height=crop_size, width=crop_size, kernel_size=kernel_size, bg_prob=bg_prob, always_apply=True),
         # albu.RandomCrop(height=crop_size, width=crop_size, always_apply=True),
         # albu.OneOf([
         #     albu.RandomBrightnessContrast(brightness_limit=(-0.15, -0.15),
@@ -75,7 +75,7 @@ def get_predict_transform(width: int, height: int):
 
 
 class RandomEdgeCrop(albu.DualTransform):
-    def __init__(self, height, width, kernel_size, always_apply=False, p=1.0):
+    def __init__(self, height, width, kernel_size, bg_prob=0.01, always_apply=False, p=1.0):
         super(RandomEdgeCrop, self).__init__(always_apply, p)
         self.height = height
         self.width = width
@@ -84,7 +84,7 @@ class RandomEdgeCrop(albu.DualTransform):
                                  [1, 0, -1]], dtype=float)
         self.sobel_y = np.transpose(self.sobel_x, (1, 0))
         self.kernel_size = kernel_size
-        self.default_prob = 0.01
+        self.default_prob = bg_prob
         self.tmp_dir = './tmp/'
         if not os.path.isdir(self.tmp_dir):
             os.makedirs(self.tmp_dir)

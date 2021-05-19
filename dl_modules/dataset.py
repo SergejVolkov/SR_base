@@ -201,12 +201,11 @@ def init_data():
     global train_set, train_loader, valid_set, valid_loader, \
         noise_set, kernel_storage, predict_set, predict_loader
     train_set = Dataset(train_dir, scale=scale,
-                        transform=trf.get_training_transform(crop_size, crop_kernel_size),
+                        transform=trf.get_training_transform(crop_size, crop_kernel_size, bg_prob),
                         augmentation=trf.get_input_image_augmentation(),
                         downscaling='kernel_even',
                         aspect_ratio=aspect_ratio,
                         extra_scale=extra_scale)
-                        # min_var=min_sample_var)
     if train_set_size != 0:
         train_set = Subset(train_set, list(range(train_set_size)))
     train_loader = torch.utils.data.DataLoader(train_set, batch_size=train_batch_size,
@@ -289,8 +288,8 @@ def init_data():
 
 
 # SAVE_DIR = ''
-# SAVE_DIR = '../drive/MyDrive/'
-SAVE_DIR = '/cache/shipilov/'
+SAVE_DIR = '../drive/MyDrive/'
+# SAVE_DIR = '/cache/shipilov/'
 
 # train_dir = os.path.join(SAVE_DIR, 'data/Cossette/Cossette_train_HR')
 # valid_hr_dir = os.path.join(SAVE_DIR, 'data/Cossette/Cossette_valid_HR')
@@ -316,8 +315,8 @@ aspect_ratio = (712 / 480) / (16 / 9)  # Aspect ratio change (anamorphic encodin
 predict_res = (1920 // scale, 1080 // scale)  # Prediction resolution
 # predict_res = (712, 480)
 
-# min_sample_var = None                  # Minimum image variance in train dataset
 crop_kernel_size = 61                  # Content-wise crop parameter, larger value - more distributed crop
+bg_prob = 0.01                         # Content crop probability of background
 
 train_set_size = 0
 valid_set_size = 0
