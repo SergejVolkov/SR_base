@@ -141,8 +141,6 @@ def prob_crop(img, prob_map, height, width):
 
     coords = np.arange(0, p_w * p_h)
     prob_map = prob_map.flatten()
-    print(prob_map.shape)
-    print(coords.shape)
     coord = np.random.choice(coords, p=prob_map)
     x = coord % p_w
     y = coord // p_w
