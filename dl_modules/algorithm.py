@@ -10,7 +10,7 @@ from dl_modules.loss import VGGPerceptual, LSGANGenLoss, \
 gen_opt_state_dict = None
 dis_opt_state_dict = None
 
-gan_loss_coeff = 0.20
+gan_loss_coeff = 0.0
 init_gen_lr = 0.001
 dis_lr = 0.0001
 

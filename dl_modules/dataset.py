@@ -52,7 +52,6 @@ class Dataset(BaseDataset):
             downscaling='bicubic',
             aspect_ratio=1.0,
             extra_scale=1.0
-            # min_var=None
     ):
         self.ids = [name for name in os.listdir(images_dir) if
                     name.lower().endswith('.png') or
@@ -61,31 +60,6 @@ class Dataset(BaseDataset):
                     name.lower().endswith('.gif') or
                     name.lower().endswith('.bmp')]
         self.ids.sort()
-        # if min_var is not None:
-        #     var_path = os.path.join(images_dir, 'variance.txt')
-        #     filtered_ids = []
-        #     self.images_fps = []
-        #     if not os.path.isfile(var_path):
-        #         variance = []
-        #         for i in range(len(self.ids)):
-        #             image = cv2.imread(os.path.join(images_dir, self.ids[i]))
-        #             var = np.mean(np.var(image, axis=(0, 1)))
-        #             variance.append(str(var) + '\n')
-        #             if var >= min_var:
-        #                 filtered_ids.append(self.ids[i])
-        #                 self.images_fps.append(os.path.join(images_dir, self.ids[i]))
-        #         fd = io.open(var_path, 'w')
-        #         fd.writelines(variance)
-        #     else:
-        #         fd = io.open(var_path, 'r')
-        #         variance = fd.readlines()
-        #         for i in range(len(self.ids)):
-        #             if float(variance[i]) >= min_var:
-        #                 filtered_ids.append(self.ids[i])
-        #                 self.images_fps.append(os.path.join(images_dir, self.ids[i]))
-        #     fd.close()
-        #     self.ids = filtered_ids
-        # else:
         self.images_fps = [os.path.join(images_dir, image_id) for image_id in self.ids]
 
         self.transform = transform
@@ -316,7 +290,7 @@ predict_res = (1920 // scale, 1080 // scale)  # Prediction resolution
 # predict_res = (712, 480)
 
 crop_kernel_size = 61                  # Content-wise crop parameter, larger value - more distributed crop
-bg_prob = 0.01                         # Content crop probability of background
+bg_prob = 0.0                          # Content crop probability of background
 
 train_set_size = 0
 valid_set_size = 0
